@@ -11,10 +11,12 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ZFXD3D_skinman.h" />
     <ClInclude Include="ZFXRenderDevice.h" />
     <ClInclude Include="ZFXRenderer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ZFXD3D_skinman.cpp" />
     <ClCompile Include="ZFXRenderer.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -48,6 +50,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(SolutionDir)ZFX3D;$(SolutionDir)ZFXEngine;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>

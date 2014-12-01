@@ -204,8 +204,6 @@ class __declspec(dllexport) ZFXPlane {
       inline int   Classify(const ZFXVector &vcPoint);
              int   Classify(const ZFXPolygon &Polygon);
 
-      bool Clip(const ZFXRay*, float, ZFXRay*, ZFXRay*);
-
       bool Intersects(const ZFXVector &vc0, const ZFXVector &vc1, 
                       const ZFXVector &vc2);
       bool Intersects(const ZFXPlane &plane, ZFXRay *pIntersection);

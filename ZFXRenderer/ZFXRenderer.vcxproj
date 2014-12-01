@@ -11,12 +11,10 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ZFXD3D_skinman.h" />
     <ClInclude Include="ZFXRenderDevice.h" />
     <ClInclude Include="ZFXRenderer.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ZFXD3D_skinman.cpp" />
     <ClCompile Include="ZFXRenderer.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

@@ -41,7 +41,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)ZFXRenderer;$(IncludePath)</IncludePath>
+    <IncludePath>$(DXSDK_DIR)include;$(SolutionDir)ZFX3D;$(SolutionDir)ZFXEngine;$(SolutionDir)ZFXRenderer;$(IncludePath)</IncludePath>
+    <LibraryPath>$(DXSDK_DIR)Lib\x86;$(SolutionDir)$(Configuration);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -81,11 +82,16 @@
   <ItemGroup>
     <ClInclude Include="resource.h" />
     <ClInclude Include="ZFXD3D.h" />
+    <ClInclude Include="ZFXD3D_skinman.h" />
+    <ClInclude Include="ZFXD3D_vcache.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ZFXD3D_enum.cpp" />
     <ClCompile Include="ZFXD3D_init.cpp" />
     <ClCompile Include="ZFXD3D_main.cpp" />
+    <ClCompile Include="ZFXD3D_misc.cpp" />
+    <ClCompile Include="ZFXD3D_skinman.cpp" />
+    <ClCompile Include="ZFXD3D_vcache.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="dlgChangeDevice.rc" />

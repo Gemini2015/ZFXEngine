@@ -1,14 +1,16 @@
 // File: ZFXD3D_init.cpp
 
-#include <windows.h>       // type definitions
-#include <vfw.h>           // show bmp's
-#include "resource.h"      // control id's
-#include "ZFX.h"           // return values and stuff
-#include "ZFXD3D.h"        // class definition
+//#include <windows.h>        // type definitions
 
-#pragma comment(lib, "vfw32.lib")
-#pragma comment(lib, "d3d9.lib")
-#pragma comment(lib, "dxguid.lib")
+#include "ZFX.h"              // return values and stuff
+#include "ZFXD3D.h"           // class definition
+#include "ZFXD3D_skinman.h"   // material manager
+#include "ZFXD3D_vcache.h"    // vertex cache manager
+#include <vfw.h>              // show bmp's
+#include "resource.h"         // control id's
+
+
+bool g_bLF=false;
 
 
 // we need this for dialog callback only
@@ -99,11 +101,33 @@ ZFXD3D::ZFXD3D(HINSTANCE hDLL) {
    m_ClearColor        = D3DCOLOR_COLORVALUE(0.0f,0.0f,0.0f,1.0f);
    m_bRunning          = false;
    m_bIsSceneRunning   = false;
+   m_bUseShaders       = false;
+   m_bCanDoShaders     = false;
+   m_bAdditive         = false;
+   m_bColorBuffer      = true;
+   m_bTextures         = true;
+   m_pSkinMan          = NULL;
+   m_pVertexMan        = NULL;
+
+   m_pDeclVertex       = NULL;
+   m_pDeclPVertex      = NULL;
+   m_pDeclLVertex      = NULL;
+   m_pDeclCVertex      = NULL;
+   m_pDecl3TVertex     = NULL;
+   m_pDeclTVertex      = NULL;
+
+   m_pFont             = NULL;
 
    // dont use swapchain at first
    m_nActivehWnd       = 0;
+   m_nNumVShaders      = 0;
+   m_nNumPShaders      = 0;
+   m_nNumFonts         = 0;
 
    g_ZFXD3D = this;
+
+   m_pLog = fopen("Log_ZFXRenderDevice.txt", "w");
+   Log("online (waiting for initialization call)");
    }
 /*----------------------------------------------------------------*/
 
@@ -112,21 +136,84 @@ ZFXD3D::ZFXD3D(HINSTANCE hDLL) {
  * Destructor
  */ 
 ZFXD3D::~ZFXD3D() {
-   Log("shutting down direct3d \n");
-   if (m_pLog) fflush(m_pLog);
-   this->Release();
+   Release();
    }
 /*----------------------------------------------------------------*/
 
 
 /**
- * Release all the Direct3D COM stuff.
+ * Release all of our own and the Direct3D COM stuff.
  */
 void ZFXD3D::Release() {
+   // our own stuff
    if (m_pEnum) {
       delete m_pEnum;
       m_pEnum = NULL;
       }
+   if (m_pSkinMan) {
+      delete m_pSkinMan;
+      m_pSkinMan = NULL;
+      }
+   if (m_pVertexMan) {
+      delete m_pVertexMan;
+      m_pVertexMan = NULL;
+      }
+
+   // shader stuff
+   if (m_pDeclVertex) {
+      m_pDeclVertex->Release();
+      m_pDeclVertex = NULL;
+      }
+   if (m_pDeclPVertex) {
+      m_pDeclPVertex->Release();
+      m_pDeclPVertex = NULL;
+      }
+   if (m_pDeclLVertex) {
+      m_pDeclLVertex->Release();
+      m_pDeclLVertex = NULL;
+      }
+
+   if (m_pDeclCVertex) {
+      m_pDeclCVertex->Release();
+      m_pDeclCVertex = NULL;
+      }
+
+   if (m_pDecl3TVertex) {
+      m_pDecl3TVertex->Release();
+      m_pDecl3TVertex = NULL;
+      }
+
+   if (m_pDeclTVertex) {
+      m_pDeclTVertex->Release();
+      m_pDeclTVertex = NULL;
+      }
+
+   for (UINT i=0; i<m_nNumVShaders; i++) {
+      if (m_pVShader[i]) {
+         m_pVShader[i]->Release();
+         m_pVShader[i] = NULL;
+         }
+      }
+   for (UINT j=0; j<m_nNumPShaders; j++) {
+      if (m_pPShader[j]) {
+         m_pPShader[j]->Release();
+         m_pPShader[j] = NULL;
+         }
+      }
+
+   for (UINT k=0; k<m_nNumFonts; k++) {
+      if (m_pFont[k]) {
+         m_pFont[k]->Release();
+         m_pFont[k] = NULL;
+         }
+      }
+
+   if (m_pFont) {
+      free(m_pFont);
+      m_pFont = NULL;
+      }
+
+   // main objects
    if(m_pDevice) {
       m_pDevice->Release();
       m_pDevice = NULL;
@@ -135,7 +222,7 @@ void ZFXD3D::Release() {
       m_pD3D->Release();
       m_pD3D = NULL;
       }
-   Log("shutdown completed \n");
+   Log("offline (ok)");
    fclose(m_pLog);
    }
 /*----------------------------------------------------------------*/
@@ -158,8 +245,7 @@ HRESULT ZFXD3D::Init(HWND hWnd, const HWND *hWnd3D,
                      int nMinStencil, bool bSaveLog) {
    int nResult;
 
-   m_pLog = fopen("log_renderdevice.txt", "w");
-   if (!m_pLog) return ZFX_FAIL;
+   g_bLF = bSaveLog;
    
    // are there any child windows to use?
    if (nNumhWnd > 0) {
@@ -172,17 +258,16 @@ HRESULT ZFXD3D::Init(HWND hWnd, const HWND *hWnd3D,
       m_hWnd[0] = hWnd;
       m_nNumhWnd = 0;
       }
+ 
    m_hWndMain = hWnd;
 
    if (nMinStencil > 0)
       m_bStencil = true;
 
-   Log("ZFXEngine ZFXD3D-RenderDevice Log File:\n\n");
-
    // create enum object
    m_pEnum = new ZFXD3DEnum(nMinDepth, nMinStencil);
 
-   Log("calling dialog... \n");
+   Log("calling dialog");
 
    // load bmp logo
    g_hBMP = (HBITMAP)LoadImage(NULL, "zfx.bmp",
@@ -196,21 +281,25 @@ HRESULT ZFXD3D::Init(HWND hWnd, const HWND *hWnd3D,
    // delete bmp if any
    if (g_hBMP) DeleteObject(g_hBMP);
 
-   Log("returning from dialog... \n");
+   Log("dialog finished");
 
    // dialog failed somehow
    if (nResult == -1) {
-      Log("selection dialog error \n");
+      Log("error: selection dialog error");
       return ZFX_FAIL;
       }
    // dialog was canceled by user
    else if (nResult == 0) {
-      Log("selection dialog canceled by user\n");
+      Log("warning: selection dialog canceled by user");
       return ZFX_CANCELED;
+      }
+   else if (nResult == -2) {
+      Log("error: no compatible graphics adapter");
+      return ZFX_NOTCOMPATIBLE;
       }
    // dialog ended with ok button
    else {
-      Log("selection dialog ok\nfiring up direct3d \n");
+      Log("firing up MS Direct3D");
       return Go();
       }
    }
@@ -225,8 +314,11 @@ HRESULT ZFXD3D::Init(HWND hWnd, const HWND *hWnd3D,
  */
 HRESULT ZFXD3D::InitWindowed(HWND hWnd, const HWND *hWnd3D, 
                              int nNumhWnd, bool bSaveLog) {
-   HRESULT hr;
-   HWND    hwnd;
+   HRESULT  hr;
+   D3DCAPS9 caps;
+   RECT     rc;
+
+   g_bLF = bSaveLog;
    
    // are there any child windows to use?
    if (nNumhWnd > 0) {
@@ -254,6 +346,17 @@ HRESULT ZFXD3D::InitWindowed(HWND hWnd, const HWND *hWnd3D,
       return ZFX_CREATEAPI;
       }
 
+   m_pD3D->GetDeviceCaps(D3DADAPTER_DEFAULT,
+                         D3DDEVTYPE_HAL,
+                         &caps);
+
+   if ( (caps.DevCaps & D3DDEVCAPS_HWTRANSFORMANDLIGHT) == 0) {
+      Log("error: no hardware vertexprocessing");
+      m_pD3D->Release();
+      m_pD3D = NULL;
+      return ZFX_NOTCOMPATIBLE;
+      }
+
    // prepare present parameters structure
    ZeroMemory(&m_d3dpp, sizeof(m_d3dpp));
    m_d3dpp.Windowed               = m_bWindowed;
@@ -266,41 +369,58 @@ HRESULT ZFXD3D::InitWindowed(HWND hWnd, const HWND *hWnd3D,
    m_bStencil = false;
 
    // windowed mode
-   m_d3dpp.hDeviceWindow     = hwnd = m_hWnd[0];
-   m_d3dpp.BackBufferWidth   = GetSystemMetrics(SM_CXSCREEN);
-   m_d3dpp.BackBufferHeight  = GetSystemMetrics(SM_CYSCREEN);
+   GetClientRect(m_hWnd[0], &rc);
+   m_d3dpp.hDeviceWindow     = m_hWnd[0];
+   m_d3dpp.BackBufferWidth   = rc.right;
+   m_d3dpp.BackBufferHeight  = rc.bottom;
 
    // create direct3d device
    hr = m_pD3D->CreateDevice(D3DADAPTER_DEFAULT, 
                              D3DDEVTYPE_HAL,
-                             hwnd, 
+                             m_hWnd[0], 
                              D3DCREATE_HARDWARE_VERTEXPROCESSING, 
                              &m_d3dpp, 
                              &m_pDevice);
+
    
+   if(FAILED(hr)) {
+      Log("error: IDirect3D::CreateDevice()");
+      if (hr == D3DERR_NOTAVAILABLE)
+         Log("D3DERR_NOTAVAILABLE");
+      else if (hr == D3DERR_INVALIDCALL)
+         Log("D3DERR_INVALIDCALL");
+      else if (hr == D3DERR_OUTOFVIDEOMEMORY)
+         Log("D3DERR_OUTOFVIDEOMEMORY");
+      else
+         Log("unknown error");
+
+      return ZFX_CREATEDEVICE;
+      }
+
    // create additional swap chains if wished and possible
    if ( (m_nNumhWnd > 0) && m_bWindowed) {
       for (UINT i=0; i<m_nNumhWnd; i++) {
-         m_d3dpp.hDeviceWindow = m_hWnd[i];
-         m_pDevice->CreateAdditionalSwapChain(&m_d3dpp, &m_pChain[i]);
-         }
-      }
+         GetClientRect(m_hWnd[i], &rc);
+         m_d3dpp.hDeviceWindow    = m_hWnd[i];
+         m_d3dpp.BackBufferWidth  = rc.right;
+         m_d3dpp.BackBufferHeight = rc.bottom;
 
-   if(FAILED(hr)) {
-      Log("error: IDirect3D::CreateDevice()");
-      return ZFX_CREATEDEVICE;
+         hr = m_pDevice->CreateAdditionalSwapChain(&m_d3dpp, &m_pChain[i]);
+         if (FAILED(hr)) break;
+         }
       }
 
    Log("initialized (online and ready)");
    m_pDevice->GetDeviceCaps(&g_xDevice.d3dCaps);
+   LogDeviceCaps(&g_xDevice.d3dCaps);
 
    m_bRunning        = true;
    m_bIsSceneRunning = false;
    m_dwWidth         = m_d3dpp.BackBufferWidth;
    m_dwHeight        = m_d3dpp.BackBufferHeight;
    
-   return ZFX_OK;
-   } // InitWindowed
+   return OneTimeInit();
+   } // InitWnd
 /*----------------------------------------------------------------*/
 
 
@@ -319,7 +439,7 @@ HRESULT ZFXD3D::Go(void) {
       }
    m_pD3D = Direct3DCreate9( D3D_SDK_VERSION );
    if(!m_pD3D) {
-      Log("error: Direct3DCreate8()\n");
+      Log("error: Direct3DCreate8()");
       return ZFX_CREATEAPI;
       }
 
@@ -342,7 +462,7 @@ HRESULT ZFXD3D::Go(void) {
    m_d3dpp.BackBufferFormat       = g_Dspmd.Format;
    m_d3dpp.EnableAutoDepthStencil = TRUE;
    m_d3dpp.AutoDepthStencilFormat = xCombo.fmtDepthStencil;
-   m_d3dpp.MultiSampleType        = xCombo.msType;
+   m_d3dpp.MultiSampleType        = D3DMULTISAMPLE_NONE;
    m_d3dpp.SwapEffect             = D3DSWAPEFFECT_DISCARD;
 
    // stencil buffer active?
@@ -358,6 +478,7 @@ HRESULT ZFXD3D::Go(void) {
       m_d3dpp.hDeviceWindow     = hwnd = m_hWndMain;
       m_d3dpp.BackBufferWidth   = g_Dspmd.Width;
       m_d3dpp.BackBufferHeight  = g_Dspmd.Height;
+      m_d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
       ShowCursor(FALSE);
       }
    // windowed mode
@@ -371,6 +492,7 @@ HRESULT ZFXD3D::Go(void) {
    hr = m_pD3D->CreateDevice(g_xDevice.nAdapter, g_xDevice.d3dDevType,
                              hwnd, xCombo.dwBehavior, 
                              &m_d3dpp, &m_pDevice);
+   
 
    // create additional swap chains if wished and possible
    if ( (m_nNumhWnd > 0) && m_bWindowed) {
@@ -380,27 +502,140 @@ HRESULT ZFXD3D::Go(void) {
          }
       }
 
+
    m_pEnum->~ZFXD3DEnum();
    m_pEnum = NULL;
 
    if(FAILED(hr)) {
-      Log("error: IDirect3D::CreateDevice() \n");
+      Log("error: IDirect3D::CreateDevice()");
       return ZFX_CREATEDEVICE;
       }
 
-   Log("everything initialized smoothly... \n");
+   Log("initialized (online and ready)");
+   LogDeviceCaps(&g_xDevice.d3dCaps);
 
    m_bRunning        = true;
    m_bIsSceneRunning = false;
+   m_dwWidth         = m_d3dpp.BackBufferWidth;
+   m_dwHeight        = m_d3dpp.BackBufferHeight;
 
-   return ZFX_OK;
+   return OneTimeInit();
    } // Go
 /*----------------------------------------------------------------*/
 
 
 /**
+ * Called by ZFXD3D::Go to initialize renderstates and stuff.
+ */
+HRESULT ZFXD3D::OneTimeInit(void) {
+
+   if (!ZFX3DInitCPU()) Log("no SIMD compatible CPU detected");
+   else Log("SIMD compatible CPU detected => using fast math");
+
+   // solid rendering
+   m_ShadeMode = RS_SHADE_SOLID;
+
+   // bring material and vertex cache managers online
+   m_pSkinMan = new ZFXD3DSkinManager(m_pDevice, m_pLog);
+
+   m_pVertexMan = new ZFXD3DVCManager((ZFXD3DSkinManager*)m_pSkinMan, 
+                                      m_pDevice, this, 8192, 8192, m_pLog);
+
+   // activate renderstates
+   m_pDevice->SetRenderState(D3DRS_LIGHTING, TRUE);
+   m_pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW); 
+   m_pDevice->SetRenderState(D3DRS_ZENABLE,  D3DZB_TRUE);
+
+   // create and set standard material
+   memset(&m_StdMtrl, 0, sizeof(D3DMATERIAL9));
+   m_StdMtrl.Ambient.r  = 1.0f;
+   m_StdMtrl.Ambient.g  = 1.0f;
+   m_StdMtrl.Ambient.b  = 1.0f;
+   m_StdMtrl.Ambient.a  = 1.0f;
+
+   if (FAILED(m_pDevice->SetMaterial(&m_StdMtrl))) {
+      Log("error: set material (OneTimeInit)");
+      return ZFX_FAIL;
+      }
+
+   // set texture filtering
+   m_pDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
+	m_pDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
+	m_pDevice->SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR);
+
+   // goto 3D mode in first stage
+   ZFXVIEWPORT vpView = { 0, 0, m_dwWidth, m_dwHeight };
+   m_Mode   = EMD_PERSPECTIVE;
+   m_nStage = -1;
+   SetActiveSkinID(MAX_ID);
+
+   // identity matrix for view
+   IDENTITY(m_mView3D);
+
+   // set clipping plane values
+   SetClippingPlanes(0.1f, 1000.0f);
+
+   // check and init shaders
+   PrepareShaderStuff();
+
+   // create a default shader. Note: its ID is 0
+   if (m_bCanDoShaders) {
+      const char BaseShader[] =
+         "vs.1.1                 \n"\
+         "dcl_position0 v0       \n"\
+         "dcl_normal0   v3       \n"\
+         "dcl_texcoord0 v6       \n"\
+         "m4x4 oPos, v0, c0      \n"\
+         "mov oD0, c4            \n"\
+         "mov oT0, v6            \n";
+
+      if (FAILED(CreateVShader((void*)BaseShader, sizeof(BaseShader),
+                               false, false, NULL))) {
+         Log("CreateVShader() default failed");
+         return ZFX_FAIL;
+         }
+      /*
+      if (FAILED(ActivateVShader(0, VID_UU))) {
+         Log("ActivateVShader() default failed");
+         return ZFX_FAIL;
+         }
+      */
+      } // default shader
+
+   // Set Ambient light level
+   SetAmbientLight(1.0f, 1.0f, 1.0f);
+
+   SetTextureStage(0, RS_TEX_MODULATE);
+   SetTextureStage(1, RS_NONE);
+   SetTextureStage(2, RS_NONE);
+   SetTextureStage(3, RS_NONE);
+   SetTextureStage(4, RS_NONE);
+   SetTextureStage(5, RS_NONE);
+   SetTextureStage(6, RS_NONE);
+   SetTextureStage(7, RS_NONE);
+
+   // set perspective projection stage 0
+   if (FAILED(InitStage(0.8f, &vpView, 0)))
+      return ZFX_FAIL;
+
+   // set perspective projection
+   if (FAILED(SetMode(EMD_PERSPECTIVE, 0)))
+      return ZFX_FAIL;
+
+   // world matrix to identity, this is needed to set
+   // correct values to vertex shader registers also
+   SetWorldTransform(NULL);
+
+   Log("one time scene init complete");
+   return ZFX_OK;
+   } // OneTimeInit
+/*----------------------------------------------------------------*/
+
+
+/**
  * write outputstring to attribut outputstream if exists
- * -> IN: FILE - pointer to logfile stream or NULL
+ * -> IN: char - format string to output
+ *        ...  - output values
  */
 void ZFXD3D::Log(char *chString, ...) {
 
@@ -408,15 +643,16 @@ void ZFXD3D::Log(char *chString, ...) {
    char *pArgs;
    
    pArgs = (char*) &chString + sizeof(chString);
-   vsprintf(ch, chString, pArgs) ;
+   vsprintf(ch, chString, pArgs);
+   fprintf(m_pLog, "[ZFXD3DDevice]: ");
    fprintf(m_pLog, ch);
+   fprintf(m_pLog, "\n");
    
-   #ifdef _DEBUGFLUSH_
-   fflush(m_pLog);
-   #endif
-   }
+   if (g_bLF)
+      fflush(m_pLog);
+   } // Log
 /*----------------------------------------------------------------*/
- 
+
 
 /**
  * Callback function to handle the device/mode selection dialog
@@ -424,6 +660,7 @@ void ZFXD3D::Log(char *chString, ...) {
 BOOL CALLBACK ZFXD3D::DlgProc(HWND hDlg, UINT message, 
                               WPARAM wParam, LPARAM lParam) {
    DIBSECTION dibSection;
+   HRESULT    hr;
    BOOL       bWnd=FALSE;
    
    // get handles
@@ -440,10 +677,15 @@ BOOL CALLBACK ZFXD3D::DlgProc(HWND hDlg, UINT message,
       // preselect windowed
       case WM_INITDIALOG: {
          SendMessage(hWND, BM_SETCHECK, BST_CHECKED, 0);
-         this->m_pEnum->Enum(hADAPTER, hMODE, hDEVICE, 
-                             hADAPTERFMT, hBACKFMT,
-                             hWND, hFULL, m_pLog);
-         
+         hr = m_pEnum->Enum(hADAPTER, hMODE, hDEVICE, 
+                            hADAPTERFMT, hBACKFMT,
+                            hWND, hFULL, m_pLog);
+
+         if (hr == ZFX_NOTCOMPATIBLE)
+            EndDialog(hDlg, -2);
+         else if (hr == ZFX_FAIL)
+            EndDialog(hDlg, -1);
+        
          return TRUE;
          }
          
@@ -469,7 +711,7 @@ BOOL CALLBACK ZFXD3D::DlgProc(HWND hDlg, UINT message,
             
             // okay button => read selections
             case IDOK: {
-               m_bWindowed = SendMessage(hFULL, BM_GETCHECK, 0, 0) != BST_CHECKED;
+               m_bWindowed = !SendMessage(hFULL, BM_GETCHECK, 0, 0);
                m_pEnum->GetSelections(&g_xDevice, &g_Dspmd, &g_fmtA, &g_fmtB);
                GetWindowText(hADAPTER, m_chAdapter, 256);
                EndDialog(hDlg, 1);
@@ -513,5 +755,101 @@ BOOL CALLBACK ZFXD3D::DlgProc(HWND hDlg, UINT message,
 /*----------------------------------------------------------------*/
 
 
+/**
+ * Log all nice features of a device for eye candy
+ */
+void ZFXD3D::LogDeviceCaps(D3DCAPS9 *pCaps) {
 
+   Log("ADAPTERINFO: {");
+
+   if (pCaps->DevCaps & D3DDEVCAPS_HWTRANSFORMANDLIGHT) {
+      Log("   adapter features hardware TnL");
+      if (pCaps->DevCaps & D3DDEVCAPS_PUREDEVICE)
+         Log("   (pure device possible)");
+      else Log("   (no pure device possible)");
+      }
+   else
+      Log("   adapter only features software TnL");
+
+   // TEXTURE STUFF
+   Log("   max. texture stages: %d" , pCaps->MaxTextureBlendStages);
+   Log("   max. textures for single pass: %d" , pCaps->MaxSimultaneousTextures);
+   Log("   max. texture width: %d" , pCaps->MaxTextureWidth);
+   Log("   max. texture height: %d" , pCaps->MaxTextureHeight);
+
+   // VERTEX SHADER VERSION
+   if (pCaps->VertexShaderVersion < D3DVS_VERSION(1,1) )
+      Log("   Vertex Shader Version 1.0");
+   else if (pCaps->VertexShaderVersion < D3DVS_VERSION(2,0) )
+      Log("   Vertex Shader Version 1.1");
+   else  
+      Log("   Vertex Shader Version 2.0 or better");
+
+   // PIXEL SHADER VERSION
+   if (pCaps->PixelShaderVersion < D3DPS_VERSION(1,1) )
+      Log("   Pixel Shader Version 1.0");
+   else if (pCaps->PixelShaderVersion < D3DPS_VERSION(1,2) )
+      Log("   Pixel Shader Version 1.1");
+   else if (pCaps->PixelShaderVersion < D3DPS_VERSION(1,3) )
+      Log("   Pixel Shader Version 1.2");
+   else if (pCaps->PixelShaderVersion < D3DPS_VERSION(1,4) )
+      Log("   Pixel Shader Version 1.3");
+   else if (pCaps->PixelShaderVersion < D3DPS_VERSION(2,0) )
+      Log("   Pixel Shader Version 1.4");
+   else
+      Log("   Pixel Shader Version 2.0 or better");
+   Log("   } ENDINFO");
+
+
+   // SCREEN RESOLUTION, FORMAT AND STUFF
+   Log("DISPLAYINFO {");
+   LPDIRECT3DSURFACE9 pDepthStencil=NULL;
+   D3DSURFACE_DESC desc;
+   D3DFORMAT Format = D3DFMT_UNKNOWN;
+   D3DDISPLAYMODE mode = {0,0,0,D3DFMT_UNKNOWN};
+   
+   if (FAILED(m_pD3D->GetAdapterDisplayMode(D3DADAPTER_DEFAULT, &mode)))
+      Log("Error: IDirect3D::GetAdapterDisplayMode failed");
+
+   if (FAILED(m_pDevice->GetDepthStencilSurface(&pDepthStencil)))
+      Log("Error: IDirect3DDevice::GetDepthStencilSurface failed");
+   else {
+      if (FAILED(pDepthStencil->GetDesc(&desc))) {
+         Log("Error: IDirect3DSurface::GetDesc failed");
+         Format = D3DFMT_UNKNOWN;
+         }
+      }
+
+   Log("   Resolution: %dx%d", mode.Width, mode.Height);
+   Log("   Refreshrate: %d", mode.RefreshRate);
+
+   // backbuffer format
+   switch(mode.Format) {
+      case D3DFMT_A2R10G10B10: Log("   Pixelformat: D3DFMT_A2R10G10B10"); break;
+      case D3DFMT_A8R8G8B8:    Log("   Pixelformat: D3DFMT_A8R8G8B8"); break;
+      case D3DFMT_X8R8G8B8:    Log("   Pixelformat: D3DFMT_X8R8G8B8"); break;
+      case D3DFMT_A1R5G5B5 :   Log("   Pixelformat: D3DFMT_A1R5G5B5"); break;
+      case D3DFMT_X1R5G5B5:    Log("   Pixelformat: D3DFMT_X1R5G5B5"); break;
+      case D3DFMT_R5G6B5:      Log("   Pixelformat: D3DFMT_R5G6B5");   break;
+      default: break;
+      } // switch
+
+   // depth buffer format
+   switch(desc.Format) {
+      case D3DFMT_D16_LOCKABLE:  Log("   Depth/Stencil: D3DFMT_D16_LOCKABLE");  break;
+      case D3DFMT_D32F_LOCKABLE: Log("   Depth/Stencil: D3DFMT_D32F_LOCKABLE"); break;
+      case D3DFMT_D32:     Log("   Depth/Stencil: D3DFMT_D32");     break;
+      case D3DFMT_D15S1:   Log("   Depth/Stencil: D3DFMT_D15S1");   break;
+      case D3DFMT_D24S8:   Log("   Depth/Stencil: D3DFMT_D24S8");   break;
+      case D3DFMT_D24X8:   Log("   Depth/Stencil: D3DFMT_D24X8");   break;
+      case D3DFMT_D24X4S4: Log("   Depth/Stencil: D3DFMT_D24X4S4"); break;
+      case D3DFMT_D24FS8:  Log("   Depth/Stencil: D3DFMT_D24FS8");  break;
+      case D3DFMT_D16:     Log("   Depth/Stencil: D3DFMT_D16");     break;
+      default: break;
+      } // switch
+   
+   pDepthStencil->Release();
+   Log("   } ENDINFO");
+   } // LogDeviceCaps
+/*----------------------------------------------------------------*/
 

@@ -11,7 +11,7 @@ ZFXRenderer::ZFXRenderer(HINSTANCE hInst) {
    m_hDLL    = NULL;
    }
 /*----------------------------------------------------------------*/
-
+  
 /**
  * Destructor: Just call the Release method
  */
@@ -50,9 +50,6 @@ HRESULT ZFXRenderer::CreateDevice(const char *chAPI) {
    _CreateRenderDevice = (CREATERENDERDEVICE)
                           GetProcAddress(m_hDLL,
                                  "CreateRenderDevice");
-
-   if ( !_CreateRenderDevice ) return E_FAIL;
-
    // call dll's create function
    hr = _CreateRenderDevice(m_hDLL, &m_pDevice);
    if(FAILED(hr)){

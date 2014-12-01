@@ -4,6 +4,7 @@
 #include "ZFX.h"           // return values and stuff
 #include "ZFXD3D.h"        // class definition
 
+extern bool g_bLF;
 
 // some common backbuffer formats
 const UINT g_nFormats_B=9;
@@ -99,6 +100,9 @@ HRESULT ZFXD3DEnum::Enum(HWND hAdapter, HWND hMode,
 
    if(FAILED(hr) || !hAdapter)
       return ZFX_FAIL;
+
+   if (m_dwNumAdapters == 0)
+      return ZFX_NOTCOMPATIBLE;
 
    // list the found graphics adapter
    SendMessage(m_hADAPTER,CB_RESETCONTENT,0,0);
@@ -480,6 +484,7 @@ HRESULT ZFXD3DEnum::EnumCombos(ZFXDEVICEINFO &xDev) {
    ZFXCOMBOINFO *pCombo;
    bool          bWindowed;
    bool          bFmtCheck=false;
+   bool          bAny=false;
 
    xDev.nNumCombo = 0;
 
@@ -559,16 +564,19 @@ HRESULT ZFXD3DEnum::EnumCombos(ZFXDEVICEINFO &xDev) {
                                     pCombo->fmtBackBuffer)==ZFX_OK) ) {
                   pCombo->dwBehavior = D3DCREATE_HARDWARE_VERTEXPROCESSING 
                                      | D3DCREATE_PUREDEVICE;
+                  bAny = true;
                   }
                // 2.case: hardware device
                else if (ConfirmDevice(&xDev.d3dCaps, D3DCREATE_HARDWARE_VERTEXPROCESSING, 
                                       pCombo->fmtBackBuffer)==ZFX_OK) {
                   pCombo->dwBehavior = D3DCREATE_HARDWARE_VERTEXPROCESSING;
+                  bAny = true;
                   }
                // 3.case: mixed sw/hw
                else if (ConfirmDevice(&xDev.d3dCaps, D3DCREATE_MIXED_VERTEXPROCESSING, 
                                       pCombo->fmtBackBuffer)==ZFX_OK) {
                   pCombo->dwBehavior = D3DCREATE_MIXED_VERTEXPROCESSING;
+                  bAny = true;
                   }
                } // if [HW]
             // 4.case: must be sw processing
@@ -576,8 +584,12 @@ HRESULT ZFXD3DEnum::EnumCombos(ZFXDEVICEINFO &xDev) {
                if (ConfirmDevice(&xDev.d3dCaps, D3DCREATE_SOFTWARE_VERTEXPROCESSING, 
                                  pCombo->fmtBackBuffer)==ZFX_OK) {
                   pCombo->dwBehavior = D3DCREATE_SOFTWARE_VERTEXPROCESSING;
+                  bAny = true;
                   }
                }
+
+            // none combo found that supports everything we need
+            if (!bAny) continue;
 
       // SELECT MULTISAMPLE TYPE
 
@@ -639,11 +651,6 @@ HRESULT ZFXD3DEnum::ConfirmDevice(D3DCAPS9* pCaps, DWORD dwBehavior,
       // alphablending from texture pixels supported
       if ( !(pCaps->TextureCaps & D3DPTEXTURECAPS_ALPHA) ) {
          fprintf(m_pLog, "[ZFXD3D_ENUM] error: no alphablending from texture \n");
-         return ZFX_FAIL;
-         }
-
-      if (pCaps->VertexShaderVersion < D3DVS_VERSION(1,0) ) {
-         fprintf(m_pLog, "[ZFXD3D_ENUM] error: Vertex Shader Version < 1.0 \n");
          return ZFX_FAIL;
          }
       }

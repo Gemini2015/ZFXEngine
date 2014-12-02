@@ -47,6 +47,9 @@
     <ClCompile Include="ZFXD3D_vcache.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="ZFX3D_text.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="dlgChangeDevice.rc">

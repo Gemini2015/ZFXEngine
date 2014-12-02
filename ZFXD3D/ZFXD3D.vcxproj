@@ -86,6 +86,7 @@
     <ClInclude Include="ZFXD3D_vcache.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ZFX3D_text.cpp" />
     <ClCompile Include="ZFXD3D_enum.cpp" />
     <ClCompile Include="ZFXD3D_init.cpp" />
     <ClCompile Include="ZFXD3D_main.cpp" />

@@ -159,7 +159,7 @@ struct _ZFXCOLOR
 {
 	union
 	{
-		struct  
+		struct
 		{
 			float fR;
 			float fG;

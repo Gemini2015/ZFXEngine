@@ -194,11 +194,13 @@ public:
 	UINT      GetActiveVShadID(void)    { return m_nActiveVShader; }
 	UINT      GetActivePShadID(void)    { return m_nActivePShader; }
 
-	// main/rendering stuff
+	
+	// Font & Text
 	HRESULT   CreateFont(const char*, int, bool, bool, bool, DWORD, UINT*);
 	HRESULT   DrawText(UINT, int, int, UCHAR, UCHAR, UCHAR, char*, ...);
 	HRESULT   DrawText(UINT, int, int, DWORD, char*, ...);
 	HRESULT   DrawText(UINT, int, int, DWORD, char*);
+	// main/rendering stuff
 	HRESULT   BeginRendering(bool, bool, bool);
 	HRESULT   Clear(bool, bool, bool);
 	HRESULT   UseWindow(UINT nHwnd);
@@ -308,7 +310,15 @@ private:
 }; // class
 
 
+/************************************************************************/
+/* 导出DLL接口                                                           */
+/************************************************************************/
 
+// 创建RenderDevice实例
+extern "C" _declspec(dllexport) HRESULT CreateRenderDevice(HINSTANCE hDLL, ZFXRenderDevice **pInterface);
+
+// 释放RenderDevice对象
+extern "C" _declspec(dllexport) HRESULT ReleaseRenderDevice(ZFXRenderDevice **pInterface);
 
 /*----------------------------------------------------------------*/
 

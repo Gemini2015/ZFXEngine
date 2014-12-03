@@ -16,6 +16,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ZFXD3D", "ZFXD3D\ZFXD3D.vcx
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ZFX3D", "ZFX3D\ZFX3D.vcxproj", "{33F48CA8-47CC-4E69-BEEE-9513E5B28AA3}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ZFXOpenGL", "ZFXOpenGL\ZFXOpenGL.vcxproj", "{95432232-5393-4FD0-B8D1-61F3AD52A6B5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -38,6 +40,10 @@ Global
 		{33F48CA8-47CC-4E69-BEEE-9513E5B28AA3}.Debug|Win32.Build.0 = Debug|Win32
 		{33F48CA8-47CC-4E69-BEEE-9513E5B28AA3}.Release|Win32.ActiveCfg = Release|Win32
 		{33F48CA8-47CC-4E69-BEEE-9513E5B28AA3}.Release|Win32.Build.0 = Release|Win32
+		{95432232-5393-4FD0-B8D1-61F3AD52A6B5}.Debug|Win32.ActiveCfg = Debug|Win32
+		{95432232-5393-4FD0-B8D1-61F3AD52A6B5}.Debug|Win32.Build.0 = Debug|Win32
+		{95432232-5393-4FD0-B8D1-61F3AD52A6B5}.Release|Win32.ActiveCfg = Release|Win32
+		{95432232-5393-4FD0-B8D1-61F3AD52A6B5}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

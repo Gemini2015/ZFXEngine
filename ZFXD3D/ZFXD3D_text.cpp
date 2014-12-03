@@ -1,5 +1,42 @@
 #include "ZFXD3D.h"
 
+
+/**
+* Creates a D3DXFont object from a GDI font the caller submitted
+* and returns its ID to the caller for later use.
+*/
+HRESULT ZFXD3D::CreateFont(const char *chType, int nWeight, bool bItalic,
+	bool bUnderline, bool bStrike, DWORD dwSize,
+	UINT *pID) {
+	HRESULT hr;
+	LPD3DXFONT font;
+	HDC     hDC;
+	int     nHeight;
+
+	if (!pID) return ZFX_INVALIDPARAM;
+
+	hDC = GetDC(NULL);
+	nHeight = -MulDiv(dwSize, GetDeviceCaps(hDC, LOGPIXELSY), 72);
+	ReleaseDC(NULL, hDC);
+
+	// 创建字体
+	hr = D3DXCreateFont(m_pDevice, nHeight, 0, FW_BOLD, 1, bItalic,
+		DEFAULT_CHARSET, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY,
+		DEFAULT_PITCH | FF_DONTCARE, chType, &font);
+
+	if (FAILED(hr)) return ZFX_FAIL;
+
+	// 加入字体列表
+	m_pFont = (LPD3DXFONT*)realloc(m_pFont, sizeof(LPD3DXFONT)*(m_nNumFonts + 1));
+
+	m_pFont[m_nNumFonts] = font;
+	(*pID) = m_nNumFonts;
+	m_nNumFonts++;
+	return ZFX_OK;
+
+} // CreateFont
+/*----------------------------------------------------------------*/
+
 /**
 * Draws text using the previously created font object.
 */

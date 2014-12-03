@@ -279,7 +279,7 @@ HRESULT ZFXD3DVCManager::CreateStaticBuffer(ZFXVERTEXID VertexID,
 	}
 
 	// no need for FVF if shaders are used
-	if (m_pZFXD3D->UsesShaders()) dwActualFVF = 0;
+	if (m_pZFXD3D->IsUseShaders()) dwActualFVF = 0;
 	else dwActualFVF = m_pSB[m_nNumSB].dwFVF;
 
 	// create vertex buffer
@@ -370,7 +370,7 @@ HRESULT ZFXD3DVCManager::CreateIndexBuffer(UINT nIndis,
 HRESULT ZFXD3DVCManager::ForcedFlushAll(void)
 {
 	HRESULT hr = ZFX_OK;
-	bool    bShaders = m_pZFXD3D->UsesShaders();
+	bool    bShaders = m_pZFXD3D->IsUseShaders();
 	int     i;
 
 	for (i = 0; i < NUM_CACHES; i++)
@@ -433,7 +433,7 @@ HRESULT ZFXD3DVCManager::ForcedFlush(ZFXVERTEXID VertexID)
 	} // switch
 
 	for (i = 0; i < NUM_CACHES; i++)
-		if (FAILED(pCache[i]->Flush(m_pZFXD3D->UsesShaders())))
+		if (FAILED(pCache[i]->Flush(m_pZFXD3D->IsUseShaders())))
 			hr = ZFX_FAIL;
 
 	return hr;
@@ -494,7 +494,7 @@ HRESULT ZFXD3DVCManager::Render(UINT nID)
 			// set material for device
 			ZFXMATERIAL *pMat = &m_pSkinMan->m_pMaterials[pSkin->nMaterial];
 
-			if (!m_pZFXD3D->UsesShaders())
+			if (!m_pZFXD3D->IsUseShaders())
 			{
 				// 材质
 				D3DMATERIAL9 mat = {
@@ -516,7 +516,7 @@ HRESULT ZFXD3DVCManager::Render(UINT nID)
 
 			// forced rendering without textures?
 			// 设置纹理
-			if (m_pZFXD3D->UsesTextures())
+			if (m_pZFXD3D->IsUseTextures())
 			{
 				// set texture for device
 				for (iT = 0; iT < 8; iT++)
@@ -588,11 +588,11 @@ HRESULT ZFXD3DVCManager::Render(UINT nID)
 
 	// if using shaders they should be activated by the
 	// ActivateVShader methods. Else set FVF
-	if (!m_pZFXD3D->UsesShaders())
+	if (!m_pZFXD3D->IsUseShaders())
 		m_pDevice->SetFVF(m_pSB[nID].dwFVF);
 
 	//  should we use additive rendering?
-	if (m_pZFXD3D->UsesAdditiveBlending()) 
+	if (m_pZFXD3D->IsUseAdditiveBlending()) 
 	{
 		m_pDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
 		m_pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
@@ -600,7 +600,7 @@ HRESULT ZFXD3DVCManager::Render(UINT nID)
 	}
 
 	//  should we use rendering to color buffer at all?
-	if (!m_pZFXD3D->UsesColorBuffer()) 
+	if (!m_pZFXD3D->IsUseColorBuffer()) 
 	{
 		m_pDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
 		m_pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ZERO);
@@ -707,7 +707,7 @@ HRESULT ZFXD3DVCManager::Render(UINT nSBID, UINT nIBID, UINT nSkin) {
 			// set material for device
 			ZFXMATERIAL *pMat = &m_pSkinMan->m_pMaterials[pSkin->nMaterial];
 
-			if (!m_pZFXD3D->UsesShaders()) {
+			if (!m_pZFXD3D->IsUseShaders()) {
 				D3DMATERIAL9 mat = {
 					pMat->cDiffuse.fR, pMat->cDiffuse.fG, pMat->cDiffuse.fB, pMat->cDiffuse.fA,
 					pMat->cAmbient.fR, pMat->cAmbient.fG, pMat->cAmbient.fB, pMat->cAmbient.fA,
@@ -725,7 +725,7 @@ HRESULT ZFXD3DVCManager::Render(UINT nSBID, UINT nIBID, UINT nSkin) {
 			}
 
 			// forced rendering without textures?
-			if (m_pZFXD3D->UsesTextures()) {
+			if (m_pZFXD3D->IsUseTextures()) {
 				// set texture for device
 				for (iT = 0; iT < 8; iT++) {
 					if (pSkin->nTexture[iT] != MAX_ID) {
@@ -783,18 +783,18 @@ HRESULT ZFXD3DVCManager::Render(UINT nSBID, UINT nIBID, UINT nSkin) {
 
 	// if using shaders they should be activated by the
 	// ActivateVShader methods. Else set FVF
-	if (!m_pZFXD3D->UsesShaders())
+	if (!m_pZFXD3D->IsUseShaders())
 		m_pDevice->SetFVF(m_pSB[nSBID].dwFVF);
 
 	//  should we use additive rendering?
-	if (m_pZFXD3D->UsesAdditiveBlending()) {
+	if (m_pZFXD3D->IsUseAdditiveBlending()) {
 		m_pDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
 		m_pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
 		m_pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
 	}
 
 	//  should we use rendering to color buffer at all?
-	if (!m_pZFXD3D->UsesColorBuffer()) {
+	if (!m_pZFXD3D->IsUseColorBuffer()) {
 		m_pDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
 		m_pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ZERO);
 		m_pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
@@ -880,7 +880,7 @@ HRESULT ZFXD3DVCManager::Render(UINT nID, UINT SkinID, UINT StartIndex,
 			// set material for device
 			ZFXMATERIAL *pMat = &m_pSkinMan->m_pMaterials[pSkin->nMaterial];
 
-			if (!m_pZFXD3D->UsesShaders()) {
+			if (!m_pZFXD3D->IsUseShaders()) {
 				D3DMATERIAL9 mat = {
 					pMat->cDiffuse.fR, pMat->cDiffuse.fG, pMat->cDiffuse.fB, pMat->cDiffuse.fA,
 					pMat->cAmbient.fR, pMat->cAmbient.fG, pMat->cAmbient.fB, pMat->cAmbient.fA,
@@ -897,7 +897,7 @@ HRESULT ZFXD3DVCManager::Render(UINT nID, UINT SkinID, UINT StartIndex,
 				GetZFXD3D()->SetShaderConstant(SHT_PIXEL, DAT_FLOAT, 4, 1, &pMat->cSpecular);
 			}
 
-			if (m_pZFXD3D->UsesTextures()) {
+			if (m_pZFXD3D->IsUseTextures()) {
 				// set texture for device
 				for (iT = 0; iT < 8; iT++) {
 					if (pSkin->nTexture[iT] != MAX_ID) {
@@ -955,21 +955,21 @@ HRESULT ZFXD3DVCManager::Render(UINT nID, UINT SkinID, UINT StartIndex,
 
 	// if using shaders they should be activated by the
 	// ActivateVShader methods. Else set FVF
-	if (!m_pZFXD3D->UsesShaders())
+	if (!m_pZFXD3D->IsUseShaders())
 		m_pDevice->SetFVF(m_pSB[nID].dwFVF);
 
 	// this method is for indexed primitives only
 	if (!m_pSB[nID].bIndis) return ZFX_FAIL;
 
 	//  should we use additive rendering?
-	if (m_pZFXD3D->UsesAdditiveBlending()) {
+	if (m_pZFXD3D->IsUseAdditiveBlending()) {
 		m_pDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
 		m_pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
 		m_pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
 	}
 
 	//  should we use rendering to color buffer at all?
-	if (!m_pZFXD3D->UsesColorBuffer()) {
+	if (!m_pZFXD3D->IsUseColorBuffer()) {
 		m_pDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
 		m_pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ZERO);
 		m_pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
@@ -1033,7 +1033,7 @@ HRESULT ZFXD3DVCManager::Render(ZFXVERTEXID VertexID,
 	int nEmptyVC = -1;
 	int nFullestVC = 0;
 
-	bool bShaders = m_pZFXD3D->UsesShaders();
+	bool bShaders = m_pZFXD3D->IsUseShaders();
 
 	// which vertex type is to be processed?
 	switch (VertexID) {
@@ -1200,7 +1200,7 @@ HRESULT ZFXD3DVCManager::RenderPoints(ZFXVERTEXID VID,
 	} // switch
 
 	// shaders or FVF
-	if (m_pZFXD3D->UsesShaders()) {
+	if (m_pZFXD3D->IsUseShaders()) {
 		m_pZFXD3D->ActivateVShader(0, VID);
 		m_pZFXD3D->ActivatePShader(0);
 	}
@@ -1287,7 +1287,7 @@ HRESULT ZFXD3DVCManager::RenderLines(ZFXVERTEXID VID,
 	} // switch
 
 	// shaders or FVF
-	if (m_pZFXD3D->UsesShaders()) {
+	if (m_pZFXD3D->IsUseShaders()) {
 		m_pZFXD3D->ActivateVShader(0, VID);
 		m_pZFXD3D->ActivatePShader(0);
 	}
@@ -1524,7 +1524,7 @@ HRESULT ZFXD3DVCache::Flush(bool bUseShaders) {
 		// WIREFRAME MODE NEEDS A SPECIAL CASE
 		if (m_pDad->GetZFXD3D()->GetShadeMode() == RS_SHADE_SOLID) 
 		{
-			if (!m_pDad->GetZFXD3D()->UsesShaders()) 
+			if (!m_pDad->GetZFXD3D()->IsUseShaders()) 
 			{
 				D3DMATERIAL9 mat = {
 					pMat->cDiffuse.fR, pMat->cDiffuse.fG, pMat->cDiffuse.fB, pMat->cDiffuse.fA,
@@ -1543,7 +1543,7 @@ HRESULT ZFXD3DVCache::Flush(bool bUseShaders) {
 				m_pDad->GetZFXD3D()->SetShaderConstant(SHT_PIXEL, DAT_FLOAT, 4, 1, &pMat->cSpecular);
 			}
 
-			if (m_pDad->GetZFXD3D()->UsesTextures()) 
+			if (m_pDad->GetZFXD3D()->IsUseTextures()) 
 			{
 				// set texture for device
 				for (iT = 0; iT < 8; iT++) 
@@ -1610,7 +1610,7 @@ HRESULT ZFXD3DVCache::Flush(bool bUseShaders) {
 	} // [device->skin]
 
 	//  should we use additive rendering?
-	if (m_pDad->GetZFXD3D()->UsesAdditiveBlending()) 
+	if (m_pDad->GetZFXD3D()->IsUseAdditiveBlending()) 
 	{
 		m_pDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
 		m_pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
@@ -1618,7 +1618,7 @@ HRESULT ZFXD3DVCache::Flush(bool bUseShaders) {
 	}
 
 	//  should we use rendering to color buffer at all?
-	if (!m_pDad->GetZFXD3D()->UsesColorBuffer()) 
+	if (!m_pDad->GetZFXD3D()->IsUseColorBuffer()) 
 	{
 		m_pDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
 		m_pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ZERO);

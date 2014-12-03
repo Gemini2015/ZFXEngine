@@ -145,7 +145,8 @@ LRESULT WINAPI MsgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 /**
  * Create a render device and stuff.
  */
-HRESULT ProgramStartup(char *chAPI) {
+HRESULT ProgramStartup(char *chAPI) 
+{
 	HWND hWnd3D[4];
 	RECT rcWnd;
 	int  x = 0, y = 0;
@@ -166,7 +167,8 @@ HRESULT ProgramStartup(char *chAPI) {
 	// build for child windows
 	GetClientRect(g_hWnd, &rcWnd);
 
-	for (int i = 0; i < 4; i++) {
+	for (int i = 0; i < 4; i++) 
+	{
 		if ((i == 0) || (i == 2)) x = 10;
 		else x = rcWnd.right / 2 + 10;
 
@@ -187,8 +189,10 @@ HRESULT ProgramStartup(char *chAPI) {
 /**
  * Release the render device and stuff.
  */
-HRESULT ProgramCleanup(void) {
-	if (g_pRenderer) {
+HRESULT ProgramCleanup(void) 
+{
+	if (g_pRenderer) 
+	{
 		delete g_pRenderer;
 		g_pRenderer = NULL;
 	}

@@ -28,7 +28,8 @@ HRESULT ZFXD3D::UseWindow(UINT nHwnd) {
 	// try to get the right back buffer
 	if (FAILED(m_pChain[nHwnd]->GetBackBuffer(0,
 		D3DBACKBUFFER_TYPE_MONO,
-		&pBack))) {
+		&pBack))) 
+	{
 		Log("error: GetBackBuffer() failed in UseWindow()");
 		return ZFX_FAIL;
 	}
@@ -50,18 +51,21 @@ HRESULT ZFXD3D::UseWindow(UINT nHwnd) {
  */
 HRESULT ZFXD3D::BeginRendering(bool bClearPixel,
 	bool bClearDepth,
-	bool bClearStencil) {
+	bool bClearStencil) 
+{
 	DWORD dw = 0;
 
 	// is there anything at all to clear?
-	if (bClearPixel || bClearDepth || bClearStencil) {
+	if (bClearPixel || bClearDepth || bClearStencil) 
+	{
 		if (bClearPixel)   dw |= D3DCLEAR_TARGET;
 		if (bClearDepth)   dw |= D3DCLEAR_ZBUFFER;
 
 		if (bClearStencil && m_bStencil)
 			dw |= D3DCLEAR_STENCIL;
 
-		if (FAILED(m_pDevice->Clear(0, NULL, dw, m_ClearColor, 1.0f, 0))) {
+		if (FAILED(m_pDevice->Clear(0, NULL, dw, m_ClearColor, 1.0f, 0))) 
+		{
 			Log("error: Clear()");
 			return ZFX_FAIL;
 		}
@@ -83,7 +87,8 @@ HRESULT ZFXD3D::BeginRendering(bool bClearPixel,
  *        bool - clear stencil buffer?
  */
 HRESULT ZFXD3D::Clear(bool bClearPixel, bool bClearDepth,
-	bool bClearStencil) {
+	bool bClearStencil) 
+{
 	DWORD dw = 0;
 
 	if (bClearPixel)   dw |= D3DCLEAR_TARGET;
@@ -111,18 +116,22 @@ HRESULT ZFXD3D::Clear(bool bClearPixel, bool bClearDepth,
 /**
  * End of render operations and flip scene to front buffer.
  */
-void ZFXD3D::EndRendering(void) {
+void ZFXD3D::EndRendering(void)
+{
 	// flush all vertex buffers
 	if (FAILED(m_pVertexMan->ForcedFlushAll()))
 		Log("error: ForceFlushAll() from EndRendering() failed");
 
 	m_pDevice->EndScene();
 
-	if (m_d3dpp.Windowed && (m_nNumhWnd > 0)) {
+	if (m_d3dpp.Windowed && (m_nNumhWnd > 0)) 
+	{	// 窗口模式
 		if (FAILED(m_pChain[m_nActivehWnd]->Present(NULL, NULL, NULL, NULL, 0)))
 			Log("error: Chain->Present() from EndRendering() failed");
 	}
-	else {
+	else 
+	{
+		// 全屏模式，只有一个窗口
 		if (FAILED(m_pDevice->Present(NULL, NULL, NULL, NULL)))
 			Log("error: Deviec->Present() from EndRendering() failed");
 	}
@@ -203,44 +212,6 @@ void ZFXD3D::SetAmbientLight(float fRed, float fGreen, float fBlue) {
 
 
 /**
- * Creates a D3DXFont object from a GDI font the caller submitted
- * and returns its ID to the caller for later use.
- */
-HRESULT ZFXD3D::CreateFont(const char *chType, int nWeight, bool bItalic,
-	bool bUnderline, bool bStrike, DWORD dwSize,
-	UINT *pID) {
-	HRESULT hr;
-	LPD3DXFONT font;
-	HDC     hDC;
-	int     nHeight;
-
-	if (!pID) return ZFX_INVALIDPARAM;
-
-	hDC = GetDC(NULL);
-	nHeight = -MulDiv(dwSize, GetDeviceCaps(hDC, LOGPIXELSY), 72);
-	ReleaseDC(NULL, hDC);
-
-	// 创建字体
-	hr = D3DXCreateFont(m_pDevice, nHeight, 0, FW_BOLD, 1, bItalic,
-		DEFAULT_CHARSET, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY,
-		DEFAULT_PITCH | FF_DONTCARE, chType, &font);
-
-	if (FAILED(hr)) return ZFX_FAIL;
-
-	// 加入字体列表
-	m_pFont = (LPD3DXFONT*)realloc(m_pFont, sizeof(LPD3DXFONT)*(m_nNumFonts + 1));
-
-	m_pFont[m_nNumFonts] = font;
-	(*pID) = m_nNumFonts;
-	m_nNumFonts++;
-	return ZFX_OK;
-
-} // CreateFont
-/*----------------------------------------------------------------*/
-
-
-
-/**
  * Fade the screen to given color by blending a semi-transparent
  * quad over the whole backbuffer.
  * -> IN: float - red
@@ -248,7 +219,8 @@ HRESULT ZFXD3D::CreateFont(const char *chType, int nWeight, bool bItalic,
  *        float - blue
  *        float - alpha
  */
-void ZFXD3D::FadeScreen(float fR, float fG, float fB, float fA) {
+void ZFXD3D::FadeScreen(float fR, float fG, float fB, float fA) 
+{
 	ZFXENGINEMODE OldMode;
 	LVERTEX       v[4];
 	bool          bChanged = false;

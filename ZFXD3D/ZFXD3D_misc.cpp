@@ -19,7 +19,8 @@ extern bool g_bLF;
  * -> IN: ZFXENGINEMODE - mode perspective, ortho or 2D
  *        int           - stage, not needed for 2D mode
  */
-HRESULT ZFXD3D::SetMode(ZFXENGINEMODE Mode, int nStage) {
+HRESULT ZFXD3D::SetMode(ZFXENGINEMODE Mode, int nStage)
+{
 	D3DVIEWPORT9 d3dVP;
 
 	if (!m_bRunning) return E_FAIL;
@@ -42,11 +43,13 @@ HRESULT ZFXD3D::SetMode(ZFXENGINEMODE Mode, int nStage) {
 	d3dVP.MaxZ = 1.0f;
 
 	// if 2D mode set orthogonal projection and view
-	if (Mode == EMD_TWOD) {
+	if (Mode == EMD_TWOD)
+	{
 		if (FAILED(m_pDevice->SetViewport(&d3dVP)))
 			return ZFX_FAIL;
 
-		if (!m_bUseShaders) {
+		if (!m_bUseShaders)
+		{
 			if (FAILED(m_pDevice->SetTransform(D3DTS_PROJECTION, &m_mProj2D)))
 				return ZFX_FAIL;
 
@@ -56,20 +59,24 @@ HRESULT ZFXD3D::SetMode(ZFXENGINEMODE Mode, int nStage) {
 	}
 
 	// perspective or orthogonal projection
-	else {
+	else 
+	{
 		if (FAILED(m_pDevice->SetViewport(&d3dVP)))
 			return ZFX_FAIL;
 
-		if (!m_bUseShaders) {
+		if (!m_bUseShaders)
+		{
 			if (FAILED(m_pDevice->SetTransform(D3DTS_VIEW, &m_mView3D)))
 				return ZFX_FAIL;
 
-			if (m_Mode == EMD_PERSPECTIVE) {
+			if (m_Mode == EMD_PERSPECTIVE) 
+			{
 				if (FAILED(m_pDevice->SetTransform(D3DTS_PROJECTION,
 					&m_mProjP[nStage])))
 					return ZFX_FAIL;
 			}
-			else { // EMD_ORTHOGONAL
+			else 
+			{ // EMD_ORTHOGONAL
 				if (FAILED(m_pDevice->SetTransform(D3DTS_PROJECTION,
 					&m_mProjO[nStage])))
 					return ZFX_FAIL;
@@ -1311,7 +1318,7 @@ void ZFXD3D::SetShadeMode(ZFXRENDERSTATE smd, float f, const ZFXCOLOR *pClr) {
 /*----------------------------------------------------------------*/
 
 
-
+// 设置纹理层级混合操作
 HRESULT ZFXD3D::SetTextureStage(UCHAR n, ZFXRENDERSTATE rs) {
 	D3DCAPS9 caps;
 
@@ -1338,19 +1345,24 @@ HRESULT ZFXD3D::SetTextureStage(UCHAR n, ZFXRENDERSTATE rs) {
 } // SetTextureStage
 /*----------------------------------------------------------------*/
 
-
-HRESULT ZFXD3D::SetLight(const ZFXLIGHT *pLight, UCHAR nStage) {
+// 设置光照
+HRESULT ZFXD3D::SetLight(const ZFXLIGHT *pLight, UCHAR nStage) 
+{
 	D3DLIGHT9 d3dLight;
 
 	// switch it off
-	if (!pLight) {
+	if (!pLight) 
+	{
+		// 禁用光照
 		m_pDevice->LightEnable(nStage, FALSE);
 		return ZFX_OK;
 	}
 
 	memset(&d3dLight, 0, sizeof(D3DLIGHT9));
 
-	switch (pLight->Type) {
+	switch (pLight->Type) 
+	{
+		// 平行光源
 	case LGT_DIRECTIONAL:
 		// set light values
 		d3dLight.Type = D3DLIGHT_DIRECTIONAL;
@@ -1361,11 +1373,14 @@ HRESULT ZFXD3D::SetLight(const ZFXLIGHT *pLight, UCHAR nStage) {
 			sizeof(float) * 3);
 		break;
 
+		// 点光源
 	case LGT_POINT:
 		// set light values
 		d3dLight.Type = D3DLIGHT_POINT;
+		// 范围
 		d3dLight.Range = pLight->fRange;
 
+		// 光照强度
 		d3dLight.Attenuation1 = 1.0f;
 
 		// copy light position
@@ -1374,11 +1389,13 @@ HRESULT ZFXD3D::SetLight(const ZFXLIGHT *pLight, UCHAR nStage) {
 			sizeof(float) * 3);
 		break;
 
+		// 聚光灯
 	case LGT_SPOT:
 		// set light values
 		d3dLight.Type = D3DLIGHT_SPOT;
 		d3dLight.Range = pLight->fRange;
 		d3dLight.Falloff = 1.0f;
+		// 聚焦内外角
 		d3dLight.Theta = pLight->fTheta;
 		d3dLight.Phi = pLight->fPhi;
 
@@ -1417,7 +1434,8 @@ HRESULT ZFXD3D::SetLight(const ZFXLIGHT *pLight, UCHAR nStage) {
 
 
 // the user wants to render additive
-void ZFXD3D::UseAdditiveBlending(bool b) {
+void ZFXD3D::UseAdditiveBlending(bool b) 
+{
 	if (m_bAdditive == b) return;
 
 	// clear all vertex caches
@@ -1426,7 +1444,8 @@ void ZFXD3D::UseAdditiveBlending(bool b) {
 
 	m_bAdditive = b;
 
-	if (!m_bAdditive) {
+	if (!m_bAdditive) 
+	{
 		m_pDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
 		m_pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
 		m_pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ZERO);

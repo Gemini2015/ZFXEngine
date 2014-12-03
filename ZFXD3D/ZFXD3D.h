@@ -227,14 +227,14 @@ public:
 
 	// misc stuff
 	void      UseAdditiveBlending(bool);
-	bool      UsesAdditiveBlending(void)  { return m_bAdditive; }
+	bool      IsUseAdditiveBlending(void)  { return m_bAdditive; }
 	void      UseColorBuffer(bool);
-	bool      UsesColorBuffer(void)  { return m_bColorBuffer; }
+	bool      IsUseColorBuffer(void)  { return m_bColorBuffer; }
 	void      UseTextures(bool);
-	bool      UsesTextures(void) { return m_bTextures; }
+	bool      IsUseTextures(void) { return m_bTextures; }
 	void      UseShaders(bool);
 	bool      CanDoShaders(void) { return m_bCanDoShaders; }
-	bool      UsesShaders(void)  { return m_bUseShaders; }
+	bool      IsUseShaders(void)  { return m_bUseShaders; }
 	HRESULT   SetShaderConstant(ZFXSHADERTYPE, ZFXDATATYPE, UINT, UINT, const void*);
 	HRESULT   SetView3D(const ZFXVector&, const ZFXVector&,
 		const ZFXVector&, const ZFXVector&);

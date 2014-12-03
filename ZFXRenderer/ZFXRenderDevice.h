@@ -227,7 +227,7 @@ public:
 	// ================
 
 	// activate or deactivate shaders
-	virtual bool    UsesShaders(void) = 0;
+	virtual bool    IsUseShaders(void) = 0;
 	virtual void    UseShaders(bool) = 0;
 	virtual bool    CanDoShaders(void) = 0;
 	virtual HRESULT SetShaderConstant(ZFXSHADERTYPE, ZFXDATATYPE,
@@ -235,7 +235,7 @@ public:
 
 	// activate additive blending
 	virtual void    UseAdditiveBlending(bool) = 0;
-	virtual bool    UsesAdditiveBlending(void) = 0;
+	virtual bool    IsUseAdditiveBlending(void) = 0;
 
 	// set view matrix from cam's vRight, vUp, vDir, vPos
 	virtual HRESULT SetView3D(const ZFXVector&, const ZFXVector&,
@@ -284,11 +284,11 @@ public:
 
 	// activate color buffer
 	virtual void UseColorBuffer(bool) = 0;
-	virtual bool UsesColorBuffer(void) = 0;
+	virtual bool IsUseColorBuffer(void) = 0;
 
 	// activate usage of texture
 	virtual void UseTextures(bool) = 0;
-	virtual bool UsesTextures(void) = 0;
+	virtual bool IsUseTextures(void) = 0;
 
 	// activate depth buffer
 	virtual void SetDepthBufferMode(ZFXRENDERSTATE) = 0;

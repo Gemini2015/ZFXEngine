@@ -206,6 +206,8 @@ public:
 	inline int   Classify(const ZFXVector &vcPoint);
 	int   Classify(const ZFXPolygon &Polygon);
 
+	bool Clip(const ZFXRay *_pRay, float fL, ZFXRay *pF, ZFXRay *pB);
+
 	bool Intersects(const ZFXVector &vc0, const ZFXVector &vc1,
 		const ZFXVector &vc2);
 	bool Intersects(const ZFXPlane &plane, ZFXRay *pIntersection);

@@ -143,6 +143,8 @@ public:
 	inline void SetTranslation(ZFXVector vc, bool EraseContent = false);
 	inline ZFXVector GetTranslation(void);
 
+	inline void GetMatrix(float m[4][4]);
+
 	inline void Billboard(ZFXVector vcPos, ZFXVector vcDir,
 		ZFXVector vcWorldUp = ZFXVector(0, 1, 0));
 	inline void LookAt(ZFXVector vcPos, ZFXVector vcLookAt,
@@ -153,7 +155,10 @@ public:
 
 	ZFXMatrix operator * (const ZFXMatrix &m)const;    // matrix multiplication
 	ZFXVector operator * (const ZFXVector &vc)const;   // matrix vector multiplication
+	ZFXMatrix operator = (const ZFXMatrix &m) const;
 }; // class
+
+
 /*----------------------------------------------------------------*/
 
 

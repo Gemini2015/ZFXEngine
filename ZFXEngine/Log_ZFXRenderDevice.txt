@@ -1,0 +1,29 @@
+[ZFXD3DDevice]: online (waiting for initialization call)
+[ZFXD3DDevice]: calling dialog
+[ZFXD3DDevice]: dialog finished
+[ZFXD3DDevice]: firing up MS Direct3D
+[ZFXD3DDevice]: initialized (online and ready)
+[ZFXD3DDevice]: ADAPTERINFO: {
+[ZFXD3DDevice]:    adapter features hardware TnL
+[ZFXD3DDevice]:    (pure device possible)
+[ZFXD3DDevice]:    max. texture stages: 8
+[ZFXD3DDevice]:    max. textures for single pass: 8
+[ZFXD3DDevice]:    max. texture width: 16384
+[ZFXD3DDevice]:    max. texture height: 16384
+[ZFXD3DDevice]:    Vertex Shader Version 2.0 or better
+[ZFXD3DDevice]:    Pixel Shader Version 2.0 or better
+[ZFXD3DDevice]:    } ENDINFO
+[ZFXD3DDevice]: DISPLAYINFO {
+[ZFXD3DDevice]:    Resolution: 1920x1080
+[ZFXD3DDevice]:    Refreshrate: 60
+[ZFXD3DDevice]:    Pixelformat: D3DFMT_X8R8G8B8
+[ZFXD3DDevice]:    Depth/Stencil: D3DFMT_D16
+[ZFXD3DDevice]:    } ENDINFO
+[ZFXD3DDevice]: SIMD compatible CPU detected => using fast math
+[ZFXD3DSkinMn]: online
+[ZFXD3DVCMngr]: online
+[ZFXD3DDevice]: use of shaders activated (VS 1.1, PS 1.1)
+[ZFXD3DDevice]: one time scene init complete
+[ZFXD3DSkinMn]: offline (ok)
+[ZFXD3DVCMngr]: offline (ok)
+[ZFXD3DDevice]: offline (ok)

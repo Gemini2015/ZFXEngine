@@ -125,6 +125,19 @@ inline ZFXVector ZFXMatrix::GetTranslation(void)
 }
 /*----------------------------------------------------------------*/
 
+// 
+inline void ZFXMatrix::GetMatrix(float m[4][4])
+{
+	float *p = (float*)this;
+	for (int i = 0; i < 4; i++)
+	{
+		for (int j = 0; j < 4; j++)
+		{
+			m[i][j] = p[i * 4 + j];
+		}
+	}
+}
+
 
 // Build rotation matrix around arbitrary axis
 inline void ZFXMatrix::RotaArbi(const ZFXVector &_vcAxis, float a) {
@@ -370,6 +383,12 @@ ZFXVector ZFXMatrix::operator * (const ZFXVector &vc) const {
 	return vcResult;
 }
 /*----------------------------------------------------------------*/
+
+ZFXMatrix ZFXMatrix::operator=(const ZFXMatrix &m) const
+{
+	memcpy((void*)&(this->_11), &m, sizeof(ZFXMatrix));
+	return *this;
+}
 
 // transpose the matrix
 inline void ZFXMatrix::TransposeOf(const ZFXMatrix &m) {

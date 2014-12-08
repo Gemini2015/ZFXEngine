@@ -159,7 +159,8 @@ void ZFXD3D::CalcViewProjMatrix(void) {
 
 
 void ZFXD3D::CalcOrthoProjMatrix(float l, float r, float b, float t,
-	float fN, float fF, int nStage) {
+	float fN, float fF, int nStage)
+{
 	float x = 2.0f / (r - l);
 	float y = 2.0f / (t - b);
 	float z = 2.0f / (fF - fN);
@@ -491,7 +492,8 @@ HRESULT ZFXD3D::GetFrustrum(ZFXPlane *p) {
  */
 void  ZFXD3D::Transform2Dto3D(const POINT &pt,
 	ZFXVector *vcOrig,
-	ZFXVector *vcDir) {
+	ZFXVector *vcDir) 
+{
 	D3DMATRIX *pView = NULL, *pProj = NULL;
 	ZFXMatrix mInvView;
 	ZFXVector vcS;
@@ -995,7 +997,8 @@ HRESULT ZFXD3D::CreateVShader(const void *pData, UINT nSize,
  */
 HRESULT ZFXD3D::CreatePShader(const void *pData, UINT nSize,
 	bool bLoadFromFile,
-	bool bIsCompiled, UINT *pID) {
+	bool bIsCompiled, UINT *pID) 
+{
 	LPD3DXBUFFER  pCode = NULL;
 	LPD3DXBUFFER  pDebug = NULL;
 	HRESULT       hrC = ZFX_OK, hrA = ZFX_OK;

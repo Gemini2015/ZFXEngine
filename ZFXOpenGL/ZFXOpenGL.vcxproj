@@ -11,9 +11,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ZFXGLSL.h" />
     <ClInclude Include="ZFXOpenGL.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ZFXGLSL.cpp" />
     <ClCompile Include="ZFXOpenGL.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -47,7 +49,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)ZFXRenderer;$(SolutionDir)ZFX3D;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)ZFXEngine;$(SolutionDir)ZFXRenderer;$(SolutionDir)ZFX3D;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>

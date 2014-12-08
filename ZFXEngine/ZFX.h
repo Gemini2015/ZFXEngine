@@ -113,19 +113,24 @@ typedef enum ZFXSHADER_TYPE {
 
 typedef enum ZFXRENDERSTATE_TYPE {
 	RS_NONE,             // just nothing
+	
 	RS_CULL_CW,          // cull clockwise ordered triangles
 	RS_CULL_CCW,         // cull counter cw ordered triangles
 	RS_CULL_NONE,        // render front- and backsides
+	
 	RS_DEPTH_READWRITE,  // read and write depth buffer
 	RS_DEPTH_READONLY,   // read but don't write depth buffer
 	RS_DEPTH_NONE,       // no read or write with depth buffer
+	
 	RS_SHADE_POINTS,     // render just vertices
 	RS_SHADE_LINES,      // render two verts as one line
 	RS_SHADE_TRIWIRE,    // render triangulated wire
 	RS_SHADE_HULLWIRE,   // render poly hull as polyline
 	RS_SHADE_SOLID,      // render solid polygons
+	
 	RS_TEX_ADDSIGNED,    // texture stage operation
 	RS_TEX_MODULATE,     // texture stage operation
+	
 	RS_STENCIL_DISABLE,        // stencilbuffer off
 	RS_STENCIL_ENABLE,         // stencilbuffer off
 	RS_STENCIL_FUNC_ALWAYS,    // stencil pass mode

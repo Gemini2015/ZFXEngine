@@ -80,6 +80,8 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance,
 	else
 		g_pDevice->SetClearColor(0.1f, 0.3f, 0.1f);
 
+	g_pDevice->UseWindow(2);
+
 	while (!g_bDone)
 	{
 		while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))

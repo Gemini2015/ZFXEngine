@@ -179,7 +179,7 @@ private:
 	bool m_bTextures;
 	std::map<UCHAR, GLenum> m_mapTextureOp;
 	UCHAR m_nActivateTextureUnit;
-	GLSLManager *m_GLSLManager;
+	GLSLManager *m_pGLSLManager;
 
 	ZFXMatrix m_mProj2D;
 	ZFXMatrix m_mView2D;

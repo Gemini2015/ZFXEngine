@@ -9,11 +9,17 @@ ZFXOpenGL::ZFXOpenGL()
 {
 	m_mView3D.Identity();
 	m_mWorld3D.Identity();
+	m_pGLSLManager = NULL;
 }
 
 
 ZFXOpenGL::~ZFXOpenGL()
 {
+	if (m_pGLSLManager)
+	{
+		delete m_pGLSLManager;
+		m_pGLSLManager = NULL;
+	}
 }
 
 void ZFXOpenGL::SetClippingPlanes(float fNear, float fFar)
@@ -646,52 +652,69 @@ HRESULT ZFXOpenGL::SetLight(const ZFXLIGHT* pLight, UCHAR nStage)
 
 HRESULT ZFXOpenGL::CreateVShader(const void *pData, UINT nSize, bool bLoadFromFile, bool bIsCompiled, UINT *pID)
 {
-	HRESULT result = 0;
-	HANDLE hFile = NULL, hMap = NULL;
-	DWORD *pShaderSource = NULL;
-	if (m_nVShaderNum >= (MAX_SHADER - 1))
-		return ZFX_OUTOFMEMORY;
+	if (pData == NULL)
+		return E_INVALIDARG;
 
-	// create shader object
-	GLuint shader = glCreateShader(GL_VERTEX_SHADER);
-	if (shader == 0)
-	{
-		Log("error create shader");
+	if (m_pGLSLManager == NULL)
 		return E_FAIL;
-	}
 
-	
-	GLchar **str = (GLchar**)&pShaderSource;
-	glShaderSource(shader, 1, str, NULL);
-	
-	
-	GLuint programID = glCreateProgram();
-	glAttachShader(programID, shader);
-
+	return m_pGLSLManager->CreateShader(pData, GL_VERTEX_SHADER, bLoadFromFile, pID);
 }
 
 HRESULT ZFXOpenGL::CreatePShader(const void *pData, UINT nSize, bool bLoadFromFile, bool bIsCompiled, UINT *pID)
 {
-	throw std::logic_error("The method or operation is not implemented.");
+	if (pData == NULL)
+		return E_INVALIDARG;
+
+	if (m_pGLSLManager == NULL)
+		return E_FAIL;
+
+	return m_pGLSLManager->CreateShader(pData, GL_FRAGMENT_SHADER, bLoadFromFile, pID);
 }
 
 HRESULT ZFXOpenGL::ActivateVShader(UINT id, ZFXVERTEXID VertexID)
 {
-	throw std::logic_error("The method or operation is not implemented.");
+	if (m_pGLSLManager)
+	{
+		return m_pGLSLManager->ActivateShader(id, GL_VERTEX_SHADER);
+	}
+	return E_FAIL;
 }
 
 HRESULT ZFXOpenGL::ActivatePShader(UINT id)
 {
-	throw std::logic_error("The method or operation is not implemented.");
+	if (m_pGLSLManager)
+	{
+		return m_pGLSLManager->ActivateShader(id, GL_FRAGMENT_SHADER);
+	}
+	return E_FAIL;
 }
 
 HRESULT ZFXOpenGL::UseWindow(UINT nHwnd)
 {
-	throw std::logic_error("The method or operation is not implemented.");
+	if (nHwnd >= m_nNumhWnd)
+		return E_INVALIDARG;
+
+	if (!wglMakeCurrent(NULL, NULL))
+	{
+		Log("unbing window error");
+		return E_FAIL;
+	}
+
+	if (!wglMakeCurrent(m_hDC[nHwnd], m_hRC))
+	{
+		Log("bing window error");
+		return E_FAIL;
+	}
+
+	m_nActivehWnd = nHwnd;
+	return ZFX_OK;
+
 }
 
 HRESULT ZFXOpenGL::BeginRendering(bool bClearPixel, bool bClearDepth, bool bClearStencil)
 {
+
 	throw std::logic_error("The method or operation is not implemented.");
 }
 
@@ -747,6 +770,16 @@ HRESULT ZFXOpenGL::Init(HWND mainWnd, const HWND* childWnds, int nWndsNum, int n
 	HRESULT result = E_FAIL;
 
 	g_bLF = bSaveLog;
+
+	if (m_pGLSLManager == NULL)
+	{
+		m_pGLSLManager = new GLSLManager();
+		if (m_pGLSLManager == NULL)
+		{
+			Log("create GLSLManager error");
+			return E_FAIL;
+		}
+	}
 
 	if (nWndsNum > 0)
 	{

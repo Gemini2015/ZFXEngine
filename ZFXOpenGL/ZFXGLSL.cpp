@@ -133,14 +133,13 @@ GLSLManager::~GLSLManager()
 	m_nCurrentFShader = -1;
 }
 
-HRESULT GLSLManager::CreateShader(const void* pData, GLenum type, bool bLoadFromFile, int *pID)
+HRESULT GLSLManager::CreateShader(const void* pData, GLenum type, bool bLoadFromFile, UINT *pID)
 {
-	(*pID) = -1;
 	if (pData == NULL)
 		return E_INVALIDARG;
 	if (pID == NULL)
 		return E_INVALIDARG;
-	
+	(*pID) = UINT_MAX;
 
 	if (m_nShaderNum >= (MAX_SHADER_NUM - 1))
 		return ZFX_OUTOFMEMORY;
@@ -251,7 +250,7 @@ HRESULT GLSLManager::UseShader(int nVShader /*= -1*/, int nFShader /*= -1*/)
 		return E_INVALIDARG;
 
 	if (nVShader == m_nCurrentVShader &&
-		nFShader == m_nCurrentFShader)
+		nFShader == m_nCurrentFShader && m_bProgramCreated)
 		return ZFX_OK;
 
 	GLuint program = 0;
@@ -261,7 +260,7 @@ HRESULT GLSLManager::UseShader(int nVShader /*= -1*/, int nFShader /*= -1*/)
 	{
 		return hr;
 	}
-	
+	m_bProgramCreated = true;
 	glUseProgram(program);
 	m_nCurrentFShader = nVShader;
 	m_nCurrentFShader = nFShader;
@@ -285,6 +284,33 @@ GLuint GLSLManager::FindProgram(GLuint vshader /*= 0*/, GLuint fshader /*= 0*/)
 		}
 	}
 	return program;
+}
+
+HRESULT GLSLManager::ActivateShader(UINT id, GLenum type)
+{
+	if (type != GL_VERTEX_SHADER && type != GL_FRAGMENT_SHADER)
+		return E_INVALIDARG;
+
+	if (id >= m_nShaderNum)
+		return E_INVALIDARG;
+
+	if (type == GL_VERTEX_SHADER && m_nCurrentVShader == id)
+		return ZFX_OK;
+	if (type == GL_FRAGMENT_SHADER && m_nCurrentFShader == id)
+		return ZFX_OK;
+
+	GLSLShader* pShader = m_Shader[id];
+	if (pShader && pShader->m_type == type
+		&& pShader->m_bCompiled == true)
+	{
+		m_nCurrentVShader = id;
+		m_bProgramCreated = false;
+		return ZFX_OK;
+	}
+	else
+	{
+		return E_FAIL;
+	}
 }
 
 

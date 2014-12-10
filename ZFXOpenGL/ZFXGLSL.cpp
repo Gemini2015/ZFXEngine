@@ -103,7 +103,10 @@ HRESULT GLSLProgram::CreateProgram(GLuint vshader /*= 0*/, GLuint fshader /*= 0*
 
 GLSLManager::GLSLManager()
 {
-	memset(m_Shader, 0, sizeof(GLSLShader) * MAX_SHADER_NUM);
+	for (int i = 0; i < MAX_SHADER_NUM; i++)
+	{
+		m_Shader[i] = NULL;
+	}
 	m_nShaderNum = 0;
 	m_nCurrentFShader = -1;
 	m_nCurrentFShader = -1;

@@ -18,6 +18,14 @@
     <ClCompile Include="ZFXGLSL.cpp" />
     <ClCompile Include="ZFXOpenGL.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ZFX3D\ZFX3D.vcxproj">
+      <Project>{33f48ca8-47cc-4e69-beee-9513e5b28aa3}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\ZFXUtil\ZFXUtil.vcxproj">
+      <Project>{eaa626ce-f656-498a-8535-8b503da05dde}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{95432232-5393-4FD0-B8D1-61F3AD52A6B5}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
@@ -28,7 +36,7 @@
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v120</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -49,7 +57,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)ZFXEngine;$(SolutionDir)ZFXRenderer;$(SolutionDir)ZFX3D;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)ZFXEngine;$(SolutionDir)ZFXRenderer;$(SolutionDir)ZFX3D;$(SolutionDir)ZFXUtil;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -60,12 +68,13 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>glew32.lib;glu32.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

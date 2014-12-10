@@ -2,24 +2,29 @@
 #include <stdexcept>
 #include <math.h>
 #include <gl\glew.h>
+#include "..\ZFXUtil\ZFXUtil.h"
+#include "ZFXGLSL.h"
 
 bool g_bLF = false;
 
-ZFXOpenGL::ZFXOpenGL()
+ZFXOpenGL::ZFXOpenGL(HINSTANCE hDLL)
 {
+	m_hDLL = hDLL;
 	m_mView3D.Identity();
 	m_mWorld3D.Identity();
 	m_pGLSLManager = NULL;
+	m_name.assign("OpenGL Device");
+
+	m_pLog = fopen("Log_OpenGL.txt", "w");
+
+	glLoadIdentity();
+	//glUseProgram(0);
 }
 
 
 ZFXOpenGL::~ZFXOpenGL()
 {
-	if (m_pGLSLManager)
-	{
-		delete m_pGLSLManager;
-		m_pGLSLManager = NULL;
-	}
+	Release();
 }
 
 void ZFXOpenGL::SetClippingPlanes(float fNear, float fFar)
@@ -594,6 +599,7 @@ HRESULT ZFXOpenGL::SetTextureStage(UCHAR n, ZFXRENDERSTATE rs)
 		m_mapTextureOp[n] = GL_MODULATE;
 		break;
 	}
+	return ZFX_OK;
 }
 
 HRESULT ZFXOpenGL::SetLight(const ZFXLIGHT* pLight, UCHAR nStage)
@@ -714,23 +720,61 @@ HRESULT ZFXOpenGL::UseWindow(UINT nHwnd)
 
 HRESULT ZFXOpenGL::BeginRendering(bool bClearPixel, bool bClearDepth, bool bClearStencil)
 {
+	if (m_nStage < 0 || m_nStage > 4)
+		return E_INVALIDARG;
 
-	throw std::logic_error("The method or operation is not implemented.");
+	m_bIsSceneRunning = true;
+
+	return Clear(bClearPixel, bClearDepth, bClearStencil);
 }
 
 void ZFXOpenGL::EndRendering(void)
 {
-	throw std::logic_error("The method or operation is not implemented.");
+	if(m_bIsSceneRunning)
+		glFlush();
+
+	m_bIsSceneRunning = false;
+
+	if (m_bWindowed && m_nActivehWnd >= 0 && m_nActivehWnd < m_nNumhWnd && m_hDC[m_nActivehWnd])
+		SwapBuffers(m_hDC[m_nActivehWnd]);
+	else if (m_hDC[0])
+		SwapBuffers(m_hDC[0]);
+	//throw std::logic_error("The method or operation is not implemented.");
 }
 
-HRESULT ZFXOpenGL::Clear(bool, bool, bool)
+HRESULT ZFXOpenGL::Clear(bool bClearPixel, bool bClearDepth, bool bClearStencil)
 {
-	throw std::logic_error("The method or operation is not implemented.");
+	GLbitfield mask = 0;
+	if (bClearPixel)
+	{
+		mask |= GL_COLOR_BUFFER_BIT;
+		glColorMask(true, true, true, true);
+		glClearColor(m_ClearColor.fR, m_ClearColor.fG, m_ClearColor.fB, m_ClearColor.fA);
+	}
+	if (bClearDepth)
+	{
+		mask |= GL_DEPTH_BUFFER_BIT;
+		glDepthMask(GL_TRUE);
+		glClearDepth(1.0);
+	}
+	if (bClearStencil)
+	{
+		mask |= GL_STENCIL_BUFFER_BIT;
+		glStencilMask(0xFFFFFFFF);
+		glClearStencil(0);
+	}
+
+	glClear(mask);
+
+	return ZFX_OK;
 }
 
 void ZFXOpenGL::SetClearColor(float fRed, float fGreen, float fBlue)
 {
-	throw std::logic_error("The method or operation is not implemented.");
+	m_ClearColor.fR = fRed;
+	m_ClearColor.fG = fGreen;
+	m_ClearColor.fB = fBlue;
+	m_ClearColor.fA = 1.0f;
 }
 
 void ZFXOpenGL::FadeScreen(float fR, float fG, float fB, float fA)
@@ -762,6 +806,12 @@ void ZFXOpenGL::SetAmbientLight(float fRed, float fGreen, float fBlue)
 {
 	GLfloat lmodel_ambient[] = { fRed, fGreen, fBlue, 1.0f };
 	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lmodel_ambient);
+
+	if (m_bCanDoShaders)
+	{
+		//
+	}
+
 	//throw std::logic_error("The method or operation is not implemented.");
 }
 
@@ -801,11 +851,25 @@ HRESULT ZFXOpenGL::Init(HWND mainWnd, const HWND* childWnds, int nWndsNum, int n
 				return E_FAIL;
 			}
 		}
+
+		m_bWindowed = true;
 	}
 	else
 	{
 		m_hWnd[0] = mainWnd;
-		m_nNumhWnd = 0;
+		m_nNumhWnd = 1;
+		m_hDC[0] = GetDC(mainWnd);
+		if (!m_hDC[0])
+		{
+			Log("GetDC error.");
+			return E_FAIL;
+		}
+		if (!InitPixelFormat(0))
+		{
+			Log("SetPixelFormat error");
+			return E_FAIL;
+		}
+		m_bWindowed = false;
 	}
 
 	if (nMinStencil > 0)
@@ -839,27 +903,56 @@ HRESULT ZFXOpenGL::Init(HWND mainWnd, const HWND* childWnds, int nWndsNum, int n
 
 HRESULT ZFXOpenGL::Go(void)
 {
-	
+	m_bRunning = true;
+	return ZFX_OK;
 }
 
 HRESULT ZFXOpenGL::InitWindowed(HWND mainWnd, const HWND* childWnds, int nWndsNum, bool bSaveLog)
 {
-
+	return ZFX_OK;
 }
 
 void ZFXOpenGL::Release(void)
 {
+	if (m_pGLSLManager)
+	{
+		delete m_pGLSLManager;
+		m_pGLSLManager = NULL;
+	}
 
+	if (m_bWindowed)
+	{
+		for (int i = 0; i < m_nNumhWnd; i++)
+		{
+			if (m_hWnd[i] && m_hDC[i])
+				ReleaseDC(m_hWnd[i], m_hDC[i]);
+		}
+	}
+	GetLogger().Print("OpenGL release");
 }
 
-void ZFXOpenGL::UseShaders(bool)
+void ZFXOpenGL::UseShaders(bool b)
 {
+	if (!m_bCanDoShaders) return;
+
+	if (m_bUseShaders == b) return;
+
+
+	m_bUseShaders = b;
+	if (!m_bUseShaders)
+	{
+		glUseProgram(0);
+	}
+	else
+	{
+		
+	}
 
 }
 
 HRESULT ZFXOpenGL::SetShaderConstant(ZFXSHADERTYPE, ZFXDATATYPE, UINT, UINT, const void*)
 {
-
+	return ZFX_OK;
 }
 
 void ZFXOpenGL::UseAdditiveBlending(bool)
@@ -903,9 +996,51 @@ HRESULT ZFXOpenGL::SetView3D(const ZFXVector &vcRight,
 	return ZFX_OK;
 }
 
-HRESULT ZFXOpenGL::SetViewLookAt(const ZFXVector&, const ZFXVector&, const ZFXVector&)
+HRESULT ZFXOpenGL::SetViewLookAt(const ZFXVector& vcPos, const ZFXVector& vcPoint, const ZFXVector& vcWorldUp)
 {
+	ZFXVector vcDir, vcTemp, vcUp;
 
+	vcDir = vcPoint - vcPos;
+	vcDir.Normalize();
+
+	// calculate up vector
+	float fDot = vcWorldUp * vcDir;
+
+	vcTemp = vcDir * fDot;
+	vcUp = vcWorldUp - vcTemp;
+	float fL = vcUp.GetLength();
+
+	// if length too small take normal y axis as up vector
+	if (fL < 1e-6f) {
+		ZFXVector vcY;
+		vcY.Set(0.0f, 1.0f, 0.0f);
+
+		vcTemp = vcDir * vcDir.y;
+		vcUp = vcY - vcTemp;
+
+		fL = vcUp.GetLength();
+
+		// if still too small take z axis as up vector
+		if (fL < 1e-6f) {
+			vcY.Set(0.0f, 0.0f, 1.0f);
+
+			vcTemp = vcDir * vcDir.z;
+			vcUp = vcY - vcTemp;
+
+			// if still too small we are lost         
+			fL = vcUp.GetLength();
+			if (fL < 1e-6f) return ZFX_FAIL;
+		}
+	}
+
+	vcUp /= fL;
+
+	// build right vector using cross product
+	ZFXVector vcRight;
+	vcRight.Cross(vcUp, vcDir);
+
+	// build final matrix and set for device
+	return SetView3D(vcRight, vcUp, vcDir, vcPos);
 }
 
 void ZFXOpenGL::MakeGLMatrix(GLfloat gl_matrix[16], ZFXMatrix matrix)
@@ -1052,7 +1187,7 @@ bool ZFXOpenGL::InitPixelFormat(int nHWnd)
 
 	PIXELFORMATDESCRIPTOR pfd;
 	memset(&pfd, 0, sizeof(PIXELFORMATDESCRIPTOR));
-	pfd.nSize = sizeof(pfd);
+	pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);
 	pfd.nVersion = 1;
 	pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
 	pfd.iPixelType = PFD_TYPE_RGBA;
@@ -1073,23 +1208,28 @@ bool ZFXOpenGL::InitPixelFormat(int nHWnd)
 */
 void ZFXOpenGL::Log(char *chString, ...)
 {
+	
 	char ch[1024];
-	char *pArgs;
 
-	pArgs = (char*)&chString + sizeof(chString);
-	vsprintf(ch, chString, pArgs);
-	fprintf(m_pLog, "[%s]: ", GetName().c_str());
+	va_list args;
+	va_start(args, chString);
+	vsprintf_s(ch, chString, args);
+	va_end(args);
+
+	fprintf(m_pLog, "[%s]: ", "OpenGL");
 	fprintf(m_pLog, ch);
 	fprintf(m_pLog, "\n");
 
 	if (g_bLF)
 		fflush(m_pLog);
+	
+	GetLogger().Print(ch);
 } // Log
 
 std::string ZFXOpenGL::GetName()
 {
-	static std::string APIName("OpenGL Device");
-	return APIName;
+	//static std::string APIName("OpenGL Device");
+	return m_name;
 }
 
 bool ZFXOpenGL::ActivateGLTextureUnit(UCHAR n)
@@ -1113,3 +1253,53 @@ bool ZFXOpenGL::ActivateGLTextureUnit(UCHAR n)
 }
 
 
+/*-----------------------------------------------------------*/
+/* DLL stuff implementation                                  *
+/*-----------------------------------------------------------*/
+
+/**
+* DLL Entry Point similar to WinMain()/main()
+*/
+BOOL WINAPI DllEntryPoint(HINSTANCE hDll,
+	DWORD     fdwReason,
+	LPVOID    lpvReserved) {
+	switch (fdwReason) {
+		// called when we attach to the DLL
+	case DLL_PROCESS_ATTACH:
+		/* dll init/setup stuff */
+		break;
+	case DLL_PROCESS_DETACH:
+		/* dll shutdown/release stuff */
+		break;
+	default:
+		break;
+	};
+
+	return TRUE;
+} // DllEntryPoint
+/*----------------------------------------------------------------*/
+
+/**
+* Exported create function: Creates a new ZFXRenderDevice object.
+*/
+HRESULT CreateRenderDevice(HINSTANCE hDLL, ZFXRenderDevice **pDevice) {
+	if (!*pDevice) {
+		*pDevice = new ZFXOpenGL(hDLL);
+		return ZFX_OK;
+	}
+	return ZFX_FAIL;
+}
+/*----------------------------------------------------------------*/
+
+/**
+* Exported release function: Realeses the given ZFXRenderDevice object.
+*/
+HRESULT ReleaseRenderDevice(ZFXRenderDevice **pDevice) {
+	if (!*pDevice) {
+		return ZFX_FAIL;
+	}
+	delete *pDevice;
+	*pDevice = NULL;
+	return ZFX_OK;
+}
+/*----------------------------------------------------------------*/

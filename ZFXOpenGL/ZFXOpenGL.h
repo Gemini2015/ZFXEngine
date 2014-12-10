@@ -3,10 +3,10 @@
 
 
 #include <windows.h>
+#include <gl\glew.h>
 #include <gl\GL.h>
 #include <gl\GLU.h>
 #include <gl\freeglut.h>
-#include <gl\glew.h>
 #include "ZFXRenderDevice.h"
 #include "zfx3d.h"
 #include "ZFX.h"
@@ -21,6 +21,11 @@ BOOL WINAPI DllEntryPoint(HINSTANCE hDll,
 	DWORD fdwReason,
 	LPVOID lpvRserved);
 
+#pragma comment(lib, "glew32.lib")
+#pragma comment(lib, "glu32.lib")
+#pragma comment(lib, "opengl32.lib")
+#pragma comment(lib, "zfx3d.lib");
+
 #define _USE_MATH_DEFINES
 #define RADIAN2DEGREE(radian) ((radian) * 180.0f / M_PI)
 
@@ -30,7 +35,7 @@ class ZFXOpenGL :
 	public ZFXRenderDevice
 {
 public:
-	ZFXOpenGL();
+	ZFXOpenGL(HINSTANCE hDLL);
 	~ZFXOpenGL();
 
 	std::string GetName();
@@ -75,7 +80,7 @@ public:
 	void UseShaders(bool);
 	bool IsUseShaders(void)
 	{
-		m_bUseShaders;
+		return m_bUseShaders;
 	}
 
 	bool CanDoShaders(void)
@@ -173,13 +178,17 @@ public:
 
 
 private:
+	HINSTANCE m_hDLL;
 	HDC m_hDC[MAX_3DHWND];
 	HGLRC m_hRC;
 	bool m_bStencil;
 	bool m_bTextures;
+	ZFXCOLOR m_ClearColor;
+	bool m_bIsSceneRunning;
 	std::map<UCHAR, GLenum> m_mapTextureOp;
 	UCHAR m_nActivateTextureUnit;
 	GLSLManager *m_pGLSLManager;
+	std::string m_name;
 
 	ZFXMatrix m_mProj2D;
 	ZFXMatrix m_mView2D;

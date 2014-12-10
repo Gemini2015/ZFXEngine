@@ -19,6 +19,9 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ZFXUtil", "ZFXUtil\ZFXUtil.vcxproj", "{EAA626CE-F656-498A-8535-8B503DA05DDE}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ZFXOpenGL", "ZFXOpenGL\ZFXOpenGL.vcxproj", "{95432232-5393-4FD0-B8D1-61F3AD52A6B5}"
+	ProjectSection(ProjectDependencies) = postProject
+		{33F48CA8-47CC-4E69-BEEE-9513E5B28AA3} = {33F48CA8-47CC-4E69-BEEE-9513E5B28AA3}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -37,6 +37,16 @@ HRESULT ZFXRenderer::CreateDevice(const char *chAPI) {
 			return E_FAIL;
 		}
 	}
+	else if (strcmp(chAPI, "OpenGL") == 0)
+	{
+		m_hDLL = LoadLibrary("ZFXOpenGL.dll");
+		if (!m_hDLL) {
+			MessageBox(NULL,
+				"Loading ZFXD3D.dll from lib failed.",
+				"ZFXEngine - error", MB_OK | MB_ICONERROR);
+			return E_FAIL;
+		}
+	}
 	else
 	{
 		_snprintf(buffer, 300, "API '%s' not yet supported.", chAPI);

@@ -9,7 +9,7 @@ void ZFXLogger::Print(LOG_LEVEL level, const char* fmt, ...)
 	std::string header = GetLevelString(level);
 	if (m_stream.is_open() && !header.empty())
 	{
-		std::string time = GetClock()->GetTimeString(ZFXClock::YMDHS);
+		std::string time = GetClock().GetTimeString(ZFXClock::YMDHS);
 		std::ostringstream ostr;
 		ostr << "[" << header << " " << time << "] ";
 		
@@ -31,7 +31,7 @@ void ZFXLogger::Print(const char* str)
 	std::string header = GetLevelString(m_levelfilter);
 	if (m_stream.is_open() && !header.empty() && strlen(str) != 0)
 	{
-		std::string time = GetClock()->GetTimeString(ZFXClock::YMDHS);
+		std::string time = GetClock().GetTimeString(ZFXClock::YMDHS);
 		
 		m_stream << "[" << header << " " << time << "] ";
 		m_stream << str << std::endl;
@@ -44,7 +44,7 @@ void ZFXLogger::Print(LOG_LEVEL level, const char* str)
 	std::string header = GetLevelString(level);
 	if (m_stream.is_open() && !header.empty() && strlen(str) != 0)
 	{
-		std::string time = GetClock()->GetTimeString(ZFXClock::YMDHS);
+		std::string time = GetClock().GetTimeString(ZFXClock::YMDHS);
 
 		m_stream << "[" << header << " " << time << "] ";
 		m_stream << str << std::endl;
@@ -60,7 +60,7 @@ void ZFXLogger::Print(LOG_LEVEL level, std::string filepath, const char* fmt, ..
 		std::ofstream tempfile(filepath, std::ios::app);
 		if (!tempfile)
 		{
-			std::string time = GetClock()->GetTimeString();
+			std::string time = GetClock().GetTimeString();
 
 			tempfile << "[" << header << " " << time << "] ";
 
@@ -83,7 +83,7 @@ void ZFXLogger::Print(std::string str)
 	std::string header = GetLevelString(m_levelfilter);
 	if (m_stream.is_open() && !header.empty() && !str.empty())
 	{
-		std::string time = GetClock()->GetTimeString(ZFXClock::YMDHS);
+		std::string time = GetClock().GetTimeString(ZFXClock::YMDHS);
 
 		m_stream << "[" << header << " " << time << "] ";
 		m_stream << str << std::endl;
@@ -170,19 +170,19 @@ std::string ZFXClock::GetTimeString(TIME_FORMAT format /*= YMD*/)
 		strftime(buf, 260, "%Y_%m_%d", &t_temp);
 		break;
 	case ZFXClock::YMDHS:
-		strftime(buf, 260, "%Y-%m-%d %H:%M:%s", &t_temp);
+		strftime(buf, 260, "%Y-%m-%d %H:%M:%S", &t_temp);
 		break;
 	case ZFXClock::YMDHS_FILE:
-		strftime(buf, 260, "%Y-%m-%d-%H-%M-%s", &t_temp);
+		strftime(buf, 260, "%Y-%m-%d-%H-%M-%S", &t_temp);
 		break;
 	case ZFXClock::Y_M_D_H_S:
-		strftime(buf, 260, "%Y_%m_%d_%H_%M_%s", &t_temp);
+		strftime(buf, 260, "%Y_%m_%d_%H_%M_%S", &t_temp);
 		break;
 	case ZFXClock::HS:
-		strftime(buf, 260, "%H:%M:%s", &t_temp);
+		strftime(buf, 260, "%H:%M:%S", &t_temp);
 		break;
 	case ZFXClock::H_S:
-		strftime(buf, 260, "%H_%M_%s", &t_temp);
+		strftime(buf, 260, "%H_%M_%S", &t_temp);
 		break;
 	default:
 		strftime(buf, 260, "%Y-%m-%d", &t_temp);
@@ -190,3 +190,4 @@ std::string ZFXClock::GetTimeString(TIME_FORMAT format /*= YMD*/)
 	}
 	return std::string(buf);
 }
+

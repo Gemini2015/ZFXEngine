@@ -69,7 +69,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance,
 	pLog = fopen("log_main.txt", "w");
 
 	// try to start the engine
-	if (FAILED(hr = ProgramStartup("Direct3D"))) {
+	if (FAILED(hr = ProgramStartup("OpenGL"))) {
 		fprintf(pLog, "error: ProgramStartup() failed\n");
 		g_bDone = true;
 	}
@@ -80,7 +80,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance,
 	else
 		g_pDevice->SetClearColor(0.1f, 0.3f, 0.1f);
 
-	g_pDevice->UseWindow(2);
+	//g_pDevice->UseWindow(0);
 
 	while (!g_bDone)
 	{
@@ -154,7 +154,7 @@ HRESULT ProgramStartup(char *chAPI)
 	int  x = 0, y = 0;
 
 	// no opengl render device yet...
-	if (strcmp(chAPI, "OpenGL") == 0) return S_OK;
+	//if (strcmp(chAPI, "OpenGL") == 0) return S_OK;
 
 	// create a render objekt
 	g_pRenderer = new ZFXRenderer(g_hInst);
@@ -168,8 +168,8 @@ HRESULT ProgramStartup(char *chAPI)
 
 	// build for child windows
 	GetClientRect(g_hWnd, &rcWnd);
-
-	for (int i = 0; i < 4; i++) 
+	int WindNum = 0;
+	for (int i = 0; i < WindNum; i++) 
 	{
 		if ((i == 0) || (i == 2)) x = 10;
 		else x = rcWnd.right / 2 + 10;
@@ -184,7 +184,7 @@ HRESULT ProgramStartup(char *chAPI)
 	}
 
 	// init render device
-	return g_pDevice->Init(g_hWnd, hWnd3D, 4, 16, 0, false);
+	return g_pDevice->Init(g_hWnd, hWnd3D, WindNum, 16, 0, false);
 } // ProgramStartup
 /*----------------------------------------------------------------*/
 

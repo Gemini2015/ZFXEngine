@@ -2,9 +2,9 @@
 #define _ZFXGLSL_H_
 
 #include <windows.h>
+#include <gl\glew.h>
 #include <gl\GL.h>
 #include <gl\GLU.h>
-#include <gl\glew.h>
 #include "ZFXRenderDevice.h"
 
 #include <string>

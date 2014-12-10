@@ -4,6 +4,8 @@
 #include <windows.h>
 
 #include "zfx3d.h"
+#include "..\ZFXUtil\ZFXUtil.h"
+
 
 // everything went smooth
 #define ZFX_OK                        S_OK
@@ -32,6 +34,15 @@
 #define ZFX_FAILc               0x8200000e
 #define ZFX_FAILd               0x8200000f
 
+#ifdef _DEBUG
+
+#define DEBUG_LOG(str) { extern ZFXLogger* GetLogger(); GetLogger()->Print();}
+
+#else
+
+#define DEBUG_LOG(str) 
+
+#endif
 
 // VERTEX TYPES:
 
@@ -238,5 +249,9 @@ typedef struct ZFXLIGHT_TYPE {
 	float      fAttenuation1;  // change of intensity over distance
 } ZFXLIGHT;
 /*----------------------------------------------------------------*/
+
+
+
+
 
 #endif

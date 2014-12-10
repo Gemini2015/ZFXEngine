@@ -59,36 +59,22 @@ public:
 	std::string GetTimeString(TIME_FORMAT format = YMD);
 };
 
-ZFXClock* GetClock();
-ZFXLogger* GetLogger();
-
-ZFXLogger* GetLogger()
+inline ZFXClock& GetClock()
 {
-	static ZFXLogger* logger;
-	if (!logger)
-	{
-		logger = new ZFXLogger();
-		if (!logger)
-		{
-			//error
-		}
-		
-		std::ostringstream ostr;
-		ostr << "ZFXLog-" << GetClock()->GetTimeString(ZFXClock::YMDHS_FILE) << ".log";
-		
-		logger->SetFile(ostr.str());
-	}
-	return logger;
+	static ZFXClock clock;
+	return clock;
 }
 
-ZFXClock* GetClock()
+inline ZFXLogger& GetLogger()
 {
-	static ZFXClock* clock;
-	if (clock == NULL)
-	{
-		clock = new ZFXClock();
-	}
-	return clock;
+	static ZFXLogger logger;
+
+	std::ostringstream ostr;
+	ostr << "ZFXLog-" << GetClock().GetTimeString(ZFXClock::YMDHS_FILE) << ".log";
+
+	logger.SetFile(ostr.str());
+
+	return logger;
 }
 
 #endif

@@ -139,6 +139,11 @@ ZFXLogger::ZFXLogger()
 	m_levelfilter = LOG_DEBUG;
 	m_filepath.clear();
 	m_stream.clear();
+
+	std::ostringstream ostr;
+	ostr << "ZFXLog-" << GetClock().GetTimeString(ZFXClock::YMDHS_FILE) << ".log";
+
+	SetFile(ostr.str());
 }
 
 ZFXLogger::~ZFXLogger()

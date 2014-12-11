@@ -16,9 +16,6 @@ ZFXOpenGL::ZFXOpenGL(HINSTANCE hDLL)
 	m_name.assign("OpenGL Device");
 
 	m_pLog = fopen("Log_OpenGL.txt", "w");
-
-	glLoadIdentity();
-	//glUseProgram(0);
 }
 
 
@@ -701,6 +698,14 @@ HRESULT ZFXOpenGL::UseWindow(UINT nHwnd)
 	if (nHwnd >= m_nNumhWnd)
 		return E_INVALIDARG;
 
+	if (nHwnd == m_nActivehWnd)
+		return ZFX_OK;
+
+	if (m_bIsSceneRunning)
+	{
+		EndRendering();
+	}
+
 	if (!wglMakeCurrent(NULL, NULL))
 	{
 		Log("unbing window error");
@@ -713,9 +718,10 @@ HRESULT ZFXOpenGL::UseWindow(UINT nHwnd)
 		return E_FAIL;
 	}
 
+	Log("Shift window to %d", nHwnd);
+
 	m_nActivehWnd = nHwnd;
 	return ZFX_OK;
-
 }
 
 HRESULT ZFXOpenGL::BeginRendering(bool bClearPixel, bool bClearDepth, bool bClearStencil)
@@ -896,7 +902,9 @@ HRESULT ZFXOpenGL::Init(HWND mainWnd, const HWND* childWnds, int nWndsNum, int n
 
 	glEnable(GL_DEPTH_TEST);
 
-	std::logic_error("enum parameter");
+	//std::logic_error("enum parameter");
+	Log("OpenGL Device Init complete");
+
 
 	return Go();
 }
@@ -904,6 +912,7 @@ HRESULT ZFXOpenGL::Init(HWND mainWnd, const HWND* childWnds, int nWndsNum, int n
 HRESULT ZFXOpenGL::Go(void)
 {
 	m_bRunning = true;
+	Log("OpenGL Device is running");
 	return ZFX_OK;
 }
 
@@ -928,7 +937,7 @@ void ZFXOpenGL::Release(void)
 				ReleaseDC(m_hWnd[i], m_hDC[i]);
 		}
 	}
-	GetLogger().Print("OpenGL release");
+	Log("OpenGL release");
 }
 
 void ZFXOpenGL::UseShaders(bool b)
@@ -1198,7 +1207,16 @@ bool ZFXOpenGL::InitPixelFormat(int nHWnd)
 	if (!(iformat = ChoosePixelFormat(m_hDC[nHWnd], &pfd)))
 		return false;
 
-	return SetPixelFormat(m_hDC[nHWnd], iformat, &pfd);
+	bool res = SetPixelFormat(m_hDC[nHWnd], iformat, &pfd);
+	if (res)
+	{
+		Log("Wnd %d set pixel format complete", nHWnd);
+	}
+	else
+	{
+		Log("Wnd %d set pixel format failure", nHWnd);
+	}
+	return res;
 }
 
 /**

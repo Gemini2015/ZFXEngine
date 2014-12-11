@@ -19,6 +19,8 @@ TCHAR     g_szAppClass[] = TEXT("FrameWorktest");
 BOOL g_bIsActive = FALSE;
 bool g_bDone = false;
 
+int g_nWndCtl = 0;
+
 FILE *pLog = NULL;
 
 
@@ -94,6 +96,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance,
 		{
 			if (g_pDevice->IsRunning()) {
 				g_pDevice->BeginRendering(true, true, true);
+
 				g_pDevice->EndRendering();
 			}
 		}
@@ -120,12 +123,39 @@ LRESULT WINAPI MsgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	} break;
 
 		// key was pressed
-	case WM_KEYDOWN: {
-		switch (wParam) {
-		case VK_ESCAPE: {
+	case WM_KEYDOWN:
+	{
+		switch (wParam) 
+		{
+		case VK_ESCAPE: 
+		{
 			g_bDone = true;
 			PostMessage(hWnd, WM_CLOSE, 0, 0);
 			return 0;
+		} break;
+		case VK_LEFT:
+		{
+			if (g_nWndCtl <= 0)
+			{
+				break;
+			}
+			g_nWndCtl--;
+			if (g_pDevice)
+			{
+				g_pDevice->UseWindow(g_nWndCtl);
+			}
+		} break;
+		case VK_RIGHT:
+		{
+			if (g_nWndCtl >= 4 - 1)
+			{
+				break;
+			}
+			g_nWndCtl++;
+			if (g_pDevice)
+			{
+				g_pDevice->UseWindow(g_nWndCtl);
+			}
 		} break;
 		}
 	} break;
@@ -168,7 +198,7 @@ HRESULT ProgramStartup(char *chAPI)
 
 	// build for child windows
 	GetClientRect(g_hWnd, &rcWnd);
-	int WindNum = 0;
+	int WindNum = 4;
 	for (int i = 0; i < WindNum; i++) 
 	{
 		if ((i == 0) || (i == 2)) x = 10;

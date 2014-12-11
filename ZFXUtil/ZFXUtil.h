@@ -69,10 +69,7 @@ inline ZFXLogger& GetLogger()
 {
 	static ZFXLogger logger;
 
-	std::ostringstream ostr;
-	ostr << "ZFXLog-" << GetClock().GetTimeString(ZFXClock::YMDHS_FILE) << ".log";
-
-	logger.SetFile(ostr.str());
+	
 
 	return logger;
 }

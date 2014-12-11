@@ -6,6 +6,16 @@
 #include "ZFX.h"          // return values and stuff
 #include "main.h"         // prototypes and stuff
 
+
+#include <windows.h>
+#include <gl\GL.h>
+#include <gl\GLU.h>
+#include <gl\freeglut.h>
+
+
+
+
+
 //include our library
 #pragma comment(lib, "ZFXRenderer.lib")
 
@@ -18,7 +28,7 @@ TCHAR     g_szAppClass[] = TEXT("FrameWorktest");
 // application stuff
 BOOL g_bIsActive = FALSE;
 bool g_bDone = false;
-
+int g_MAXWND = 0;
 int g_nWndCtl = 0;
 
 FILE *pLog = NULL;
@@ -147,7 +157,7 @@ LRESULT WINAPI MsgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		} break;
 		case VK_RIGHT:
 		{
-			if (g_nWndCtl >= 4 - 1)
+			if (g_nWndCtl >= g_MAXWND - 1)
 			{
 				break;
 			}
@@ -198,8 +208,8 @@ HRESULT ProgramStartup(char *chAPI)
 
 	// build for child windows
 	GetClientRect(g_hWnd, &rcWnd);
-	int WindNum = 4;
-	for (int i = 0; i < WindNum; i++) 
+	g_MAXWND = 0;
+	for (int i = 0; i < g_MAXWND; i++) 
 	{
 		if ((i == 0) || (i == 2)) x = 10;
 		else x = rcWnd.right / 2 + 10;
@@ -214,7 +224,7 @@ HRESULT ProgramStartup(char *chAPI)
 	}
 
 	// init render device
-	return g_pDevice->Init(g_hWnd, hWnd3D, WindNum, 16, 0, false);
+	return g_pDevice->Init(g_hWnd, hWnd3D, g_MAXWND, 16, 0, false);
 } // ProgramStartup
 /*----------------------------------------------------------------*/
 

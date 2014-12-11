@@ -540,7 +540,8 @@ HRESULT ZFXD3DSkinManager::ExchangeTexture(UINT nSkinID, UINT nTexStage,
 	const char *chName,
 	bool bAlpha, float fAlpha,
 	ZFXCOLOR *cColorKeys,
-	DWORD dwNumColorKeys) {
+	DWORD dwNumColorKeys) 
+{
 	ZFXTEXTURE *pZFXTex = NULL;
 	HRESULT     hr;
 	UINT        nTex, n;

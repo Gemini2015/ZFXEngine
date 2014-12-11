@@ -58,7 +58,18 @@ typedef struct VERTEX_TYPE {
 
 typedef struct LVERTEX_TYPE {
 	float	 x, y, z;
-	DWORD  Color;
+	union 
+	{
+		struct
+		{
+			BYTE r;
+			BYTE g;
+			BYTE b;
+			BYTE a;
+		};
+		DWORD  Color;
+	};
+	
 	float  tu, tv;
 } LVERTEX;
 

@@ -14,11 +14,13 @@
     <ClInclude Include="ZFXGLSL.h" />
     <ClInclude Include="ZFXOpenGL.h" />
     <ClInclude Include="ZFXOpenGL_Skin.h" />
+    <ClInclude Include="ZFXOpenGL_VCM.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ZFXGLSL.cpp" />
     <ClCompile Include="ZFXOpenGL.cpp" />
     <ClCompile Include="ZFXOpenGL_Skin.cpp" />
+    <ClCompile Include="ZFXOpenGL_VCM.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ZFX3D\ZFX3D.vcxproj">

@@ -24,6 +24,9 @@
     <ClInclude Include="ZFXOpenGL_Skin.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="ZFXOpenGL_VCM.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ZFXOpenGL.cpp">
@@ -33,6 +36,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="ZFXOpenGL_Skin.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ZFXOpenGL_VCM.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

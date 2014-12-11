@@ -24,7 +24,7 @@ BOOL WINAPI DllEntryPoint(HINSTANCE hDll,
 #pragma comment(lib, "glew32.lib")
 #pragma comment(lib, "glu32.lib")
 #pragma comment(lib, "opengl32.lib")
-#pragma comment(lib, "zfx3d.lib");
+#pragma comment(lib, "zfx3d.lib")
 
 #define _USE_MATH_DEFINES
 #define RADIAN2DEGREE(radian) ((radian) * 180.0f / M_PI)

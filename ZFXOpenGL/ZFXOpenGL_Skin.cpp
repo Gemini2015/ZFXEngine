@@ -22,9 +22,11 @@ ZFXOpenGLSkinManager::~ZFXOpenGLSkinManager()
 		{
 			if (m_pTextures[i].pData)
 			{
-				// 纹理数据
-				//((LPDIRECT3DTEXTURE9)(m_pTextures[i].pData))->Release();
-				//m_pTextures[i].pData = NULL;
+				GLuint texture = *(GLuint*)m_pTextures[i].pData;
+				if (glIsTexture(texture))
+				{
+					glDeleteTextures(1, &texture);
+				}
 			}
 			if (m_pTextures[i].pClrKeys)
 			{
@@ -69,9 +71,11 @@ void ZFXOpenGLSkinManager::Reset(void)
 		{
 			if (m_pTextures[i].pData)
 			{
-				// 纹理数据
-				//((LPDIRECT3DTEXTURE9)(m_pTextures[i].pData))->Release();
-				//m_pTextures[i].pData = NULL;
+				GLuint texture = *(GLuint*)m_pTextures[i].pData;
+				if (glIsTexture(texture))
+				{
+					glDeleteTextures(1, &texture);
+				}
 			}
 			if (m_pTextures[i].pClrKeys)
 			{
@@ -230,9 +234,45 @@ HRESULT ZFXOpenGLSkinManager::AddTexture(UINT nSkinID, const char *chName, bool 
 			return hr;
 		}
 
-		
+		// add alpha values if needed
+		if (bAlpha) {
 
+			pZFXTex = &m_pTextures[m_nNumTextures];
 
+			// remind information
+			pZFXTex->dwNum = dwNumColorKeys;
+			pZFXTex->pClrKeys = new ZFXCOLOR[dwNumColorKeys];
+			memcpy(pZFXTex->pClrKeys, cColorKeys,
+				sizeof(ZFXCOLOR)*pZFXTex->dwNum);
+
+			GLuint texture = (*(GLuint*)pZFXTex->pData);
+
+			// set alpha keys first
+			for (DWORD dw = 0; dw < dwNumColorKeys; dw++) {
+				hr = SetAlphaKey(texture,
+					UCHAR(cColorKeys[dw].fR * 255),
+					UCHAR(cColorKeys[dw].fG * 255),
+					UCHAR(cColorKeys[dw].fB * 255),
+					UCHAR(cColorKeys[dw].fA * 255));
+				if (FAILED(hr)) {
+					Log("error: SetAlphaKey() failed");
+					return hr;
+				}
+			}
+
+			if (fAlpha < 1.0f) {
+				// remind that value for info purpose
+				pZFXTex->fAlpha = fAlpha;
+
+				// now generell transparency
+				// 设置全局alpha
+				hr = SetTransparency(texture, UCHAR(fAlpha * 255));
+				if (FAILED(hr)) {
+					Log("error: SetTransparency() failed");
+					return hr;
+				}
+			}
+		}
 		// save ID and add to count
 		nTex = m_nNumTextures;
 		m_nNumTextures++;

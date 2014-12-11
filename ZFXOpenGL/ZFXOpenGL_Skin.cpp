@@ -14,27 +14,27 @@ ZFXOpenGLSkinManager::ZFXOpenGLSkinManager()
 
 ZFXOpenGLSkinManager::~ZFXOpenGLSkinManager()
 {
-	// ÊÍ·ÅD3DµÄÎÆÀí¶ÔÏó
+	// é‡Šæ”¾D3Dçš„çº¹ç†å¯¹è±¡
 	if (m_pTextures)
 	{
-		// Ó¦¸ÃÎª ZFXTEXTURE ÊµÏÖÎö¹¹º¯Êı
+		// åº”è¯¥ä¸º ZFXTEXTURE å®ç°ææ„å‡½æ•°
 		for (UINT i = 0; i < m_nNumTextures; i++)
 		{
 			if (m_pTextures[i].pData)
 			{
-				// ÎÆÀíÊı¾İ
+				// çº¹ç†æ•°æ®
 				//((LPDIRECT3DTEXTURE9)(m_pTextures[i].pData))->Release();
 				//m_pTextures[i].pData = NULL;
 			}
 			if (m_pTextures[i].pClrKeys)
 			{
-				// ÑÕÉ«¼üÖµ
+				// é¢œè‰²é”®å€¼
 				delete[] m_pTextures[i].pClrKeys;
 				m_pTextures[i].pClrKeys = NULL;
 			}
 			if (m_pTextures[i].chName)
 			{
-				// ÎÆÀíÃû³Æ
+				// çº¹ç†åç§°
 				delete[] m_pTextures[i].chName;
 				m_pTextures[i].chName = NULL;
 			}
@@ -43,14 +43,14 @@ ZFXOpenGLSkinManager::~ZFXOpenGLSkinManager()
 		m_pTextures = NULL;
 	}
 
-	// ÊÍ·Å²ÄÖÊ¶ÔÏó
+	// é‡Šæ”¾æè´¨å¯¹è±¡
 	if (m_pMaterials)
 	{
 		free(m_pMaterials);
 		m_pMaterials = NULL;
 	}
 
-	// ÊÍ·ÅÆ¤·ô
+	// é‡Šæ”¾çš®è‚¤
 	if (m_pSkins)
 	{
 		free(m_pSkins);
@@ -61,27 +61,27 @@ ZFXOpenGLSkinManager::~ZFXOpenGLSkinManager()
 
 void ZFXOpenGLSkinManager::Reset(void)
 {
-	// ÊÍ·ÅD3DµÄÎÆÀí¶ÔÏó
+	// é‡Šæ”¾D3Dçš„çº¹ç†å¯¹è±¡
 	if (m_pTextures)
 	{
-		// Ó¦¸ÃÎª ZFXTEXTURE ÊµÏÖÎö¹¹º¯Êı
+		// åº”è¯¥ä¸º ZFXTEXTURE å®ç°ææ„å‡½æ•°
 		for (UINT i = 0; i < m_nNumTextures; i++)
 		{
 			if (m_pTextures[i].pData)
 			{
-				// ÎÆÀíÊı¾İ
+				// çº¹ç†æ•°æ®
 				//((LPDIRECT3DTEXTURE9)(m_pTextures[i].pData))->Release();
 				//m_pTextures[i].pData = NULL;
 			}
 			if (m_pTextures[i].pClrKeys)
 			{
-				// ÑÕÉ«¼üÖµ
+				// é¢œè‰²é”®å€¼
 				delete[] m_pTextures[i].pClrKeys;
 				m_pTextures[i].pClrKeys = NULL;
 			}
 			if (m_pTextures[i].chName)
 			{
-				// ÎÆÀíÃû³Æ
+				// çº¹ç†åç§°
 				delete[] m_pTextures[i].chName;
 				m_pTextures[i].chName = NULL;
 			}
@@ -90,14 +90,14 @@ void ZFXOpenGLSkinManager::Reset(void)
 		m_pTextures = NULL;
 	}
 
-	// ÊÍ·Å²ÄÖÊ¶ÔÏó
+	// é‡Šæ”¾æè´¨å¯¹è±¡
 	if (m_pMaterials)
 	{
 		free(m_pMaterials);
 		m_pMaterials = NULL;
 	}
 
-	// ÊÍ·ÅÆ¤·ô
+	// é‡Šæ”¾çš®è‚¤
 	if (m_pSkins)
 	{
 		free(m_pSkins);
@@ -115,7 +115,7 @@ HRESULT ZFXOpenGLSkinManager::AddSkin(const ZFXCOLOR *pcAmbient, const ZFXCOLOR 
 	bool    bMat = false;
 
 	// allocate 50 new memory slots for skins if necessary
-	// SkinµÄÄÚ´æ·ÖÅäÔöÁ¿Îª 50
+	// Skinçš„å†…å­˜åˆ†é…å¢é‡ä¸º 50
 	if ((m_nNumSkins % 50) == 0)
 	{
 		n = (m_nNumSkins + 50)*sizeof(ZFXSKIN);
@@ -131,7 +131,7 @@ HRESULT ZFXOpenGLSkinManager::AddSkin(const ZFXCOLOR *pcAmbient, const ZFXCOLOR 
 	mat.fPower = fSpecPower;
 
 	// do we already have an equal material
-	// ÅĞ¶ÏÊÇ·ñÒÑ¾­´æÔÚÊôĞÔÏàÍ¬µÄ²ÄÖÊ
+	// åˆ¤æ–­æ˜¯å¦å·²ç»å­˜åœ¨å±æ€§ç›¸åŒçš„æè´¨
 	for (nMat = 0; nMat < m_nNumMaterials; nMat++)
 	{
 		if (MaterialEqual(&mat, &m_pMaterials[nMat]))
@@ -145,7 +145,7 @@ HRESULT ZFXOpenGLSkinManager::AddSkin(const ZFXCOLOR *pcAmbient, const ZFXCOLOR 
 	if (bMat) m_pSkins[m_nNumSkins].nMaterial = nMat;
 	else
 	{
-		// ½«²ÄÖÊÌí¼Óµ½²ÄÖÊÁĞ±í
+		// å°†æè´¨æ·»åŠ åˆ°æè´¨åˆ—è¡¨
 		m_pSkins[m_nNumSkins].nMaterial = m_nNumMaterials;
 
 		// allocate 50 new memory slots for materials if necessary
@@ -159,7 +159,7 @@ HRESULT ZFXOpenGLSkinManager::AddSkin(const ZFXCOLOR *pcAmbient, const ZFXCOLOR 
 		m_nNumMaterials++;
 	}
 
-	// ½«¸ÃSkinµÄÎÆÀíÁĞ±í³õÊ¼»¯
+	// å°†è¯¥Skinçš„çº¹ç†åˆ—è¡¨åˆå§‹åŒ–
 	m_pSkins[m_nNumSkins].bAlpha = false;
 	for (int i = 0; i < 8; i++) m_pSkins[m_nNumSkins].nTexture[i] = MAX_ID;
 
@@ -188,7 +188,7 @@ HRESULT ZFXOpenGLSkinManager::AddTexture(UINT nSkinID, const char *chName, bool 
 	}
 
 	// do we already have this texture
-	// ²é¿´ÎÆÀíÊÇ·ñ´æÔÚ
+	// æŸ¥çœ‹çº¹ç†æ˜¯å¦å­˜åœ¨
 	for (nTex = 0; nTex < m_nNumTextures; nTex++)
 	{
 		if (strcmp(chName, m_pTextures[nTex].chName) == 0)
@@ -223,7 +223,7 @@ HRESULT ZFXOpenGLSkinManager::AddTexture(UINT nSkinID, const char *chName, bool 
 		memcpy(m_pTextures[m_nNumTextures].chName, chName, strlen(chName) + 1);
 
 		// create d3d texture from that pointer
-		// ´´½¨ÎÆÀí¶ÔÏó
+		// åˆ›å»ºçº¹ç†å¯¹è±¡
 		hr = CreateTexture(&m_pTextures[m_nNumTextures], bAlpha);
 		if (FAILED(hr)) {
 			Log("error: CreateTexture() failed");
@@ -408,7 +408,7 @@ HRESULT ZFXOpenGLSkinManager::ExchangeTexture(UINT nSkinID, UINT nTexStage, cons
 				pZFXTex->fAlpha = fAlpha;
 
 				// now generell transparency
-				// ÉèÖÃÈ«¾Öalpha
+				// è®¾ç½®å…¨å±€alpha
 				hr = SetTransparency(texture, UCHAR(fAlpha * 255));
 				if (FAILED(hr)) {
 					Log("error: SetTransparency() failed");
@@ -586,7 +586,7 @@ HRESULT ZFXOpenGLSkinManager::CreateTexture(ZFXTEXTURE *pTexture, bool bAlpha)
 	DIBSECTION dibs;
 	HRESULT hr;
 	
-	// ¹Ì¶¨BMP
+	// å›ºå®šBMP
 	HBITMAP hBMP = (HBITMAP)LoadImage(NULL, pTexture->chName,
 		IMAGE_BITMAP, 0, 0,
 		LR_LOADFROMFILE | LR_CREATEDIBSECTION);
@@ -616,15 +616,15 @@ HRESULT ZFXOpenGLSkinManager::CreateTexture(ZFXTEXTURE *pTexture, bool bAlpha)
 
 	pTexture->pData = (void *) new GLuint;
 
-	// ´´½¨Ò»¸öÎÆÀí¶ÔÏó
+	// åˆ›å»ºä¸€ä¸ªçº¹ç†å¯¹è±¡
 	GLuint texture = 0;
 	glGenTextures(1, &texture);
-	// ÅĞ¶ÏÊÇ·ñ´´½¨Ê§°Ü
+	// åˆ¤æ–­æ˜¯å¦åˆ›å»ºå¤±è´¥
 
-	// °ó¶¨Ò»¸öÎÆÀí¶ÔÏó
+	// ç»‘å®šä¸€ä¸ªçº¹ç†å¯¹è±¡
 	glBindTexture(GL_TEXTURE_2D, texture);
 
-	// Îªµ±Ç°°ó¶¨µÄÎÆÀí¶ÔÏóÌî³äÊı¾İ
+	// ä¸ºå½“å‰ç»‘å®šçš„çº¹ç†å¯¹è±¡å¡«å……æ•°æ®
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, lWidth, lHeight, 0, fmt, GL_UNSIGNED_BYTE, pBMPBits);
 
 	(*(GLuint*)pTexture->pData) = texture;
@@ -679,7 +679,7 @@ HRESULT ZFXOpenGLSkinManager::ConvertToNormalmap(ZFXTEXTURE *pTexture)
 		{
 			DWORD color00 = pData[0];
 			DWORD color10 = pData[1];
-			DWORD color01 = pData[pitch / sizeof(DWORD)]; // ÏÂ±êÒç³ö
+			DWORD color01 = pData[pitch / sizeof(DWORD)]; // ä¸‹æ ‡æº¢å‡º
 
 			float fHeight00 = (float)((color00 & 0x00ff0000) >> 16) / 255.0f;
 			float fHeight10 = (float)((color10 & 0x00ff0000) >> 16) / 255.0f;

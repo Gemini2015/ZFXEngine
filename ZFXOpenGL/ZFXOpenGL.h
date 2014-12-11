@@ -52,11 +52,11 @@ public:
 		return m_pVertexMan;
 	}
 
-	// ³õÊ¼»¯ÒıÇæ
+	// åˆå§‹åŒ–å¼•æ“
 	HRESULT Init(HWND mainWnd, const HWND* childWnds, int nWndsNum, int nMinDepth, int nMinStencil, bool bSaveLog);
 	HRESULT InitWindowed(HWND mainWnd, const HWND* childWnds, int nWndsNum, bool bSaveLog);
 
-	// Í¼ĞÎÉè±¸½Ó¿ÚÊµÏÖ
+	// å›¾å½¢è®¾å¤‡æ¥å£å®ç°
 
 	void Release(void);
 
@@ -70,7 +70,7 @@ public:
 		return m_bWindowed;
 	}
 
-	// »ñÈ¡Ö÷´°¿Ú´óĞ¡
+	// è·å–ä¸»çª—å£å¤§å°
 	void GetResolution(POINT* pPt)
 	{
 		pPt->x = m_dwWidth;
@@ -195,15 +195,15 @@ private:
 	ZFXMatrix m_mWorld2D;
 
 
-	// Í¸ÊÓÍ¶Ó°
+	// é€è§†æŠ•å½±
 	ZFXMatrix m_mProjP[4];
-	// Õı½»Í¶Ó°
+	// æ­£äº¤æŠ•å½±
 	ZFXMatrix m_mProjO[4];
 	// 3D View
 	ZFXMatrix m_mView3D;
 	ZFXMatrix m_mWorld3D;
 
-	// ±£´æ×éºÏ¾ØÕó
+	// ä¿å­˜ç»„åˆçŸ©é˜µ
 	ZFXMatrix m_mViewProj;
 	ZFXMatrix m_mWorldViewProj;
 

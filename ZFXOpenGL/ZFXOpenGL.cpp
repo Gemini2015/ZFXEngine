@@ -182,7 +182,7 @@ HRESULT ZFXOpenGL::InitStage(float fFov, ZFXVIEWPORT* pView, int nStage)
 	// throw std::logic_error("The method or operation is not implemented.");
 }
 
-// »ñÈ¡¹¹³ÉÆ½½ØÍ·ÌåµÄÁù¸öÃæ
+// èŽ·å–æž„æˆå¹³æˆªå¤´ä½“çš„å…­ä¸ªé¢
 HRESULT ZFXOpenGL::GetFrustrum(ZFXPlane* p)
 {
 	// left plane
@@ -231,7 +231,7 @@ HRESULT ZFXOpenGL::GetFrustrum(ZFXPlane* p)
 	return ZFX_OK;
 }
 
-// ÆÁÄ»Êó±êÓ³Éäµ½ÈýÎ¬ÉäÏß
+// å±å¹•é¼ æ ‡æ˜ å°„åˆ°ä¸‰ç»´å°„çº¿
 void ZFXOpenGL::Transform2Dto3D(const POINT &pt, ZFXVector *vcOrig, ZFXVector *vcDir)
 {
 	ZFXMatrix *pView = NULL, *pProj = NULL;
@@ -395,7 +395,7 @@ void ZFXOpenGL::SetWorldTransform(const ZFXMatrix* m)
 
 	if (m_bCanDoShaders)
 	{
-		// ½«mvp ´«¸ø shader
+		// å°†mvp ä¼ ç»™ shader
 		throw std::logic_error("MVP shader Update");
 	}
 	//throw std::logic_error("The method or operation is not implemented.");
@@ -626,19 +626,19 @@ HRESULT ZFXOpenGL::SetLight(const ZFXLIGHT* pLight, UCHAR nStage)
 		break;
 	}
 
-	// Âþ·´Éä
+	// æ¼«åå°„
 	glLightfv(gl_index, GL_DIFFUSE, (GLfloat*)pLight->cDiffuse.c);
 
-	// ¾µÃæ·´Éä
+	// é•œé¢åå°„
 	glLightfv(gl_index, GL_SPECULAR, (GLfloat*)pLight->cSpecular.c);
 
-	// »·¾³¹â
+	// çŽ¯å¢ƒå…‰
 	glLightfv(gl_index, GL_AMBIENT, (GLfloat*)pLight->cAmbient.c);
 
-	// Î»ÖÃ
+	// ä½ç½®
 	glLightfv(gl_index, GL_POSITION, (GLfloat*)(&(pLight->vcPosition)));
 
-	// ·½Ïò
+	// æ–¹å‘
 	if (pLight->Type == LGT_SPOT || pLight->Type == LGT_DIRECTIONAL)
 	{
 		glLightfv(gl_index, GL_SPOT_DIRECTION, (GLfloat*)(&(pLight->vcDirection)));

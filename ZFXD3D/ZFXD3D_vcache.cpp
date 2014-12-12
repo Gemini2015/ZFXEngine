@@ -1682,7 +1682,8 @@ HRESULT ZFXD3DVCache::Flush(bool bUseShaders) {
 HRESULT ZFXD3DVCache::Add(UINT  nVerts, UINT nIndis,
 	const void *pVerts,
 	const WORD *pIndices,
-	bool  bUseShaders) {
+	bool  bUseShaders) 
+{
 	BYTE *tmp_pVerts = NULL;         // pointer to VB memory
 	WORD *tmp_pIndis = NULL;         // pointer to IB memory
 

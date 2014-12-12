@@ -74,6 +74,8 @@ public:
 		ZFXCOLOR *AlphaKeys, 
 		UCHAR *NumKeys) override;
 
+	virtual ZFXTEXTURE GetTexture(UINT nTexID) override;
+
 protected:
 	void Log(char *fmt, ...);
 
@@ -81,6 +83,9 @@ protected:
 	HRESULT ConvertToNormalmap(ZFXTEXTURE *pTexture);
 	HRESULT SetAlphaKey(GLuint texture, UCHAR R, UCHAR G, UCHAR B, UCHAR A);
 	HRESULT SetTransparency(GLuint texture, UCHAR alpha);
+
+	
+
 };
 
 

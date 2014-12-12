@@ -70,9 +70,25 @@ public:
 
 	virtual ZFXRENDERSTATE GetShadeMode(void) override;
 
+	void SetActiveVCache(DWORD id)
+	{
+		m_nActiveVCache = id;
+	}
+	DWORD GetActiveVCache()
+	{
+		return m_nActiveVCache;
+	}
+
+	ZFXOpenGL* GetOpenGL()
+	{
+		return m_pOpenGL;
+	}
+
+
 private:
 	ZFXOpenGLSkinManager* m_pSkinMan;
 	ZFXOpenGL* m_pOpenGL;
+	DWORD m_nActiveVCache;
 
 
 	void Log(const char* fmt, ...);

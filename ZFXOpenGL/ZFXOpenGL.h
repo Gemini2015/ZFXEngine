@@ -176,6 +176,16 @@ public:
 	// GL helper
 	bool ActivateGLTextureUnit(UCHAR n);
 
+	UINT GetActiveSkinID(void)     { return m_nActiveSkin; }
+	void SetActiveSkinID(UINT nID) { m_nActiveSkin = nID; }
+	UINT GetActiveVShadID(void)    { return m_nActiveVShader; }
+	UINT GetActiveFShadID(void)    { return m_nActiveFShader; }
+	ZFXCOLOR GetWireColor()
+	{
+		return m_WireColor;
+	}
+
+	GLenum GetTextureOp(int n);
 
 private:
 	HINSTANCE m_hDLL;
@@ -184,11 +194,15 @@ private:
 	bool m_bStencil;
 	bool m_bTextures;
 	ZFXCOLOR m_ClearColor;
+	ZFXCOLOR m_WireColor;
 	bool m_bIsSceneRunning;
-	std::map<UCHAR, GLenum> m_mapTextureOp;
+	GLenum m_TextureOp[8];
 	UCHAR m_nActivateTextureUnit;
 	GLSLManager *m_pGLSLManager;
 	std::string m_name;
+	UINT m_nActiveSkin;
+	UINT m_nActiveVShader;
+	UINT m_nActiveFShader;
 
 	ZFXMatrix m_mProj2D;
 	ZFXMatrix m_mView2D;

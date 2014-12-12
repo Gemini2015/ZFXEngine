@@ -1073,6 +1073,20 @@ void ZFXD3DSkinManager::LogCurrentStatus(char *chLog, bool bDetailed) {
 
 	fclose(pLog);
 } // LogCurrentStatus
+
+ZFXTEXTURE ZFXD3DSkinManager::GetTexture(UINT nTexID)
+{
+	if (nTexID < m_nNumTextures && nTexID >= 0)
+	{
+		return m_pTextures[nTexID];
+	}
+	else
+	{
+		ZFXTEXTURE EmptyTexture;
+		return EmptyTexture;
+	}
+}
+
 /*----------------------------------------------------------------*/
 
 

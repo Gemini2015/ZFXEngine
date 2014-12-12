@@ -70,6 +70,7 @@ public:
 
 	const char* GetTextureName(UINT, float*, ZFXCOLOR*, UCHAR*);
 
+	ZFXTEXTURE  GetTexture(UINT nTexID);
 
 protected:
 	LPDIRECT3DDEVICE9  m_pDevice;

@@ -92,6 +92,8 @@ public:
 	virtual const char* GetTextureName(UINT nTexID, float *fAlpha,
 		ZFXCOLOR *AlphaKeys,
 		UCHAR *NumKeys) = 0;
+
+	virtual ZFXTEXTURE GetTexture(UINT nTexID) = 0;
 };
 /*----------------------------------------------------------------*/
 

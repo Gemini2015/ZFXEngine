@@ -831,3 +831,16 @@ HRESULT ZFXOpenGLSkinManager::SetTransparency(GLuint texture, UCHAR alpha)
 
 	return ZFX_OK;
 }
+
+ZFXTEXTURE ZFXOpenGLSkinManager::GetTexture(UINT nTexID)
+{
+	if (nTexID < m_nNumTextures && nTexID >= 0)
+	{
+		return m_pTextures[nTexID];
+	}
+	else
+	{
+		ZFXTEXTURE EmptyTexture;
+		return EmptyTexture;
+	}
+}

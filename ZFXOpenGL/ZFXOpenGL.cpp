@@ -590,10 +590,10 @@ HRESULT ZFXOpenGL::SetTextureStage(UCHAR n, ZFXRENDERSTATE rs)
 		break;
 	default:
 	case RS_TEX_ADDSIGNED:
-		m_mapTextureOp[n] = GL_ADD_SIGNED;
+		m_TextureOp[n] = GL_ADD_SIGNED;
 		break;
 	case RS_TEX_MODULATE:
-		m_mapTextureOp[n] = GL_MODULATE;
+		m_TextureOp[n] = GL_MODULATE;
 		break;
 	}
 	return ZFX_OK;
@@ -1268,6 +1268,15 @@ bool ZFXOpenGL::ActivateGLTextureUnit(UCHAR n)
 		return false;
 	}
 		
+}
+
+GLenum ZFXOpenGL::GetTextureOp(int n)
+{
+	if (n >= 8)
+	{
+		return GL_NONE;
+	}
+	else return m_TextureOp[n];
 }
 
 

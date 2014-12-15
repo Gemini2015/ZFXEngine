@@ -102,6 +102,7 @@ typedef struct TVERTEX_TYPE {
 // ENUMERATED TYPES:
 
 typedef enum ZFXVERTEXID_TYPE {
+	VID_NONE = -1,
 	VID_PS,       // untransformed position only
 	VID_UU,       // untransformed and unlit vertex
 	VID_UL,       // untransformed and lit vertex vertex

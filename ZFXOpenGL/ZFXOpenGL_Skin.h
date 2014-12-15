@@ -6,7 +6,7 @@
 #include "ZFX.h"
 #include "gl\GL.h"
 
-#define COLORDWORD(r,g,b,a) ((DWORD)((((a)&0xff)<<24)|(((r)&0xff)<<16)|(((g)&0xff)<<8)|((b)&0xff)))
+#define COLORDWORD(r,g,b,a) ((DWORD)((((a)&0xff)<<24)|(((b)&0xff)<<16)|(((g)&0xff)<<8)|((r)&0xff)))
 
 
 class ZFXOpenGLSkinManager : public ZFXSkinManager

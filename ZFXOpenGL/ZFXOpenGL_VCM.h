@@ -5,9 +5,36 @@
 #include "ZFXOpenGL.h"
 #include "ZFXOpenGL_Skin.h"
 
+typedef struct ZFXSTATICBUFFER_TYPE
+{
+	int nStride;
+	UINT nSkinID;
+	bool bIndis;
+	int nVertexNum;
+	int nIndisNum;
+	int nTriangleNum;
+	ZFXVERTEXID nVertexType;
+	GLuint VertexBuffer;
+	GLuint IndisBuffer;
+}ZFXSTATICBUFFER;
+
+typedef struct ZFXINDEXBUFFER_TYPE
+{
+	int nIndisNum;
+	int nTriangleNum;
+	GLuint IndisBuffer;
+}ZFXINDEXBUFFER;
+
+class ZFXOpenGLVCache;
+
 class ZFXOpenGLVCacheManager : public ZFXVertexCacheManager
 {
 public:
+	enum
+	{
+		ZFXOpenGLVCache_NUM = 10,
+		MAX_ID = ZFXOpenGLSkinManager::MAX_ID,
+	};
 	ZFXOpenGLVCacheManager(ZFXOpenGLSkinManager* pSkinMan,
 		ZFXOpenGL* pOpenGL,
 		UINT nMaxVertx,
@@ -72,11 +99,11 @@ public:
 
 	void SetActiveVCache(DWORD id)
 	{
-		m_nActiveVCache = id;
+		m_dwActiveVCache = id;
 	}
 	DWORD GetActiveVCache()
 	{
-		return m_nActiveVCache;
+		return m_dwActiveVCache;
 	}
 
 	ZFXOpenGL* GetOpenGL()
@@ -88,7 +115,21 @@ public:
 private:
 	ZFXOpenGLSkinManager* m_pSkinMan;
 	ZFXOpenGL* m_pOpenGL;
-	DWORD m_nActiveVCache;
+	
+
+	ZFXSTATICBUFFER *m_pStaticBuffer;
+	ZFXINDEXBUFFER *m_pIndexBuffer;
+	UINT m_nStaticBufferNum;
+	UINT m_nIndexBufferNum;
+	ZFXOpenGLVCache *m_pCachePS[ZFXOpenGLVCache_NUM];    // position only
+	ZFXOpenGLVCache *m_pCacheUU[ZFXOpenGLVCache_NUM];    // Untransformed Unlit
+	ZFXOpenGLVCache *m_pCacheUL[ZFXOpenGLVCache_NUM];    // Untransformed Lit
+	ZFXOpenGLVCache *m_pCacheCA[ZFXOpenGLVCache_NUM];    // character animation
+	ZFXOpenGLVCache *m_pCache3T[ZFXOpenGLVCache_NUM];    // three textures
+	ZFXOpenGLVCache *m_pCacheTV[ZFXOpenGLVCache_NUM];    // uu with tanget
+	DWORD m_dwActiveVCache;
+	DWORD m_dwActiveStaticBuffer;
+	DWORD m_dwActiveIndexBuffer;
 
 
 	void Log(const char* fmt, ...);

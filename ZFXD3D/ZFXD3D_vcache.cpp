@@ -25,7 +25,8 @@ extern bool g_bLF;
 ZFXD3DVCManager::ZFXD3DVCManager(ZFXD3DSkinManager *pSkinMan,
 	LPDIRECT3DDEVICE9 pDevice,
 	ZFXD3D *pZFXD3D, UINT nMaxVerts,
-	UINT nMaxIndis, FILE *pLog) {
+	UINT nMaxIndis, FILE *pLog)
+{
 	DWORD dwID = 1;
 	int   i = 0;
 
@@ -241,7 +242,6 @@ HRESULT ZFXD3DVCManager::CreateStaticBuffer(ZFXVERTEXID VertexID,
 		m_pSB[m_nNumSB].dwFVF = FVF_TVERTEX;
 	}
 		break;
-
 	default: return ZFX_INVALIDID;
 	} // switch
 

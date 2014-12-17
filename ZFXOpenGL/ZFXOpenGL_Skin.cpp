@@ -648,7 +648,7 @@ HRESULT ZFXOpenGLSkinManager::CreateTexture(ZFXTEXTURE *pTexture, bool bAlpha)
 	}
 
 	if (bAlpha)  fmt = GL_RGB;
-	else fmt = GL_RGB10;
+	else fmt = GL_RGB;
 
 	long lWidth = dibs.dsBmih.biWidth;
 	long lHeight = dibs.dsBmih.biHeight;
@@ -660,12 +660,15 @@ HRESULT ZFXOpenGLSkinManager::CreateTexture(ZFXTEXTURE *pTexture, bool bAlpha)
 	GLuint texture = 0;
 	glGenTextures(1, &texture);
 	// 判断是否创建失败
+	CHECK_ERROR;
 
 	// 绑定一个纹理对象
 	glBindTexture(GL_TEXTURE_2D, texture);
+	CHECK_ERROR;
 
 	// 为当前绑定的纹理对象填充数据
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, lWidth, lHeight, 0, fmt, GL_UNSIGNED_BYTE, pBMPBits);
+	CHECK_ERROR;
 
 	(*(GLuint*)pTexture->pData) = texture;
 	DeleteObject(hBMP);

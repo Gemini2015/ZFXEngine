@@ -21,6 +21,8 @@ HWND      g_hWnd = NULL;
 HINSTANCE g_hInst = NULL;
 TCHAR     g_szAppClass[] = TEXT("FrameWorktest");
 
+std::string log_file = "ZFXLog_main.txt";
+
 // application stuff
 BOOL g_bIsActive = FALSE;
 bool g_bDone = false;
@@ -88,7 +90,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance,
 	g_hInst = hInst;
 
 
-	int SwitchAPI = 0;
+	int SwitchAPI = 1;
 	std::string chAPI;
 	switch (SwitchAPI)
 	{
@@ -103,29 +105,32 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance,
 		break;
 	}
 
+	
+
 	// try to start the engine
 	if (FAILED(hr = ProgramStartup(chAPI.c_str()))) {
-		GetLogger().Print("error: ProgramStartup() failed\n");
+		
+		GetLogger().Print(LOG_DEBUG,log_file,"error: ProgramStartup() failed\n");
 		g_bDone = true;
 	}
 	else if (hr == ZFX_CANCELED) {
-		GetLogger().Print("error: ProgramStartup() canceled by user \n");
+		GetLogger().Print(LOG_DEBUG,log_file,"error: ProgramStartup() canceled by user \n");
 		g_bDone = true;
 	}
 	else
 	{
-		GetLogger().Print("ProgramStartup Success");
+		GetLogger().Print(LOG_DEBUG,log_file,"ProgramStartup Success");
 		g_pDevice->SetClearColor(0.1f, 0.3f, 0.1f);
 
 		ShowWindow(hWnd, SW_SHOW);
 
-		g_pLeopard2 = new ZFXModel("model\\leo2.s3d", g_pDevice);
+		//g_pLeopard2 = new ZFXModel("model\\leo2.s3d", g_pDevice);
 		g_pG3 = new ZFXModel("model\\G3.s3d", g_pDevice);
-		g_pMarder = new ZFXModel("model\\ma3.s3d", g_pDevice);
+		//g_pMarder = new ZFXModel("model\\ma3.s3d", g_pDevice);
 
 		/*if (FAILED(BuildAndSetShader()))
 		{
-			GetLogger().Print("Error Build and Set Shader ");
+			GetLogger().Print(LOG_DEBUG,log_file,"Error Build and Set Shader ");
 			g_bDone = true;
 		}*/
 	}
@@ -284,7 +289,7 @@ HRESULT ProgramStartup(const char *chAPI)
 	// init render device
 	if (FAILED(g_pDevice->Init(g_hWnd, hWnd3D, g_MAXWND, 16, 0, false)))
 	{
-		GetLogger().Print("Error RenderDevice Init");
+		GetLogger().Print(LOG_DEBUG,log_file,"Error RenderDevice Init");
 		return ZFX_FAIL;
 	}
 
@@ -309,7 +314,7 @@ HRESULT ProgramStartup(const char *chAPI)
 		if (FAILED(g_pDevice->CreateFont("Arial", 0, false, false,
 			false, fs, &g_nFontID)))
 		{
-			GetLogger().Print("error: ZFXRenderDevice::CreateFont failed\n");
+			GetLogger().Print(LOG_DEBUG,log_file,"error: ZFXRenderDevice::CreateFont failed\n");
 			return ZFX_FAIL;
 		}
 	}
@@ -342,7 +347,7 @@ HRESULT ProgramCleanup(void)
 		delete g_pRenderer;
 		g_pRenderer = NULL;
 	}
-	GetLogger().Print("Program Cleanup success");
+	GetLogger().Print(LOG_DEBUG,log_file,"Program Cleanup success");
 	return S_OK;
 } // ProgramCleanup
 /*----------------------------------------------------------------*/
@@ -390,8 +395,8 @@ HRESULT ProgramTick(void)
 	g_pDevice->SetWorldTransform(&mWorld);
 	hr = g_pLeopard2->Render(true, false);*/
 
-	mWorld.Translate(1.1f, -0.6f, 4.5f);
-	g_pDevice->SetWorldTransform(&mWorld);
+	/*mWorld.Translate(1.1f, -0.6f, 4.5f);
+	g_pDevice->SetWorldTransform(&mWorld);*/
 	hr = g_pG3->Render(true, false);
 
 	//g_pDevice->FadeScreen(0.0f, 0.0f, 0.0f, fA);
@@ -442,26 +447,26 @@ HRESULT BuildAndSetShader(void)
 	if (FAILED(g_pDevice->CreateVShader("test.vsh", 0,
 		true, false, &nID)))
 	{
-		GetLogger().Print("CreateVShader failed\n");
+		GetLogger().Print(LOG_DEBUG,log_file,"CreateVShader failed\n");
 		return ZFX_FAIL;
 	}
 
 	if (FAILED(g_pDevice->ActivateVShader(nID, VID_UU))) 
 	{
-		GetLogger().Print("ActivateVShader failed\n");
+		GetLogger().Print(LOG_DEBUG,log_file,"ActivateVShader failed\n");
 		return ZFX_FAIL;
 	}
 
 	if (FAILED(g_pDevice->CreatePShader("test.psh", 0,
 		true, false, &nID))) 
 	{
-		GetLogger().Print("CreatePShader failed\n");
+		GetLogger().Print(LOG_DEBUG,log_file,"CreatePShader failed\n");
 		return ZFX_FAIL;
 	}
 
 	if (FAILED(g_pDevice->ActivatePShader(nID))) 
 	{
-		GetLogger().Print("ActivatePShader failed\n");
+		GetLogger().Print(LOG_DEBUG,log_file,"ActivatePShader failed\n");
 		return ZFX_FAIL;
 	}
 

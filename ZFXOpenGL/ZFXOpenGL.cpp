@@ -4,18 +4,37 @@
 #include <gl\glew.h>
 #include "..\ZFXUtil\ZFXUtil.h"
 #include "ZFXGLSL.h"
+#include "ZFXOpenGL_Skin.h"
+#include "ZFXOpenGL_VCM.h"
 
 bool g_bLF = false;
 
 ZFXOpenGL::ZFXOpenGL(HINSTANCE hDLL)
 {
 	m_hDLL = hDLL;
+	m_pGLSLManager = NULL;
+	m_pSkinMan = NULL;
+	m_pVertexMan = NULL;
+	
+	m_bRunning = false;
+	m_bIsSceneRunning = false;
+	m_bUseShaders = false;
+	m_bCanDoShaders = false;
+	m_bAdditive = false;
+	m_bColorBuffer = true;
+	m_bTextures = true;
+	
 	m_mView3D.Identity();
 	m_mWorld3D.Identity();
-	m_pGLSLManager = NULL;
-	m_name.assign("OpenGL Device");
 
-	m_pLog = fopen("Log_OpenGL.txt", "w");
+	m_nActivehWnd = 0;
+	
+	/*
+		Shader stuff
+	*/
+
+	m_name.assign("OpenGL Device");
+	Log("OpenGL Render Device Create");
 }
 
 
@@ -81,7 +100,7 @@ HRESULT ZFXOpenGL::SetMode(ZFXENGINEMODE mode, int nStage)
 	if (m_Mode != mode)
 		m_Mode = mode;
 
-	throw std::logic_error("flush all vertext cache");
+	m_pVertexMan->ForcedFlushAll();
 
 	m_nStage = nStage;
 
@@ -132,7 +151,6 @@ HRESULT ZFXOpenGL::SetMode(ZFXENGINEMODE mode, int nStage)
 	}
 
 	return ZFX_OK;
-	///throw std::logic_error("The method or operation is not implemented.");
 }
 
 void ZFXOpenGL::SetOrthoScale(float fScale, int nStage)
@@ -145,7 +163,7 @@ void ZFXOpenGL::SetOrthoScale(float fScale, int nStage)
 	m_mProjO[nStage]._33 = 1.0f / (m_fFar - m_fNear);
 	m_mProjO[nStage]._43 = m_fNear / (m_fNear - m_fFar);
 	m_mProjO[nStage]._44 = 1.0f;
-	//throw std::logic_error("The method or operation is not implemented.");
+	
 }
 
 HRESULT ZFXOpenGL::InitStage(float fFov, ZFXVIEWPORT* pView, int nStage)
@@ -376,7 +394,7 @@ POINT ZFXOpenGL::Transform3Dto2D(const ZFXVector &vcPoint)
 void ZFXOpenGL::SetWorldTransform(const ZFXMatrix* m)
 {
 	// flush vertex manager 
-	throw std::logic_error("Flush vertex cache");
+	m_pVertexMan->ForcedFlushAll();
 
 	if (!m)
 	{
@@ -403,7 +421,8 @@ void ZFXOpenGL::SetWorldTransform(const ZFXMatrix* m)
 
 void ZFXOpenGL::SetBackfaceCulling(ZFXRENDERSTATE rs)
 {
-	throw std::logic_error("Flush vertex cache");
+	m_pVertexMan->ForcedFlushAll();
+
 	GLenum mode;
 	if (rs == RS_CULL_CW)
 	{
@@ -424,7 +443,8 @@ void ZFXOpenGL::SetBackfaceCulling(ZFXRENDERSTATE rs)
 
 void ZFXOpenGL::SetStencilBufferMode(ZFXRENDERSTATE rs, DWORD dw)
 {
-//	throw std::logic_error("Flush vertex cache");
+//	m_pVertexMan->ForcedFlushAll();
+//
 //	
 //	switch (rs) 
 //	{
@@ -498,8 +518,8 @@ void ZFXOpenGL::UseStencilShadowSettings(bool)
 
 void ZFXOpenGL::UseColorBuffer(bool b)
 {
-	throw std::logic_error("flush vertex manager.");
-	throw std::logic_error("invalidate states.");
+	m_pVertexMan->ForcedFlushAll();
+	m_pVertexMan->InvalidateStates();
 
 	m_bColorBuffer = b;
 	if (!b)
@@ -523,8 +543,9 @@ void ZFXOpenGL::UseTextures(bool b)
 {
 	if (m_bTextures == b) return;
 
-	throw std::logic_error("flush vertex manager.");
-	throw std::logic_error("invalidate states.");
+	// clear all vertex caches
+	m_pVertexMan->ForcedFlushAll();
+	m_pVertexMan->InvalidateStates();
 
 	m_bTextures = b;
 }
@@ -536,7 +557,7 @@ bool ZFXOpenGL::IsUseTextures(void)
 
 void ZFXOpenGL::SetDepthBufferMode(ZFXRENDERSTATE rs)
 {
-	throw std::logic_error("flush vertex manager.");
+	m_pVertexMan->ForcedFlushAll();
 
 	if (rs == RS_DEPTH_READWRITE)
 	{
@@ -556,14 +577,72 @@ void ZFXOpenGL::SetDepthBufferMode(ZFXRENDERSTATE rs)
 	}
 }
 
-void ZFXOpenGL::SetShadeMode(ZFXRENDERSTATE, float, const ZFXCOLOR*)
+void ZFXOpenGL::SetShadeMode(ZFXRENDERSTATE rs, float f, const ZFXCOLOR* pClr)
 {
-	throw std::logic_error("The method or operation is not implemented.");
+	if (pClr && !m_pSkinMan->ColorEqual(pClr, &m_clrWire))
+	{
+		m_pVertexMan->ForcedFlushAll();
+		m_pVertexMan->InvalidateStates();
+		memcpy(&m_clrWire, pClr, sizeof(ZFXCOLOR));
+	}
+
+	if (rs == m_ShadeMode)
+	{
+		if (rs == RS_SHADE_POINTS)
+		{
+			m_pVertexMan->ForcedFlushAll();
+			glPointSize(f);
+		}
+		return;
+	}
+	else
+	{
+		m_pVertexMan->ForcedFlushAll();
+	}
+
+	if (rs == RS_SHADE_TRIWIRE)
+	{
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glShadeModel(GL_FLAT);
+		m_ShadeMode = rs;
+	}
+	else
+	{
+		if (rs != RS_SHADE_SOLID)
+		{
+			glShadeModel(GL_FLAT);
+		}
+		glShadeModel(GL_SMOOTH);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		m_ShadeMode = rs;
+	}
+
+	if (rs == RS_SHADE_POINTS)
+	{
+		if (f > 0.0f)
+		{
+			glPointSize(f);
+			// point sprite
+			// point scale
+		}
+		else
+		{
+			// disable point sprite
+			// disable point scale
+		}
+	}
+	else
+	{
+		// disable point sprite
+		// disable point scale
+	}
+
+	m_pVertexMan->InvalidateStates();
 }
 
 ZFXRENDERSTATE ZFXOpenGL::GetShadeMode(void)
 {
-	throw std::logic_error("The method or operation is not implemented.");
+	return m_ShadeMode;
 }
 
 HRESULT ZFXOpenGL::SetTextureStage(UCHAR n, ZFXRENDERSTATE rs)
@@ -894,6 +973,8 @@ HRESULT ZFXOpenGL::Init(HWND mainWnd, const HWND* childWnds, int nWndsNum, int n
 		return E_FAIL;
 	}
 
+	glEnable(GL_LIGHTING);
+
 	glShadeModel(GL_SMOOTH);
 
 	glEnable(GL_CULL_FACE);
@@ -902,9 +983,16 @@ HRESULT ZFXOpenGL::Init(HWND mainWnd, const HWND* childWnds, int nWndsNum, int n
 
 	glEnable(GL_DEPTH_TEST);
 
+	GLenum res = glewInit();
+	if (res != GLEW_OK)
+	{
+		Log("Error glew Init");
+		return ZFX_FAIL;
+	}
 	//std::logic_error("enum parameter");
 	Log("OpenGL Device Init complete");
 
+	CHECK_ERROR;
 
 	return Go();
 }
@@ -912,6 +1000,47 @@ HRESULT ZFXOpenGL::Init(HWND mainWnd, const HWND* childWnds, int nWndsNum, int n
 HRESULT ZFXOpenGL::Go(void)
 {
 	m_bRunning = true;
+
+	m_ShadeMode = RS_SHADE_SOLID;
+	m_pSkinMan = new ZFXOpenGLSkinManager();
+
+	m_pVertexMan = new ZFXOpenGLVCacheManager((ZFXOpenGLSkinManager*)m_pSkinMan, this, 8192, 8192);
+
+	ZFXVIEWPORT vpView = { 0, 0, m_dwWidth, m_dwHeight };
+	m_Mode = EMD_PERSPECTIVE;
+	m_nStage = -1;
+	SetActiveSkinID(MAX_ID);
+
+	m_mView3D.Identity();
+
+	SetClippingPlanes(0.1f, 1000.f);
+
+	// prepare Shader stuff
+
+	SetAmbientLight(1.0f, 1.0f, 1.0f);
+	SetTextureStage(0, RS_TEX_MODULATE);
+	SetTextureStage(1, RS_NONE);
+	SetTextureStage(2, RS_NONE);
+	SetTextureStage(3, RS_NONE);
+	SetTextureStage(4, RS_NONE);
+	SetTextureStage(5, RS_NONE);
+	SetTextureStage(6, RS_NONE);
+	SetTextureStage(7, RS_NONE);
+
+	if (FAILED(InitStage(0.8f, &vpView, 0)))
+	{
+		Log("Error Init: InitStage");
+		return ZFX_FAIL;
+	}
+	if (FAILED(SetMode(EMD_PERSPECTIVE, 0)))
+	{
+		Log("Error Init: SetMode");
+		return ZFX_FAIL;
+	}
+
+	SetWorldTransform(NULL);
+
+
 	Log("OpenGL Device is running");
 	return ZFX_OK;
 }
@@ -937,6 +1066,20 @@ void ZFXOpenGL::Release(void)
 				ReleaseDC(m_hWnd[i], m_hDC[i]);
 		}
 	}
+	if (m_pSkinMan)
+	{
+		delete m_pSkinMan;
+		m_pSkinMan = NULL;
+	}
+	if (m_pVertexMan)
+	{
+		delete m_pVertexMan;
+		m_pVertexMan = NULL;
+	}
+	/*
+		Shader Stuff
+	*/
+	CHECK_ERROR;
 	Log("OpenGL release");
 }
 
@@ -946,6 +1089,8 @@ void ZFXOpenGL::UseShaders(bool b)
 
 	if (m_bUseShaders == b) return;
 
+	m_pVertexMan->ForcedFlushAll();
+	m_pVertexMan->InvalidateStates();
 
 	m_bUseShaders = b;
 	if (!m_bUseShaders)
@@ -957,6 +1102,7 @@ void ZFXOpenGL::UseShaders(bool b)
 		
 	}
 
+	CHECK_ERROR;
 }
 
 HRESULT ZFXOpenGL::SetShaderConstant(ZFXSHADERTYPE, ZFXDATATYPE, UINT, UINT, const void*)
@@ -964,9 +1110,23 @@ HRESULT ZFXOpenGL::SetShaderConstant(ZFXSHADERTYPE, ZFXDATATYPE, UINT, UINT, con
 	return ZFX_OK;
 }
 
-void ZFXOpenGL::UseAdditiveBlending(bool)
+void ZFXOpenGL::UseAdditiveBlending(bool b)
 {
+	if (m_bAdditive == b)
+		return;
 
+	m_pVertexMan->ForcedFlushAll();
+	m_pVertexMan->InvalidateStates();
+
+	m_bAdditive = b;
+
+	if (!m_bAdditive)
+	{
+		glDisable(GL_BLEND);
+		glBlendFunc(GL_ONE, GL_ZERO);
+	}
+
+	CHECK_ERROR;
 }
 
 HRESULT ZFXOpenGL::SetView3D(const ZFXVector &vcRight,
@@ -1001,7 +1161,7 @@ HRESULT ZFXOpenGL::SetView3D(const ZFXVector &vcRight,
 		glMatrixMode(GL_MODELVIEW);
 		glLoadMatrixf(mat);
 	}
-
+	CHECK_ERROR;
 	return ZFX_OK;
 }
 
@@ -1234,12 +1394,9 @@ void ZFXOpenGL::Log(char *chString, ...)
 	vsprintf_s(ch, chString, args);
 	va_end(args);
 
-	fprintf(m_pLog, "[%s]: ", "OpenGL");
+	/*fprintf(m_pLog, "[%s]: ", "OpenGL");
 	fprintf(m_pLog, ch);
-	fprintf(m_pLog, "\n");
-
-	if (g_bLF)
-		fflush(m_pLog);
+	fprintf(m_pLog, "\n");*/
 	
 	GetLogger().Print(ch);
 } // Log
@@ -1261,6 +1418,7 @@ bool ZFXOpenGL::ActivateGLTextureUnit(UCHAR n)
 	{
 		glActiveTexture(GL_TEXTURE0 + max_unit);
 		m_nActivateTextureUnit = n;
+		CHECK_ERROR;
 		return true;
 	}
 	else

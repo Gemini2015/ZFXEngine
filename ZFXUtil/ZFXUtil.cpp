@@ -6,6 +6,8 @@
 
 void ZFXLogger::Print(LOG_LEVEL level, const char* fmt, ...)
 {
+	if (!m_stream.is_open()) m_stream.open(m_filepath, std::ios::out);
+
 	std::string header = GetLevelString(level);
 	if (m_stream.is_open() && !header.empty())
 	{
@@ -28,6 +30,8 @@ void ZFXLogger::Print(LOG_LEVEL level, const char* fmt, ...)
 
 void ZFXLogger::Print(const char* str)
 {
+	if (!m_stream.is_open()) m_stream.open(m_filepath, std::ios::out);
+
 	std::string header = GetLevelString(m_levelfilter);
 	if (m_stream.is_open() && !header.empty() && strlen(str) != 0)
 	{
@@ -41,6 +45,8 @@ void ZFXLogger::Print(const char* str)
 
 void ZFXLogger::Print(LOG_LEVEL level, const char* str)
 {
+	if (!m_stream.is_open()) m_stream.open(m_filepath, std::ios::out);
+
 	std::string header = GetLevelString(level);
 	if (m_stream.is_open() && !header.empty() && strlen(str) != 0)
 	{
@@ -58,7 +64,7 @@ void ZFXLogger::Print(LOG_LEVEL level, std::string filepath, const char* fmt, ..
 	if (!header.empty() && !filepath.empty() && strlen(fmt) != 0)
 	{
 		std::ofstream tempfile(filepath, std::ios::app);
-		if (!tempfile)
+		if (tempfile.is_open())
 		{
 			std::string time = GetClock().GetTimeString();
 
@@ -80,6 +86,8 @@ void ZFXLogger::Print(LOG_LEVEL level, std::string filepath, const char* fmt, ..
 
 void ZFXLogger::Print(std::string str)
 {
+	if (!m_stream.is_open()) m_stream.open(m_filepath, std::ios::out);
+
 	std::string header = GetLevelString(m_levelfilter);
 	if (m_stream.is_open() && !header.empty() && !str.empty())
 	{
@@ -96,7 +104,7 @@ void ZFXLogger::SetFile(std::string filepath)
 	if (!filepath.empty())
 	{
 		m_filepath = filepath;
-		m_stream.open(m_filepath, std::ios::out);
+		//m_stream.open(m_filepath, std::ios::out);
 	}
 }
 

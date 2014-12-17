@@ -29,12 +29,30 @@ BOOL WINAPI DllEntryPoint(HINSTANCE hDll,
 #define _USE_MATH_DEFINES
 #define RADIAN2DEGREE(radian) ((radian) * 180.0f / M_PI)
 
+#ifdef _DEBUG
+
+#define CHECK_ERROR {\
+	GLenum error = glGetError();\
+	if(error != GL_NO_ERROR)\
+		 Log("OpenGL Error > File:%s Line:%d Error:%d",__FILE__, __LINE__, error);\
+}
+
+#else
+
+#define CHECK_ERROR {}
+
+#endif
+
 
 
 class ZFXOpenGL :
 	public ZFXRenderDevice
 {
 public:
+	enum
+	{
+		MAX_ID = 65535,
+	};
 	ZFXOpenGL(HINSTANCE hDLL);
 	~ZFXOpenGL();
 

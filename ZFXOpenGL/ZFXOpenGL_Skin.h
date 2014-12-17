@@ -8,6 +8,11 @@
 
 #define COLORDWORD(r,g,b,a) ((DWORD)((((a)&0xff)<<24)|(((b)&0xff)<<16)|(((g)&0xff)<<8)|((r)&0xff)))
 
+#define CHECK_ERROR {\
+	GLenum error = glGetError();\
+	if(error != GL_NO_ERROR)\
+		 Log("OpenGL Error > File:%s Line:%d Error:%d",__FILE__, __LINE__, error);\
+}
 
 class ZFXOpenGLSkinManager : public ZFXSkinManager
 {

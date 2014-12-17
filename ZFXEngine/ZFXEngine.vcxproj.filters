@@ -18,12 +18,18 @@
     <ClCompile Include="main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="s3d.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="ZFX.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="s3d.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

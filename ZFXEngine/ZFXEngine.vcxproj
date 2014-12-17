@@ -12,10 +12,20 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="s3d.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h" />
+    <ClInclude Include="s3d.h" />
     <ClInclude Include="ZFX.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ZFX3D\ZFX3D.vcxproj">
+      <Project>{33f48ca8-47cc-4e69-beee-9513e5b28aa3}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\ZFXUtil\ZFXUtil.vcxproj">
+      <Project>{eaa626ce-f656-498a-8535-8b503da05dde}</Project>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{6CB9917F-BFB7-407F-9B0E-6008BFC87B61}</ProjectGuid>
@@ -48,7 +58,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)ZFX3D;$(SolutionDir)ZFXRenderer;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)ZFX3D;$(SolutionDir)ZFXRenderer;$(SolutionDir)ZFXUtil;$(IncludePath)</IncludePath>
     <LibraryWPath>$(LibraryWPath)</LibraryWPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

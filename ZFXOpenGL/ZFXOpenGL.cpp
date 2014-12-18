@@ -45,21 +45,6 @@ ZFXOpenGL::~ZFXOpenGL()
 
 void ZFXOpenGL::SetClippingPlanes(float fNear, float fFar)
 {
-	GLdouble fNearplane[] = { 0, 0, 1, fNear };
-	GLdouble fFarplane[] = { 0, 0, 1, fFar };
-
-	glPushMatrix();
-
-	// fNear clip
-	glClipPlane(GL_CLIP_PLANE0, fNearplane);
-	glEnable(GL_CLIP_PLANE0);
-
-	// fFar clip
-	glClipPlane(GL_CLIP_PLANE1, fFarplane);
-	glEnable(GL_CLIP_PLANE1);
-
-	glPopMatrix();
-
 	m_fNear = fNear;
 	m_fFar = fFar;
 
@@ -86,21 +71,20 @@ void ZFXOpenGL::SetClippingPlanes(float fNear, float fFar)
 	m_mProjO[2]._43 = m_mProjO[3]._43 = X;
 
 	// change perspective projection
-	Q *= m_fFar;
-	X = -Q * m_fNear;
-	m_mProjP[0]._33 = m_mProjP[1]._33 = Q;
-	m_mProjP[2]._33 = m_mProjP[3]._33 = Q;
-	m_mProjP[0]._43 = m_mProjP[1]._43 = X;
-	m_mProjP[2]._43 = m_mProjP[3]._43 = X;
+	for (int i = 0; i < MAX_STAGE; i++)
+	{
+		CalcPerspProjMatrix(i);
+	}
 }
 
 HRESULT ZFXOpenGL::SetMode(ZFXENGINEMODE mode, int nStage)
 {
-	if ((nStage > 3) || (nStage < 0)) nStage = 0;
+	if ((nStage >= MAX_STAGE) || (nStage < 0)) nStage = 0;
 	if (m_Mode != mode)
 		m_Mode = mode;
 
-	m_pVertexMan->ForcedFlushAll();
+	if(m_pVertexMan)
+		m_pVertexMan->ForcedFlushAll();
 
 	m_nStage = nStage;
 
@@ -168,9 +152,6 @@ void ZFXOpenGL::SetOrthoScale(float fScale, int nStage)
 
 HRESULT ZFXOpenGL::InitStage(float fFov, ZFXVIEWPORT* pView, int nStage)
 {
-	float fAspect;
-	bool  bOwnRect = false;
-
 	if (!pView)
 	{
 		ZFXVIEWPORT vpOwn = { 0, 0, m_dwWidth, m_dwHeight };
@@ -181,23 +162,15 @@ HRESULT ZFXOpenGL::InitStage(float fFov, ZFXVIEWPORT* pView, int nStage)
 
 	if ((nStage > 3) || (nStage < 0)) nStage = 0;
 
-	fAspect = ((float)(m_VP[nStage].Height)) / (m_VP[nStage].Width);
-
 	// PERSPECTIVE PROJEKTION MATRIX
-	if (FAILED(this->CalcPerspProjMatrix(fFov, fAspect, &m_mProjP[nStage])))
+	if (FAILED(CalcPerspProjMatrix(nStage)))
 		return ZFX_FAIL;
 
 	// ORTHOGONAL PROJECTION MATRIX
-	memset(&m_mProjO[nStage], 0, sizeof(float) * 16);
-	m_mProjO[nStage]._11 = 2.0f / m_VP[nStage].Width;
-	m_mProjO[nStage]._22 = 2.0f / m_VP[nStage].Height;
-	m_mProjO[nStage]._33 = 1.0f / (m_fFar - m_fNear);
-
-	m_mProjO[nStage]._43 = m_fNear / (m_fNear - m_fFar);
-	m_mProjO[nStage]._44 = 1.0f;
+	if (FAILED(CalcOrthoProjMatrix(nStage)))
+		return ZFX_FAIL;;
 
 	return ZFX_OK;
-	// throw std::logic_error("The method or operation is not implemented.");
 }
 
 // 获取构成平截头体的六个面
@@ -394,7 +367,8 @@ POINT ZFXOpenGL::Transform3Dto2D(const ZFXVector &vcPoint)
 void ZFXOpenGL::SetWorldTransform(const ZFXMatrix* m)
 {
 	// flush vertex manager 
-	m_pVertexMan->ForcedFlushAll();
+	if(m_pVertexMan)
+		m_pVertexMan->ForcedFlushAll();
 
 	if (!m)
 	{
@@ -421,7 +395,8 @@ void ZFXOpenGL::SetWorldTransform(const ZFXMatrix* m)
 
 void ZFXOpenGL::SetBackfaceCulling(ZFXRENDERSTATE rs)
 {
-	m_pVertexMan->ForcedFlushAll();
+	if(m_pVertexMan)
+		m_pVertexMan->ForcedFlushAll();
 
 	GLenum mode;
 	if (rs == RS_CULL_CW)
@@ -518,9 +493,11 @@ void ZFXOpenGL::UseStencilShadowSettings(bool)
 
 void ZFXOpenGL::UseColorBuffer(bool b)
 {
-	m_pVertexMan->ForcedFlushAll();
-	m_pVertexMan->InvalidateStates();
-
+	if (m_pVertexMan)
+	{
+		m_pVertexMan->ForcedFlushAll();
+		m_pVertexMan->InvalidateStates();
+	}
 	m_bColorBuffer = b;
 	if (!b)
 	{
@@ -544,9 +521,11 @@ void ZFXOpenGL::UseTextures(bool b)
 	if (m_bTextures == b) return;
 
 	// clear all vertex caches
-	m_pVertexMan->ForcedFlushAll();
-	m_pVertexMan->InvalidateStates();
-
+	if (m_pVertexMan)
+	{
+		m_pVertexMan->ForcedFlushAll();
+		m_pVertexMan->InvalidateStates();
+	}
 	m_bTextures = b;
 }
 
@@ -557,7 +536,8 @@ bool ZFXOpenGL::IsUseTextures(void)
 
 void ZFXOpenGL::SetDepthBufferMode(ZFXRENDERSTATE rs)
 {
-	m_pVertexMan->ForcedFlushAll();
+	if (m_pVertexMan)
+		m_pVertexMan->ForcedFlushAll();
 
 	if (rs == RS_DEPTH_READWRITE)
 	{
@@ -581,8 +561,11 @@ void ZFXOpenGL::SetShadeMode(ZFXRENDERSTATE rs, float f, const ZFXCOLOR* pClr)
 {
 	if (pClr && !m_pSkinMan->ColorEqual(pClr, &m_clrWire))
 	{
-		m_pVertexMan->ForcedFlushAll();
-		m_pVertexMan->InvalidateStates();
+		if (m_pVertexMan)
+		{
+			m_pVertexMan->ForcedFlushAll();
+			m_pVertexMan->InvalidateStates();
+		}
 		memcpy(&m_clrWire, pClr, sizeof(ZFXCOLOR));
 	}
 
@@ -590,14 +573,16 @@ void ZFXOpenGL::SetShadeMode(ZFXRENDERSTATE rs, float f, const ZFXCOLOR* pClr)
 	{
 		if (rs == RS_SHADE_POINTS)
 		{
-			m_pVertexMan->ForcedFlushAll();
+			if (m_pVertexMan)
+				m_pVertexMan->ForcedFlushAll();
 			glPointSize(f);
 		}
 		return;
 	}
 	else
 	{
-		m_pVertexMan->ForcedFlushAll();
+		if (m_pVertexMan)
+			m_pVertexMan->ForcedFlushAll();
 	}
 
 	if (rs == RS_SHADE_TRIWIRE)
@@ -824,7 +809,6 @@ void ZFXOpenGL::EndRendering(void)
 		SwapBuffers(m_hDC[m_nActivehWnd]);
 	else if (m_hDC[0])
 		SwapBuffers(m_hDC[0]);
-	//throw std::logic_error("The method or operation is not implemented.");
 }
 
 HRESULT ZFXOpenGL::Clear(bool bClearPixel, bool bClearDepth, bool bClearStencil)
@@ -937,6 +921,7 @@ HRESULT ZFXOpenGL::Init(HWND mainWnd, const HWND* childWnds, int nWndsNum, int n
 			}
 		}
 
+		UseWindow(0);
 		m_bWindowed = true;
 	}
 	else
@@ -973,7 +958,12 @@ HRESULT ZFXOpenGL::Init(HWND mainWnd, const HWND* childWnds, int nWndsNum, int n
 		return E_FAIL;
 	}
 
-	glEnable(GL_LIGHTING);
+	RECT rc;
+	GetWindowRect(m_hWnd[0], &rc);
+	m_dwWidth = rc.right - rc.left;
+	m_dwHeight = rc.bottom - rc.top;
+
+	/*glEnable(GL_LIGHTING);
 
 	glShadeModel(GL_SMOOTH);
 
@@ -981,7 +971,7 @@ HRESULT ZFXOpenGL::Init(HWND mainWnd, const HWND* childWnds, int nWndsNum, int n
 
 	glFrontFace(GL_CCW);
 
-	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_DEPTH_TEST);*/
 
 	GLenum res = glewInit();
 	if (res != GLEW_OK)
@@ -1089,8 +1079,11 @@ void ZFXOpenGL::UseShaders(bool b)
 
 	if (m_bUseShaders == b) return;
 
-	m_pVertexMan->ForcedFlushAll();
-	m_pVertexMan->InvalidateStates();
+	if (m_pVertexMan)
+	{
+		m_pVertexMan->ForcedFlushAll();
+		m_pVertexMan->InvalidateStates();
+	}
 
 	m_bUseShaders = b;
 	if (!m_bUseShaders)
@@ -1114,9 +1107,11 @@ void ZFXOpenGL::UseAdditiveBlending(bool b)
 {
 	if (m_bAdditive == b)
 		return;
-
-	m_pVertexMan->ForcedFlushAll();
-	m_pVertexMan->InvalidateStates();
+	if (m_pVertexMan)
+	{
+		m_pVertexMan->ForcedFlushAll();
+		m_pVertexMan->InvalidateStates();
+	}
 
 	m_bAdditive = b;
 
@@ -1136,7 +1131,7 @@ HRESULT ZFXOpenGL::SetView3D(const ZFXVector &vcRight,
 {
 	if (!m_bRunning) return E_FAIL;
 
-	m_mView3D._14 = m_mView3D._21 = m_mView3D._34 = 0.0f;
+	m_mView3D._14 = m_mView3D._24 = m_mView3D._34 = 0.0f;
 	m_mView3D._44 = 1.0f;
 
 	m_mView3D._11 = vcRight.x;
@@ -1180,7 +1175,8 @@ HRESULT ZFXOpenGL::SetViewLookAt(const ZFXVector& vcPos, const ZFXVector& vcPoin
 	float fL = vcUp.GetLength();
 
 	// if length too small take normal y axis as up vector
-	if (fL < 1e-6f) {
+	if (fL < 1e-6f)
+	{
 		ZFXVector vcY;
 		vcY.Set(0.0f, 1.0f, 0.0f);
 
@@ -1220,7 +1216,7 @@ void ZFXOpenGL::MakeGLMatrix(GLfloat gl_matrix[16], ZFXMatrix matrix)
 	{
 		for (int j = 0; j < 4; j++)
 		{
-			gl_matrix[x] = p[j * 4 + i];
+			gl_matrix[x] = p[i * 4 + j];
 			x++;
 		}
 	}
@@ -1303,40 +1299,61 @@ void ZFXOpenGL::CalcWorldViewProjMatrix(void)
 	(*pCombo) = ((*pProj) * (*pView) * (*pWorld));  //((*pWorld) * (*pView)) * (*pProj);
 }
 
-HRESULT ZFXOpenGL::CalcPerspProjMatrix(float fFov, float fAspect, ZFXMatrix* m)
+/************************************************************************/
+/* 
+	FOV:视场角，垂直方向的可视角度
+	Aspect: height / width
+*/
+/************************************************************************/
+HRESULT ZFXOpenGL::CalcPerspProjMatrix(int nStage)
 {
-	if (fabs(m_fFar - m_fNear) < 0.01f)
-		return ZFX_FAIL;
+	float left = m_VP[nStage].X;
+	float right = left + m_VP[nStage].Width;
+	float bottom = m_VP[nStage].Y;
+	float top = bottom + m_VP[nStage].Height;
 
-	float sinFOV2 = sinf(fFov / 2);
+	if (nStage < 0 || nStage >= 4)
+		return ZFX_INVALIDPARAM;
 
-	if (fabs(sinFOV2) < 0.01f)
-		return ZFX_FAIL;
+	float hori = right - left;
+	float veri = top - bottom;
+	if (hori == 0 || veri == 0) // 是否需要做判断？
+		return ZFX_INVALIDPARAM;
 
-	float cosFOV2 = cosf(fFov / 2);
+	memset(&m_mProjP[nStage], 0, sizeof(ZFXMatrix));
 
-	float w = fAspect * (cosFOV2 / sinFOV2);
-	float h = 1.0f  * (cosFOV2 / sinFOV2);
-	float Q = m_fFar / (m_fFar - m_fNear);
-
-	memset(m, 0, sizeof(ZFXMatrix));
-	(*m)._11 = w;
-	(*m)._22 = h;
-	(*m)._33 = Q;
-	(*m)._34 = 1.0f;
-	(*m)._43 = -Q*m_fNear;
+	m_mProjP[nStage]._11 = 2 * m_fNear / hori;
+	m_mProjP[nStage]._21 = 2 * m_fNear / veri;
+	m_mProjP[nStage]._31 = (right + left) / (right - left);
+	m_mProjP[nStage]._32 = (top + bottom) / (top - bottom);
+	m_mProjP[nStage]._33 = -(m_fFar + m_fNear) / (m_fFar - m_fNear);
+	m_mProjP[nStage]._34 = -1.0f;
+	m_mProjP[nStage]._43 = -2 * m_fNear * m_fFar / (m_fFar - m_fNear);
 
 	return ZFX_OK;
 }
 
-void ZFXOpenGL::CalcOrthoProjMatrix(float l, float r, float b, float t, float fN, float fF, int nStage)
+HRESULT ZFXOpenGL::CalcOrthoProjMatrix(int nStage)
 {
-	float x = 2.0f / (r - l);
-	float y = 2.0f / (t - b);
-	float z = 2.0f / (fF - fN);
-	float tx = -(r + l) / (r - l);
-	float ty = -(t + b) / (t - b);
-	float tz = -(fF + fN) / (fF - fN);
+	float left = m_VP[nStage].X;
+	float right = left + m_VP[nStage].Width;
+	float bottom = m_VP[nStage].Y;
+	float top = bottom + m_VP[nStage].Height;
+
+	if (nStage < 0 || nStage >= 4)
+		return ZFX_INVALIDPARAM;
+
+	left /= m_dwWidth;
+	right /= m_dwWidth;
+	bottom /= m_dwHeight;
+	top /= m_dwHeight;
+
+	float x = 2.0f / (right - left);
+	float y = 2.0f / (top - bottom);
+	float z = 1.0f / (m_fFar - m_fNear);
+	float tx = -(right + left) / (right - left);
+	float ty = -(top + bottom) / (top - bottom);
+	float tz = -(m_fNear) / (m_fFar - m_fNear);
 
 	memset(&m_mProjO[nStage], 0, sizeof(ZFXMatrix));
 	m_mProjO[nStage]._11 = x;
@@ -1346,6 +1363,7 @@ void ZFXOpenGL::CalcOrthoProjMatrix(float l, float r, float b, float t, float fN
 	m_mProjO[nStage]._41 = tx;
 	m_mProjO[nStage]._42 = ty;
 	m_mProjO[nStage]._43 = tz;
+	return ZFX_OK;
 }
 
 bool ZFXOpenGL::InitPixelFormat(int nHWnd)

@@ -150,6 +150,7 @@ typedef enum ZFXRENDERSTATE_TYPE {
 	RS_SHADE_TRIWIRE,    // render triangulated wire
 	RS_SHADE_HULLWIRE,   // render poly hull as polyline
 	RS_SHADE_SOLID,      // render solid polygons
+	RS_SHADE_QUADS,		 // render quad
 	
 	RS_TEX_ADDSIGNED,    // texture stage operation
 	RS_TEX_MODULATE,     // texture stage operation

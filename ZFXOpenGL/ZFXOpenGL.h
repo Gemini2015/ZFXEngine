@@ -242,8 +242,8 @@ private:
 	void Prepare2D(void);
 	void CalcViewProjMatrix(void);
 	void CalcWorldViewProjMatrix(void);
-	HRESULT CalcPerspProjMatrix(float fFov, float fAspect, ZFXMatrix* m);
-	void CalcOrthoProjMatrix(float l, float r, float b, float t, float fN, float fF, int nStage);
+	HRESULT CalcPerspProjMatrix(int nStage);
+	HRESULT CalcOrthoProjMatrix(int nStage);
 
 	bool InitPixelFormat(int nHWnd);
 

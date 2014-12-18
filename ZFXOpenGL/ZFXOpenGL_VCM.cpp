@@ -185,8 +185,6 @@ HRESULT ZFXOpenGLVCacheManager::CreateStaticBuffer(ZFXVERTEXID VertexID,
 		GLsizeiptr size = nIndis * sizeof(WORD);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, pIndis, GL_STATIC_DRAW);
 		CHECK_ERROR;
-		/*glIndexPointer(GL_UNSIGNED_SHORT, sizeof(WORD), 0);
-		CHECK_ERROR;*/
 		m_pStaticBuffer[m_nStaticBufferNum].IndisBuffer = indexbuffer;
 	}
 	else
@@ -196,10 +194,6 @@ HRESULT ZFXOpenGLVCacheManager::CreateStaticBuffer(ZFXVERTEXID VertexID,
 		m_pStaticBuffer[m_nStaticBufferNum].IndisBuffer = 0;
 	}
 
-	ZFXVERTEXID vid = VID_NONE;
-	if (m_pOpenGL && m_pOpenGL->IsUseShaders()) vid = VID_NONE;
-	else vid = m_pStaticBuffer[m_nStaticBufferNum].nVertexType;
-
 	GLuint vertexbuffer = 0;
 	glGenBuffers(1, &vertexbuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
@@ -207,7 +201,9 @@ HRESULT ZFXOpenGLVCacheManager::CreateStaticBuffer(ZFXVERTEXID VertexID,
 	glBufferData(GL_ARRAY_BUFFER, size, pVerts, GL_STATIC_DRAW);
 	CHECK_ERROR;
 	m_pStaticBuffer[m_nStaticBufferNum].VertexBuffer = vertexbuffer;
+	
 	// Set FVF
+	ZFXOpenGLVCache::SetFVF(VertexID);
 
 	(*pnID) = m_nStaticBufferNum;
 	m_nStaticBufferNum++;
@@ -233,8 +229,8 @@ HRESULT ZFXOpenGLVCacheManager::CreateIndexBuffer(UINT nIndis, const WORD *pIndi
 	glGenBuffers(1, &indexbuffer);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexbuffer);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, nIndis * sizeof(WORD), pIndis, GL_STATIC_DRAW);
-	glIndexPointer(GL_UNSIGNED_SHORT, sizeof(WORD), 0);
 
+	m_pIndexBuffer[m_nIndexBufferNum].IndisBuffer = indexbuffer;
 	(*pnID) = m_nIndexBufferNum;
 	m_nIndexBufferNum++;
 	return ZFX_OK;
@@ -313,7 +309,6 @@ HRESULT ZFXOpenGLVCacheManager::Render(UINT nSBID)
 			CHECK_ERROR;
 			glBindBuffer(GL_ARRAY_BUFFER, m_pStaticBuffer[nSBID].VertexBuffer);
 			CHECK_ERROR;
-			glEnableClientState(GL_VERTEX_ARRAY);
 			m_dwActiveStaticBuffer = nSBID;
 
 			CHECK_ERROR;
@@ -416,12 +411,12 @@ HRESULT ZFXOpenGLVCacheManager::Render(UINT nSBID)
 	if (!m_pOpenGL->IsUseShaders())
 	{
 		// Set FVF
-		glVertexPointer(3, GL_FLOAT, sizeof(VERTEX), 0);
+		/*glVertexPointer(3, GL_FLOAT, sizeof(VERTEX), 0);
 		glNormalPointer(GL_FLOAT, sizeof(VERTEX), (void*)(sizeof(float) * 3));
 		glClientActiveTexture(GL_TEXTURE0);
 		glEnable(GL_TEXTURE_2D);
 		glTexCoordPointer(2, GL_FLOAT, sizeof(VERTEX), (void*)(sizeof(float) * 6));
-		CHECK_ERROR;
+		CHECK_ERROR;*/
 	}
 
 	if (m_pOpenGL->IsUseAdditiveBlending())
@@ -440,6 +435,8 @@ HRESULT ZFXOpenGLVCacheManager::Render(UINT nSBID)
 
 	ZFXRENDERSTATE rs = m_pOpenGL->GetShadeMode();
 
+	ZFXOpenGLVCache::SetClientStateEnable(m_pStaticBuffer[nSBID].nVertexType, true);
+
 	int nVertexNum = m_pStaticBuffer[nSBID].nVertexNum;
 	int nIndisNum = m_pStaticBuffer[nSBID].nIndisNum;
 	if (m_pStaticBuffer[nSBID].bIndis)
@@ -455,6 +452,9 @@ HRESULT ZFXOpenGLVCacheManager::Render(UINT nSBID)
 			break;
 		case RS_SHADE_HULLWIRE:   // render poly hull as polyline
 			glDrawElements(GL_LINE_STRIP, nIndisNum, GL_UNSIGNED_SHORT, 0);
+			break;
+		case RS_SHADE_QUADS:
+			glDrawElements(GL_QUADS, nIndisNum , GL_UNSIGNED_SHORT, 0);
 			break;
 		case RS_SHADE_TRIWIRE:    // render triangulated wire
 		case RS_SHADE_SOLID:	   // render solid polygons
@@ -477,6 +477,9 @@ HRESULT ZFXOpenGLVCacheManager::Render(UINT nSBID)
 		case RS_SHADE_HULLWIRE:   // render poly hull as polyline
 			glDrawArrays(GL_LINE_STRIP, 0, nVertexNum);
 			break;
+		case RS_SHADE_QUADS:
+			glDrawArrays(GL_QUADS, 0,nIndisNum );
+			break;
 		case RS_SHADE_TRIWIRE:    // render triangulated wire
 		case RS_SHADE_SOLID:	   // render solid polygons
 		default:
@@ -485,8 +488,7 @@ HRESULT ZFXOpenGLVCacheManager::Render(UINT nSBID)
 		}
 	}
 
-	glDisableClientState(GL_VERTEX_ARRAY);
-
+	ZFXOpenGLVCache::SetClientStateEnable(m_pStaticBuffer[nSBID].nVertexType, false);
 	
 	CHECK_ERROR;
 	return ZFX_OK;
@@ -1158,49 +1160,6 @@ ZFXOpenGLVCache::~ZFXOpenGLVCache()
 		glDeleteBuffers(1, &m_IndexBuffer);
 }
 
-HRESULT ZFXOpenGLVCache::SetFVF(ZFXVERTEXID vid)
-{
-	HRESULT hr = ZFX_OK;
-	switch (vid)
-	{
-	case VID_PS:
-		glVertexPointer(3, GL_FLOAT, 3 * sizeof(PVERTEX), 0);
-		break;
-	case VID_UU:
-		glVertexPointer(3, GL_FLOAT, sizeof(VERTEX), 0);
-		glNormalPointer(GL_FLOAT, sizeof(VERTEX), (void*)(sizeof(float) * 3));
-		glClientActiveTexture(GL_TEXTURE0);
-		glTexCoordPointer(2, GL_FLOAT, sizeof(VERTEX), (void*)(sizeof(float) * 6));
-		break;
-	case VID_UL:
-		glVertexPointer(3, GL_FLOAT, sizeof(LVERTEX), 0);
-		glColorPointer(4, GL_UNSIGNED_INT, sizeof(LVERTEX), (void*)(sizeof(float) * 3));
-		glClientActiveTexture(GL_TEXTURE0);
-		glTexCoordPointer(2, GL_FLOAT, sizeof(LVERTEX), (void*)(sizeof(float) * 3 + sizeof(DWORD)));
-		break;
-	case VID_CA:
-		glVertexPointer(3, GL_FLOAT, sizeof(CVERTEX), 0);
-		glNormalPointer(GL_FLOAT, sizeof(CVERTEX), (void*)(sizeof(float) * 3));
-		glClientActiveTexture(GL_TEXTURE0);
-		glTexCoordPointer(2, GL_FLOAT, sizeof(CVERTEX), (void*)(sizeof(float) * 6));
-		break;
-	case VID_3T:
-		glVertexPointer(3, GL_FLOAT, sizeof(VERTEX), 0);
-		glNormalPointer(GL_FLOAT, sizeof(VERTEX), (void*)(sizeof(float) * 3));
-		glClientActiveTexture(GL_TEXTURE0);
-		glTexCoordPointer(2, GL_FLOAT, sizeof(VERTEX), (void*)(sizeof(float) * 6));
-		// 
-		// glEnableClientState(
-		break;
-	case VID_TV:
-		break;
-	default:
-		hr = E_INVALIDARG;
-		break;
-	}
-	return hr;
-}
-
 HRESULT ZFXOpenGLVCache::Flush(bool bUseShaders)
 {
 	if (m_nVertexNum <= 0) return ZFX_OK;
@@ -1408,5 +1367,104 @@ void ZFXOpenGLVCache::Log(const char* fmt, ...)
 	va_end(args);
 
 	GetLogger().Print(ch);
+}
+
+HRESULT ZFXOpenGLVCache::SetFVF(ZFXVERTEXID vid)
+{
+	HRESULT hr = ZFX_OK;
+	switch (vid)
+	{
+	case VID_PS:
+		glVertexPointer(3, GL_FLOAT, 3 * sizeof(PVERTEX), 0);
+		break;
+	case VID_UU:
+		glVertexPointer(3, GL_FLOAT, sizeof(VERTEX), 0);
+		glNormalPointer(GL_FLOAT, sizeof(VERTEX), (void*)(sizeof(float) * 3));
+		glClientActiveTexture(GL_TEXTURE0);
+		glTexCoordPointer(2, GL_FLOAT, sizeof(VERTEX), (void*)(sizeof(float) * 6));
+		break;
+	case VID_UL:
+		glVertexPointer(3, GL_FLOAT, sizeof(LVERTEX), 0);
+		glColorPointer(4, GL_UNSIGNED_INT, sizeof(LVERTEX), (void*)(sizeof(float) * 3));
+		glClientActiveTexture(GL_TEXTURE0);
+		glTexCoordPointer(2, GL_FLOAT, sizeof(LVERTEX), (void*)(sizeof(float) * 3 + sizeof(DWORD)));
+		break;
+	case VID_CA:
+		glVertexPointer(3, GL_FLOAT, sizeof(CVERTEX), 0);
+		glNormalPointer(GL_FLOAT, sizeof(CVERTEX), (void*)(sizeof(float) * 3));
+		glClientActiveTexture(GL_TEXTURE0);
+		glTexCoordPointer(2, GL_FLOAT, sizeof(CVERTEX), (void*)(sizeof(float) * 6));
+		break;
+	case VID_3T:
+		glVertexPointer(3, GL_FLOAT, sizeof(VERTEX), 0);
+		glNormalPointer(GL_FLOAT, sizeof(VERTEX), (void*)(sizeof(float) * 3));
+		glClientActiveTexture(GL_TEXTURE0);
+		glTexCoordPointer(2, GL_FLOAT, sizeof(VERTEX), (void*)(sizeof(float) * 6));
+		break;
+	case VID_TV:
+		glVertexPointer(3, GL_FLOAT, sizeof(VERTEX), 0);
+		glNormalPointer(GL_FLOAT, sizeof(VERTEX), (void*)(sizeof(float) * 3));
+		glClientActiveTexture(GL_TEXTURE0);
+		glTexCoordPointer(2, GL_FLOAT, sizeof(VERTEX), (void*)(sizeof(float) * 6));
+		break;
+	default:
+		hr = E_INVALIDARG;
+		break;
+	}
+	return hr;
+}
+
+HRESULT ZFXOpenGLVCache::SetClientStateEnable(ZFXVERTEXID vid, bool bEnable)
+{
+	if (bEnable)
+	{
+		switch (vid)
+		{
+		case VID_PS:
+			glEnableClientState(GL_VERTEX_ARRAY);
+			break;
+		case VID_UL:
+			glEnableClientState(GL_VERTEX_ARRAY);
+			glEnableClientState(GL_COLOR_ARRAY);
+			glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+			break;
+		case VID_UU:		
+		case VID_CA:			
+		case VID_3T:
+		case VID_TV:
+			glEnableClientState(GL_VERTEX_ARRAY);
+			glEnableClientState(GL_NORMAL_ARRAY);
+			glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+			break;
+		default:
+			break;
+		}
+	}
+	else
+	{
+		switch (vid)
+		{
+		case VID_PS:
+			glDisableClientState(GL_VERTEX_ARRAY);
+			break;
+		case VID_UL:
+			glDisableClientState(GL_VERTEX_ARRAY);
+			glDisableClientState(GL_COLOR_ARRAY);
+			glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+			break;
+		case VID_UU:
+		case VID_CA:
+		case VID_3T:
+		case VID_TV:
+			glDisableClientState(GL_VERTEX_ARRAY);
+			glDisableClientState(GL_NORMAL_ARRAY);
+			glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+			break;
+		default:
+			break;
+		}
+	}
+	
+	return ZFX_OK;
 }
 

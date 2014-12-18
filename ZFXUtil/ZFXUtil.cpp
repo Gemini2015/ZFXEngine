@@ -66,7 +66,7 @@ void ZFXLogger::Print(LOG_LEVEL level, std::string filepath, const char* fmt, ..
 		std::ofstream tempfile(filepath, std::ios::app);
 		if (tempfile.is_open())
 		{
-			std::string time = GetClock().GetTimeString();
+			std::string time = GetClock().GetTimeString(ZFXClock::YMDHS);
 
 			tempfile << "[" << header << " " << time << "] ";
 

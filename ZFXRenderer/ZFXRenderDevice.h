@@ -168,7 +168,13 @@ public:
  * from which render dll's can inherit. This secures availability
  * of the necessary render functions.
  */
-class ZFXRenderDevice {
+class ZFXRenderDevice 
+{
+public:
+	enum ZFXRenderDevice_Enum
+	{
+		MAX_STAGE = 4,
+	};
 protected:
 	HWND            m_hWndMain;          // application main window
 	HWND            m_hWnd[MAX_3DHWND];  // 3D render window handle

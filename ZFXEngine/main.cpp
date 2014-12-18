@@ -8,6 +8,7 @@
 #include "s3d.h"
 
 #include <windows.h>
+#include <gl\glew.h>
 #include <gl\GL.h>
 #include <gl\GLU.h>
 #include <gl\freeglut.h>
@@ -15,6 +16,10 @@
 //include our library
 #pragma comment(lib, "ZFXRenderer.lib")
 
+
+#pragma comment(lib, "glew32.lib")
+#pragma comment(lib, "glu32.lib")
+#pragma comment(lib, "opengl32.lib")
 
 // windows stuff
 HWND      g_hWnd = NULL;
@@ -108,12 +113,13 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance,
 	
 
 	// try to start the engine
-	if (FAILED(hr = ProgramStartup(chAPI.c_str()))) {
-		
+	if (FAILED(hr = ProgramStartup(chAPI.c_str())))
+	{
 		GetLogger().Print(LOG_DEBUG,log_file,"error: ProgramStartup() failed\n");
 		g_bDone = true;
 	}
-	else if (hr == ZFX_CANCELED) {
+	else if (hr == ZFX_CANCELED)
+	{
 		GetLogger().Print(LOG_DEBUG,log_file,"error: ProgramStartup() canceled by user \n");
 		g_bDone = true;
 	}
@@ -136,7 +142,73 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance,
 	}
 	//g_pDevice->UseWindow(0);
 
+	
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+
+	glColor3f(0.0, 0.0f, 0.5f);
+	UINT nID = 0;
+	static GLfloat vertexs[] = {
+		0.5, 0.0f, 0.5,
+		1.0, 0.0f, 0.5,
+		1.0, 0.0f, 1.0,
+		0.5, 0.0f, 1.0,
+		1.5, 0.0f, 0.5,
+		2.0, 0.0f, 0.5,
+		2.0, 0.0f, 1.0,
+		1.5, 0.0f, 1.0,
+	};
+	static GLushort first[] = { 0, 1, 2, 3 };
+
+	ZFXCOLOR color;
+	color.fB = 1.0f;
+	g_pDevice->SetShadeMode(RS_SHADE_QUADS, 5.0f, &color);
+	g_pDevice->GetVertexManager()->CreateStaticBuffer(VID_PS, 0, 3 * 8, 4, vertexs, first, &nID);
+
+	/*static GLfloat vertexs[] = {
+		25.0, 25.0,
+		50.0, 25.0,
+		50.0, 50.0,
+		25.0, 50.0,
+		75.0, 25.0,
+		100.0, 25.0,
+		100.0, 50.0,
+		75.0, 50
+	};*/
+
+
+	/*GLuint vertex;
+	glGenBuffers(1, &vertex);
+	glBindBuffer(GL_ARRAY_BUFFER, vertex);
+	glBufferData(GL_ARRAY_BUFFER, 2 * 8 * sizeof(GLfloat), vertexs, GL_STATIC_DRAW);
+	glVertexPointer(2, GL_FLOAT, 2 * sizeof(GLfloat), 0);
+	
+	GLuint index;
+	glGenBuffers(1, &index);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, 4 * sizeof(GLushort), first, GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+*/
+
+	ZFXVIEWPORT vp = { 0, 0, 800, 600 };
+	g_pDevice->InitStage(0.8, &vp, 0);
+	g_pDevice->SetClippingPlanes(-1.0f, 1.0f);
+	g_pDevice->SetMode(EMD_PERSPECTIVE, 0);
+	
+	
+	/*glViewport(700, 550, 800, 600);
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glOrtho(0.5, 1, 0.5, 1, -1.0f, 1.0f);*/
+	GLfloat f[16] = { 0.0 };
+	glGetFloatv(GL_MODELVIEW_MATRIX, f);
+	glGetFloatv(GL_PROJECTION_MATRIX, f);
 	ZFXVector vR(1, 0, 0), vU(0, 1, 0);
+	
+	//g_pDevice->SetView3D(vR, vU, g_dir, g_pos);
 
 	while (!g_bDone)
 	{
@@ -149,13 +221,37 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance,
 		if (g_bIsActive)
 		{
 			// compute camera 
-			g_pos.y = distance * sin(yAngle);
+			/*g_pos.y = distance * sin(yAngle);
 			g_pos.x = distance * cos(yAngle) * sin(xAngle);
 			g_pos.z = distance * cos(yAngle) * cos(xAngle);
 
 			g_pDevice->UseWindow(0);
 			g_pDevice->SetView3D(vR, vU, g_dir, g_pos);
-			ProgramTick();
+			ProgramTick();*/
+			g_pDevice->BeginRendering(true, true, true);
+
+			/*glBindBuffer(GL_ARRAY_BUFFER, vertex);
+			glEnableClientState(GL_VERTEX_ARRAY);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index);
+
+			glDrawElements(GL_QUADS, 4, GL_UNSIGNED_SHORT, 0);
+
+			GLenum error = glGetError();
+			if (error != GL_NO_ERROR)
+			{
+				char buf[1024] = { 0 };
+				sprintf_s(buf, "OpenGL Error > File:%s Line:%d Error:%d", __FILE__, __LINE__, error);
+
+				GetLogger().Print(buf);
+			}
+
+			glDisableClientState(GL_VERTEX_ARRAY);
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);*/
+
+			g_pDevice->GetVertexManager()->Render(nID);
+			
+			g_pDevice->EndRendering();
 
 			/*if (g_pDevice->IsWindowed())
 			{

@@ -148,7 +148,6 @@ public:
 		ZFXVERTEXID vid);
 	~ZFXOpenGLVCache();
 
-	HRESULT SetFVF(ZFXVERTEXID vid);
 
 	HRESULT Flush(bool bUseShaders);
 
@@ -173,6 +172,9 @@ public:
 	{
 		return m_nVertexNum;
 	}
+
+	static HRESULT SetFVF(ZFXVERTEXID vid);
+	static HRESULT SetClientStateEnable(ZFXVERTEXID vid, bool bEnable);
 
 private:
 	GLuint m_VertexBuffer;

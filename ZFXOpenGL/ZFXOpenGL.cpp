@@ -70,11 +70,12 @@ void ZFXOpenGL::SetClippingPlanes(float fNear, float fFar)
 	m_mProjO[0]._43 = m_mProjO[1]._43 = X;
 	m_mProjO[2]._43 = m_mProjO[3]._43 = X;
 
-	// change perspective projection
-	for (int i = 0; i < MAX_STAGE; i++)
-	{
-		CalcPerspProjMatrix(i);
-	}
+	Q = -(m_fFar + m_fNear) / (m_fFar - m_fNear);
+	X = -2 * m_fFar * m_fNear / (m_fFar - m_fNear);
+	m_mProjP[0]._33 = m_mProjP[1]._33 = Q;
+	m_mProjP[2]._33 = m_mProjP[3]._33 = Q;
+	m_mProjP[0]._34 = m_mProjP[1]._34 = X;
+	m_mProjP[2]._34 = m_mProjP[3]._34 = X;
 }
 
 HRESULT ZFXOpenGL::SetMode(ZFXENGINEMODE mode, int nStage)
@@ -117,7 +118,7 @@ HRESULT ZFXOpenGL::SetMode(ZFXENGINEMODE mode, int nStage)
 			MakeGLMatrix(mat, m_mView3D * m_mWorld3D);
 			glLoadMatrixf(mat);
 
-			if (m_Mode = EMD_PERSPECTIVE)
+			if (m_Mode == EMD_PERSPECTIVE)
 			{
 				glMatrixMode(GL_PROJECTION);
 				MakeGLMatrix(mat, m_mProjP[nStage]);
@@ -162,8 +163,10 @@ HRESULT ZFXOpenGL::InitStage(float fFov, ZFXVIEWPORT* pView, int nStage)
 
 	if ((nStage > 3) || (nStage < 0)) nStage = 0;
 
+	float fAspect = (float)m_VP[nStage].Width / m_VP[nStage].Height;
+
 	// PERSPECTIVE PROJEKTION MATRIX
-	if (FAILED(CalcPerspProjMatrix(nStage)))
+	if (FAILED(CalcPerspProjMatrix(fFov, fAspect, nStage)))
 		return ZFX_FAIL;
 
 	// ORTHOGONAL PROJECTION MATRIX
@@ -1017,7 +1020,7 @@ HRESULT ZFXOpenGL::Go(void)
 	SetTextureStage(6, RS_NONE);
 	SetTextureStage(7, RS_NONE);
 
-	if (FAILED(InitStage(0.8f, &vpView, 0)))
+	if (FAILED(InitStage(30, &vpView, 0)))
 	{
 		Log("Error Init: InitStage");
 		return ZFX_FAIL;
@@ -1124,6 +1127,14 @@ void ZFXOpenGL::UseAdditiveBlending(bool b)
 	CHECK_ERROR;
 }
 
+/************************************************************************/
+/* 
+	right = x axis
+	up = y axis
+	dir = point - position
+	position = eye
+*/
+/************************************************************************/
 HRESULT ZFXOpenGL::SetView3D(const ZFXVector &vcRight,
 	const ZFXVector &vcUp,
 	const ZFXVector &vcDir,
@@ -1131,7 +1142,7 @@ HRESULT ZFXOpenGL::SetView3D(const ZFXVector &vcRight,
 {
 	if (!m_bRunning) return E_FAIL;
 
-	m_mView3D._14 = m_mView3D._24 = m_mView3D._34 = 0.0f;
+	/*m_mView3D._14 = m_mView3D._24 = m_mView3D._34 = 0.0f;
 	m_mView3D._44 = 1.0f;
 
 	m_mView3D._11 = vcRight.x;
@@ -1141,13 +1152,31 @@ HRESULT ZFXOpenGL::SetView3D(const ZFXVector &vcRight,
 
 	m_mView3D._12 = vcUp.x;
 	m_mView3D._22 = vcUp.y;
-	m_mView3D._32 = vcUp.z;
+	m_mView3D._31 = vcUp.z;
 	m_mView3D._42 = -(vcUp * vcPos);
 
 	m_mView3D._13 = vcDir.x;
 	m_mView3D._23 = vcDir.y;
 	m_mView3D._33 = vcDir.z;
-	m_mView3D._43 = -(vcDir*vcPos);
+	m_mView3D._43 = -(vcDir*vcPos);*/
+
+	m_mView3D._41 = m_mView3D._42 = m_mView3D._43 = 0.0f;
+	m_mView3D._44 = 1.0f;
+
+	m_mView3D._11 = vcRight.x;
+	m_mView3D._12 = vcRight.y;
+	m_mView3D._13 = vcRight.z;
+	m_mView3D._14 = -(vcRight * vcPos);
+
+	m_mView3D._21 = vcUp.x;
+	m_mView3D._22 = vcUp.y;
+	m_mView3D._23 = vcUp.z;
+	m_mView3D._24 = -(vcUp * vcPos);
+
+	m_mView3D._31 = vcDir.x;
+	m_mView3D._32 = vcDir.y;
+	m_mView3D._33 = vcDir.z;
+	m_mView3D._34 = -(vcDir*vcPos);
 
 	if (!m_bUseShaders)
 	{
@@ -1164,7 +1193,7 @@ HRESULT ZFXOpenGL::SetViewLookAt(const ZFXVector& vcPos, const ZFXVector& vcPoin
 {
 	ZFXVector vcDir, vcTemp, vcUp;
 
-	vcDir = vcPoint - vcPos;
+	vcDir = vcPos - vcPoint;
 	vcDir.Normalize();
 
 	// calculate up vector
@@ -1216,7 +1245,7 @@ void ZFXOpenGL::MakeGLMatrix(GLfloat gl_matrix[16], ZFXMatrix matrix)
 	{
 		for (int j = 0; j < 4; j++)
 		{
-			gl_matrix[x] = p[i * 4 + j];
+			gl_matrix[x] = p[j * 4 + i];
 			x++;
 		}
 	}
@@ -1299,12 +1328,7 @@ void ZFXOpenGL::CalcWorldViewProjMatrix(void)
 	(*pCombo) = ((*pProj) * (*pView) * (*pWorld));  //((*pWorld) * (*pView)) * (*pProj);
 }
 
-/************************************************************************/
-/* 
-	FOV:视场角，垂直方向的可视角度
-	Aspect: height / width
-*/
-/************************************************************************/
+
 HRESULT ZFXOpenGL::CalcPerspProjMatrix(int nStage)
 {
 	float left = m_VP[nStage].X;
@@ -1329,6 +1353,40 @@ HRESULT ZFXOpenGL::CalcPerspProjMatrix(int nStage)
 	m_mProjP[nStage]._33 = -(m_fFar + m_fNear) / (m_fFar - m_fNear);
 	m_mProjP[nStage]._34 = -1.0f;
 	m_mProjP[nStage]._43 = -2 * m_fNear * m_fFar / (m_fFar - m_fNear);
+
+	return ZFX_OK;
+}
+
+/************************************************************************/
+/*
+	FOV:视场角，垂直方向的可视角度
+	Aspect: width / height for opengl
+*/
+/************************************************************************/
+HRESULT ZFXOpenGL::CalcPerspProjMatrix(float fFov, float fAspect, int nStage)
+{
+	if (fabs(m_fFar - m_fNear) < 0.01f)
+		return ZFX_FAIL;
+
+	fFov = DEGREE2RADIAN(fFov);
+
+	float sinFOV2 = sinf(fFov / 2);
+
+	if (fabs(sinFOV2) < 0.01f)
+		return ZFX_FAIL;
+
+	float cosFOV2 = cosf(fFov / 2);
+
+	float w = 1 / fAspect * (cosFOV2 / sinFOV2);
+	float h = 1.0f  * (cosFOV2 / sinFOV2);
+	float Q = -(m_fFar + m_fNear) / (m_fFar - m_fNear);
+
+	memset(&m_mProjP[nStage], 0, sizeof(ZFXMatrix));
+	m_mProjP[nStage]._11 = w;
+	m_mProjP[nStage]._22 = h;
+	m_mProjP[nStage]._33 = Q;
+	m_mProjP[nStage]._43 = -1.0f;
+	m_mProjP[nStage]._34 = -2 * m_fFar * m_fNear / (m_fFar - m_fNear);
 
 	return ZFX_OK;
 }

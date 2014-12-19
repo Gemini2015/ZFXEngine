@@ -246,26 +246,26 @@ public:
 	virtual bool    IsUseAdditiveBlending(void) = 0;
 
 	// set view matrix from cam's vRight, vUp, vDir, vPos
-	virtual HRESULT SetView3D(const ZFXVector&, const ZFXVector&,
-		const ZFXVector&, const ZFXVector&) = 0;
+	virtual HRESULT SetView3D(const ZFXVector& right, const ZFXVector& up,
+		const ZFXVector& dir, const ZFXVector& pos) = 0;
 
 	// set look at matrix: from, at, world up
-	virtual HRESULT SetViewLookAt(const ZFXVector&, const ZFXVector&,
-		const ZFXVector&) = 0;
+	virtual HRESULT SetViewLookAt(const ZFXVector& from, const ZFXVector& at,
+		const ZFXVector& worldUp) = 0;
 
 	// set engines near and far clipping plane
-	virtual void    SetClippingPlanes(float, float) = 0;
+	virtual void    SetClippingPlanes(float near, float far) = 0;
 
 	// set mode for stage n, 0:=3D(perspective), 1:=2D(orthogonal)
-	virtual HRESULT SetMode(ZFXENGINEMODE, int n) = 0;
+	virtual HRESULT SetMode(ZFXENGINEMODE mode, int stage) = 0;
 
 	virtual void    SetOrthoScale(float fScale, int nStage) = 0;
 
 	// set perspective FOV and viewport for stage n
-	virtual HRESULT InitStage(float, ZFXVIEWPORT*, int n) = 0;
+	virtual HRESULT InitStage(float fov, ZFXVIEWPORT* vp, int n) = 0;
 
 	// get frustrum planes
-	virtual HRESULT GetFrustrum(ZFXPlane*) = 0;
+	virtual HRESULT GetFrustrum(ZFXPlane* planes) = 0;
 
 	// screen to worldray, give 2 vectors for output
 	virtual void    Transform2Dto3D(const POINT &pt,

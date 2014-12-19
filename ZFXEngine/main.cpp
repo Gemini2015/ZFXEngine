@@ -44,9 +44,9 @@ ZFXModel *g_pG3 = NULL,
 *g_pLeopard2 = NULL,
 *g_pMarder = NULL;
 
-ZFXVector g_dir(0, 0, 1), g_pos(0, 0, 0);
+ZFXVector g_dir(0, 0, 1), g_pos(3, 0, 3);
 float eye[3] = { 0.0f, 0.0f, 1.0f };
-float distance = 1.0f;
+float distance = 3.0f;
 float xAngle = 0.0f;
 float yAngle = 0.0f;
 float xAngleStep = 0.05f;
@@ -148,21 +148,39 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance,
 	glColor3f(0.0, 0.0f, 0.5f);
 	UINT nID = 0;
 	static GLfloat vertexs[] = {
-		0.5, 0.0f, 0.5,
-		1.0, 0.0f, 0.5,
-		1.0, 0.0f, 1.0,
-		0.5, 0.0f, 1.0,
-		1.5, 0.0f, 0.5,
-		2.0, 0.0f, 0.5,
-		2.0, 0.0f, 1.0,
-		1.5, 0.0f, 1.0,
+		-0.25f, -0.25f, -0.25f,
+		0.25f, -0.25f, -0.25f,
+		0.25f, 0.25f, -0.25f,
+		-0.25f, 0.25f, -0.25f,
+		-0.25f, -0.25f, 0.25f,
+		0.25f, -0.25f, 0.25f,
+		0.25f, 0.25f, 0.25f,
+		-0.25f, 0.25f, 0.25f,
 	};
-	static GLushort first[] = { 0, 1, 2, 3 };
+	static GLushort first[] = { 
+		0,2,1,
+		0,3,2,
+		1,2,5,
+		2,6,5,
+		2,3,6,
+		3,7,6,
+		4,5,6,
+		4,6,7,
+		0,4,3,
+		3,4,7,
+		0,1,5,
+		0,5,4,
+	};
 
 	ZFXCOLOR color;
 	color.fB = 1.0f;
-	g_pDevice->SetShadeMode(RS_SHADE_QUADS, 5.0f, &color);
-	g_pDevice->GetVertexManager()->CreateStaticBuffer(VID_PS, 0, 3 * 8, 4, vertexs, first, &nID);
+	g_pDevice->SetShadeMode(RS_SHADE_SOLID, 1.0f, &color);
+	ZFXVector vR(1, 0, 0), vU(0, 1, 0);
+	ZFXVIEWPORT vp = { 0, 0, 800, 600 };
+	g_pDevice->InitStage(60, &vp, 0);
+	g_pDevice->SetClippingPlanes(0.1f, 1000.0f);
+	g_pDevice->SetMode(EMD_PERSPECTIVE, 0);
+	g_pDevice->GetVertexManager()->CreateStaticBuffer(VID_PS, 0, 8, 36, vertexs, first, &nID);
 
 	/*static GLfloat vertexs[] = {
 		25.0, 25.0,
@@ -189,26 +207,20 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance,
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-*/
+	*/
 
-	ZFXVIEWPORT vp = { 0, 0, 800, 600 };
-	g_pDevice->InitStage(0.8, &vp, 0);
-	g_pDevice->SetClippingPlanes(-1.0f, 1.0f);
-	g_pDevice->SetMode(EMD_PERSPECTIVE, 0);
-	
-	
 	/*glViewport(700, 550, 800, 600);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glOrtho(0.5, 1, 0.5, 1, -1.0f, 1.0f);*/
+	//g_dir = -g_pos;
+	g_dir.Normalize();
+	g_pDevice->SetView3D(vR, vU, g_dir, g_pos);
 	GLfloat f[16] = { 0.0 };
 	glGetFloatv(GL_MODELVIEW_MATRIX, f);
 	glGetFloatv(GL_PROJECTION_MATRIX, f);
-	ZFXVector vR(1, 0, 0), vU(0, 1, 0);
-	
-	//g_pDevice->SetView3D(vR, vU, g_dir, g_pos);
 
 	while (!g_bDone)
 	{
@@ -221,13 +233,13 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance,
 		if (g_bIsActive)
 		{
 			// compute camera 
-			/*g_pos.y = distance * sin(yAngle);
+			g_pos.y = distance * sin(yAngle);
 			g_pos.x = distance * cos(yAngle) * sin(xAngle);
 			g_pos.z = distance * cos(yAngle) * cos(xAngle);
 
-			g_pDevice->UseWindow(0);
-			g_pDevice->SetView3D(vR, vU, g_dir, g_pos);
-			ProgramTick();*/
+			//g_pDevice->UseWindow(0);
+			
+			/*ProgramTick();*/
 			g_pDevice->BeginRendering(true, true, true);
 
 			/*glBindBuffer(GL_ARRAY_BUFFER, vertex);
@@ -248,9 +260,14 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance,
 			glDisableClientState(GL_VERTEX_ARRAY);
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);*/
-
-			g_pDevice->GetVertexManager()->Render(nID);
+			//g_dir = -g_pos;
+			g_dir.Normalize();
+			g_pDevice->SetViewLookAt(g_pos, ZFXVector(0, 0, 0), vU);
+			//g_pDevice->SetView3D(vR, vU, g_dir, g_pos);
+			//g_pDevice->GetVertexManager()->Render(nID);
 			
+			g_pG3->Render(true, false);
+
 			g_pDevice->EndRendering();
 
 			/*if (g_pDevice->IsWindowed())
@@ -402,8 +419,8 @@ HRESULT ProgramStartup(const char *chAPI)
 	fs = ptRes.x / 20;
 
 	ZFXVIEWPORT rc = { lx, 10, ldx, ldy };
-	g_pDevice->InitStage(0.8f, NULL, 0);
-	g_pDevice->InitStage(0.8f, &rc, 1);
+	g_pDevice->InitStage(30, NULL, 0);
+	g_pDevice->InitStage(30, &rc, 1);
 
 	if (strcmp(chAPI, "Direct3D") == 0)
 	{
@@ -598,8 +615,8 @@ TCHAR* HrToStr(HRESULT hr)
 HRESULT KeyProc(UCHAR key)
 {
 	HRESULT hr = ZFX_OK;
-	/*
-	switch (key)
+
+	/*switch (key)
 	{
 	case 'W':
 		g_pos.z += 0.1;
@@ -640,8 +657,51 @@ HRESULT KeyProc(UCHAR key)
 	default:
 		hr = ZFX_FAIL;
 		break;
+	}*/
+
+	switch (key)
+	{
+		/*case 'W':
+		g_pos.z += 0.1;
+		break;
+		case 'S':
+		g_pos.z -= 0.1;
+		break;
+		case 'A':
+		g_pos.x -= 0.1;
+		break;
+		case 'D':
+		g_pos.x += 0.1;
+		break;
+		case 'Q':
+		g_pos.y += 0.1;
+		break;
+		case 'E':
+		g_pos.y -= 0.1;
+		break;*/
+	case 'U':
+		g_dir.y += 0.1;
+		break;
+	case 'J':
+		g_dir.y -= 0.1;
+		break;
+	case 'H':
+		g_dir.x -= 0.1;
+		break;
+	case 'K':
+		g_dir.x += 0.1;
+		break;
+	case 'Y':
+		g_dir.z += 0.1;
+		break;
+	case 'I':
+		g_dir.z -= 0.1;
+		break;
+	default:
+		hr = ZFX_FAIL;
+		break;
 	}
-	*/
+
 	switch (key)
 	{
 		// Camera Pos

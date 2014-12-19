@@ -212,6 +212,11 @@ void ZFXVector::operator -= (const ZFXVector &v) {
 ZFXVector ZFXVector::operator - (const ZFXVector &v) const {
 	return ZFXVector(x - v.x, y - v.y, z - v.z);
 }
+
+ZFXVector ZFXVector::operator-() const
+{
+	return ZFXVector(-x, -y, -z);
+}
 /*----------------------------------------------------------------*/
 
 void ZFXVector::operator *= (float f) {

@@ -112,10 +112,12 @@ public:
 	ZFXVector operator * (const ZFXMatrix &m)const; // vector-matrix product
 	ZFXVector operator + (const ZFXVector &v)const; // addition
 	ZFXVector operator - (const ZFXVector &v)const; // subtraction
+	ZFXVector operator - () const;
 
 	inline void Cross(const ZFXVector &v1,          // cross product
 		const ZFXVector &v2);
 };  // class
+
 /*----------------------------------------------------------------*/
 
 

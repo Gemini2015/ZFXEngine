@@ -28,6 +28,7 @@ BOOL WINAPI DllEntryPoint(HINSTANCE hDll,
 
 #define _USE_MATH_DEFINES
 #define RADIAN2DEGREE(radian) ((radian) * 180.0f / M_PI)
+#define DEGREE2RADIAN(degree) ((degree) * M_PI / 180.0f)
 
 #ifdef _DEBUG
 
@@ -243,6 +244,7 @@ private:
 	void CalcViewProjMatrix(void);
 	void CalcWorldViewProjMatrix(void);
 	HRESULT CalcPerspProjMatrix(int nStage);
+	HRESULT CalcPerspProjMatrix(float fFov, float fAspect, int nStage);
 	HRESULT CalcOrthoProjMatrix(int nStage);
 
 	bool InitPixelFormat(int nHWnd);

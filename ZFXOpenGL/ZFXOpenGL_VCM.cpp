@@ -434,7 +434,7 @@ HRESULT ZFXOpenGLVCacheManager::Render(UINT nSBID)
 	CHECK_ERROR;
 
 	ZFXRENDERSTATE rs = m_pOpenGL->GetShadeMode();
-
+	ZFXOpenGLVCache::SetFVF(m_pStaticBuffer[nSBID].nVertexType);
 	ZFXOpenGLVCache::SetClientStateEnable(m_pStaticBuffer[nSBID].nVertexType, true);
 
 	int nVertexNum = m_pStaticBuffer[nSBID].nVertexNum;
@@ -459,7 +459,8 @@ HRESULT ZFXOpenGLVCacheManager::Render(UINT nSBID)
 		case RS_SHADE_TRIWIRE:    // render triangulated wire
 		case RS_SHADE_SOLID:	   // render solid polygons
 		default:
-			glDrawElements(GL_TRIANGLES, nIndisNum / 3, GL_UNSIGNED_SHORT, 0);
+			// count 是索引点的数量，不是三角形的数量
+			glDrawElements(GL_TRIANGLES, nIndisNum, GL_UNSIGNED_SHORT, 0);	
 			break;
 		}
 	}
@@ -1375,7 +1376,7 @@ HRESULT ZFXOpenGLVCache::SetFVF(ZFXVERTEXID vid)
 	switch (vid)
 	{
 	case VID_PS:
-		glVertexPointer(3, GL_FLOAT, 3 * sizeof(PVERTEX), 0);
+		glVertexPointer(3, GL_FLOAT, sizeof(PVERTEX), 0);
 		break;
 	case VID_UU:
 		glVertexPointer(3, GL_FLOAT, sizeof(VERTEX), 0);

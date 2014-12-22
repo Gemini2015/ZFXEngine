@@ -973,8 +973,8 @@ HRESULT ZFXOpenGL::Init(HWND mainWnd, const HWND* childWnds, int nWndsNum, int n
 	glEnable(GL_CULL_FACE);
 
 	glFrontFace(GL_CCW);
-
-	glEnable(GL_DEPTH_TEST);*/
+	*/
+	glEnable(GL_DEPTH_TEST);
 
 	GLenum res = glewInit();
 	if (res != GLEW_OK)
@@ -982,7 +982,6 @@ HRESULT ZFXOpenGL::Init(HWND mainWnd, const HWND* childWnds, int nWndsNum, int n
 		Log("Error glew Init");
 		return ZFX_FAIL;
 	}
-	//std::logic_error("enum parameter");
 	Log("OpenGL Device Init complete");
 
 	CHECK_ERROR;

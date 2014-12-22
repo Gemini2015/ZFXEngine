@@ -130,9 +130,9 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance,
 
 		ShowWindow(hWnd, SW_SHOW);
 
-		//g_pLeopard2 = new ZFXModel("model\\leo2.s3d", g_pDevice);
+		g_pLeopard2 = new ZFXModel("model\\leo2.s3d", g_pDevice);
 		g_pG3 = new ZFXModel("model\\G3.s3d", g_pDevice);
-		//g_pMarder = new ZFXModel("model\\ma3.s3d", g_pDevice);
+		g_pMarder = new ZFXModel("model\\ma3.s3d", g_pDevice);
 
 		/*if (FAILED(BuildAndSetShader()))
 		{
@@ -145,7 +145,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance,
 	
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
-	glColor3f(0.0, 0.0f, 0.5f);
+	//glColor3f(0.0, 0.0f, 0.0f);
 	UINT nID = 0;
 	static GLfloat vertexs[] = {
 		-0.25f, -0.25f, -0.25f,
@@ -182,40 +182,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance,
 	g_pDevice->SetMode(EMD_PERSPECTIVE, 0);
 	g_pDevice->GetVertexManager()->CreateStaticBuffer(VID_PS, 0, 8, 36, vertexs, first, &nID);
 
-	/*static GLfloat vertexs[] = {
-		25.0, 25.0,
-		50.0, 25.0,
-		50.0, 50.0,
-		25.0, 50.0,
-		75.0, 25.0,
-		100.0, 25.0,
-		100.0, 50.0,
-		75.0, 50
-	};*/
-
-
-	/*GLuint vertex;
-	glGenBuffers(1, &vertex);
-	glBindBuffer(GL_ARRAY_BUFFER, vertex);
-	glBufferData(GL_ARRAY_BUFFER, 2 * 8 * sizeof(GLfloat), vertexs, GL_STATIC_DRAW);
-	glVertexPointer(2, GL_FLOAT, 2 * sizeof(GLfloat), 0);
 	
-	GLuint index;
-	glGenBuffers(1, &index);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, 4 * sizeof(GLushort), first, GL_STATIC_DRAW);
-
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-	*/
-
-	/*glViewport(700, 550, 800, 600);
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glOrtho(0.5, 1, 0.5, 1, -1.0f, 1.0f);*/
-	//g_dir = -g_pos;
 	g_dir.Normalize();
 	g_pDevice->SetView3D(vR, vU, g_dir, g_pos);
 	GLfloat f[16] = { 0.0 };
@@ -267,6 +234,8 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance,
 			//g_pDevice->GetVertexManager()->Render(nID);
 			
 			g_pG3->Render(true, false);
+			//g_pLeopard2->Render(true, false);
+			//g_pMarder->Render(true, false);
 
 			g_pDevice->EndRendering();
 

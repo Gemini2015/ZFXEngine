@@ -363,6 +363,7 @@ HRESULT ZFXOpenGLVCacheManager::Render(UINT nSBID)
 						GLuint texture = *(GLuint*)zfxtexture.pData;
 						glActiveTexture(GL_TEXTURE0 + i);
 						glEnable(GL_TEXTURE_2D);
+
 						glBindTexture(GL_TEXTURE_2D, texture);
 						CHECK_ERROR;
 						glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, m_pOpenGL->GetTextureOp(i));
@@ -1381,7 +1382,8 @@ HRESULT ZFXOpenGLVCache::SetFVF(ZFXVERTEXID vid)
 	case VID_UU:
 		glVertexPointer(3, GL_FLOAT, sizeof(VERTEX), 0);
 		glNormalPointer(GL_FLOAT, sizeof(VERTEX), (void*)(sizeof(float) * 3));
-		glClientActiveTexture(GL_TEXTURE0);
+		//glClientActiveTexture(GL_TEXTURE0);
+		//glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 		glTexCoordPointer(2, GL_FLOAT, sizeof(VERTEX), (void*)(sizeof(float) * 6));
 		break;
 	case VID_UL:
@@ -1435,6 +1437,7 @@ HRESULT ZFXOpenGLVCache::SetClientStateEnable(ZFXVERTEXID vid, bool bEnable)
 		case VID_TV:
 			glEnableClientState(GL_VERTEX_ARRAY);
 			glEnableClientState(GL_NORMAL_ARRAY);
+			//glClientActiveTexture(GL_TEXTURE0);
 			glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 			break;
 		default:

@@ -95,6 +95,7 @@ HRESULT ZFXOpenGL::SetMode(ZFXENGINEMODE mode, int nStage)
 	DWORD height = m_VP[nStage].Height;
 
 	glViewport(x, y, width, height);
+	glScissor(x, y, width, height);
 
 	GLfloat mat[16];
 
@@ -816,6 +817,9 @@ void ZFXOpenGL::EndRendering(void)
 
 HRESULT ZFXOpenGL::Clear(bool bClearPixel, bool bClearDepth, bool bClearStencil)
 {
+	if (m_bIsSceneRunning)
+		glFlush();
+
 	GLbitfield mask = 0;
 	if (bClearPixel)
 	{
@@ -851,7 +855,102 @@ void ZFXOpenGL::SetClearColor(float fRed, float fGreen, float fBlue)
 
 void ZFXOpenGL::FadeScreen(float fR, float fG, float fB, float fA)
 {
-	throw std::logic_error("The method or operation is not implemented.");
+	if (m_bIsSceneRunning)
+		glFlush();
+
+	SetActiveSkinID(MAX_ID);
+	
+	LVERTEX v[4];
+	DWORD dwColor = FCOLOR2DWORD(fR, fG, fB, fA);
+	v[0].x = -1.0f;   // oben rechts
+	v[0].y = -1.0f;
+	v[0].z = 1.0f;
+	v[0].tu = 1.0f;
+	v[0].tv = 0.0f;
+	v[0].Color = dwColor;
+
+	v[1].x = -1.0f;   // unten links
+	v[1].y = 1.0f;
+	v[1].z = 1.0f;
+	v[1].tu = 0.0f;
+	v[1].tv = 1.0f;
+	v[1].Color = dwColor;
+
+	v[2].x = 1.0f;   // oben links
+	v[2].y = 1.0f;
+	v[2].z = 1.0f;
+	v[2].tu = 0.0f;
+	v[2].tv = 0.0f;
+	v[2].Color = dwColor;
+
+	v[3].x = 1.0f;   // unten rechts
+	v[3].y = -1.0f;
+	v[3].z = 1.0f;
+	v[3].tu = 1.0f;
+	v[3].tv = 1.0f;
+	v[3].Color = dwColor;
+	GLuint vertexbuffer;
+	glGenBuffers(1, &vertexbuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+	glBufferData(GL_ARRAY_BUFFER, 4 * sizeof(LVERTEX), v, GL_STATIC_DRAW);
+
+	/*SetWorldTransform(NULL);
+	SetView3D(ZFXVector(1, 0, 0), ZFXVector(0, 1, 0),
+		ZFXVector(0, 0, 1), ZFXVector(0, 0, 0));*/
+
+	UseShaders(false);
+	glActiveTexture(GL_TEXTURE0);
+	glDisable(GL_TEXTURE_2D);
+
+	bool bChanged = false;
+	ZFXENGINEMODE oldMode = m_Mode;
+	if (m_Mode != EMD_ORTHOGONAL)
+	{
+		bChanged = true;
+		oldMode = m_Mode;
+		SetMode(EMD_ORTHOGONAL, m_nStage);
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+	}
+	float f[16];
+	glGetFloatv(GL_MODELVIEW_MATRIX, f);
+	glGetFloatv(GL_PROJECTION_MATRIX, f);
+	ZFXCOLOR clr_diff_amb;
+	clr_diff_amb.c[0] = clr_diff_amb.c[1] = 1.0f;
+	clr_diff_amb.c[2] = clr_diff_amb.c[3] = 1.0f;
+	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, clr_diff_amb.c);
+
+	glDisable(GL_LIGHTING);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_SRC_ALPHA);
+
+	SetDepthBufferMode(RS_DEPTH_NONE);
+
+	glShadeModel(GL_FLAT);
+
+	// set LVERTEX fvf
+	ZFXOpenGLVCache::SetFVF(VID_UL);
+	ZFXOpenGLVCache::SetClientStateEnable(VID_UL, true);
+
+	glDrawArrays(GL_QUADS, 0, 4);
+
+	ZFXOpenGLVCache::SetClientStateEnable(VID_UL, false);
+	glDeleteBuffers(1, &vertexbuffer);
+
+	glFlush();
+
+	if (bChanged) SetMode(oldMode, m_nStage);
+
+	//glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, 
+	
+	glDisable(GL_BLEND);
+	glEnable(GL_LIGHTING);
+	glShadeModel(GL_SMOOTH);
+
+	SetDepthBufferMode(RS_DEPTH_READWRITE);
+	CHECK_ERROR;
 }
 
 HRESULT ZFXOpenGL::CreateFont(const char*, int, bool, bool, bool, DWORD, UINT*)
@@ -975,6 +1074,8 @@ HRESULT ZFXOpenGL::Init(HWND mainWnd, const HWND* childWnds, int nWndsNum, int n
 	glFrontFace(GL_CCW);
 	*/
 	glEnable(GL_DEPTH_TEST);
+
+	glEnable(GL_SCISSOR_TEST);
 
 	GLenum res = glewInit();
 	if (res != GLEW_OK)
@@ -1265,14 +1366,34 @@ void ZFXOpenGL::Prepare2D(void)
 	m_mWorld2D.Identity();
 
 	// orthogonal projection matrix
-	m_mProj2D._11 = 2.0f / (float)m_dwWidth;
-	m_mProj2D._22 = 2.0f / (float)m_dwHeight;
-	m_mProj2D._33 = 1.0f / (m_fFar - m_fNear);
-	m_mProj2D._43 = -m_fNear*(1.0f / (m_fFar - m_fNear));
+	float left = m_VP[m_nStage].X;
+	float right = left + m_VP[m_nStage].Width;
+	float bottom = m_VP[m_nStage].Y;
+	float top = bottom + m_VP[m_nStage].Height;
+
+	left /= m_dwWidth;
+	right /= m_dwWidth;
+	bottom /= m_dwHeight;
+	top /= m_dwHeight;
+
+	float x = 2.0f / (right - left);
+	float y = 2.0f / (top - bottom);
+	float z = 1.0f / (m_fFar - m_fNear);
+	float tx = -(right + left) / (right - left);
+	float ty = -(top + bottom) / (top - bottom);
+	float tz = -(m_fNear) / (m_fFar - m_fNear);
+
+	memset(&m_mProj2D, 0, sizeof(ZFXMatrix));
+	m_mProj2D._11 = x;
+	m_mProj2D._22 = y;
+	m_mProj2D._33 = z;
 	m_mProj2D._44 = 1.0f;
+	m_mProj2D._41 = tx;
+	m_mProj2D._42 = ty;
+	m_mProj2D._43 = tz;
 
 	// 2D view matrix
-	float tx, ty, tz;
+	//float tx, ty, tz;
 	tx = -((int)m_dwWidth) + m_dwWidth * 0.5f;
 	ty = m_dwHeight - m_dwHeight  * 0.5f;
 	tz = m_fNear + 0.1f;

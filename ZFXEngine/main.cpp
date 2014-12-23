@@ -145,7 +145,6 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance,
 	
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
-	//glColor3f(0.0, 0.0f, 0.0f);
 	UINT nID = 0;
 	static GLfloat vertexs[] = {
 		-0.25f, -0.25f, -0.25f,
@@ -205,68 +204,49 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance,
 			g_pos.x = distance * cos(yAngle) * sin(xAngle);
 			g_pos.z = distance * cos(yAngle) * cos(xAngle);
 
-			//g_pDevice->UseWindow(0);
+			g_pDevice->UseWindow(0);
 			
-			/*ProgramTick();*/
-			g_pDevice->BeginRendering(true, true, true);
-
-			/*glBindBuffer(GL_ARRAY_BUFFER, vertex);
-			glEnableClientState(GL_VERTEX_ARRAY);
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index);
-
-			glDrawElements(GL_QUADS, 4, GL_UNSIGNED_SHORT, 0);
-
-			GLenum error = glGetError();
-			if (error != GL_NO_ERROR)
-			{
-				char buf[1024] = { 0 };
-				sprintf_s(buf, "OpenGL Error > File:%s Line:%d Error:%d", __FILE__, __LINE__, error);
-
-				GetLogger().Print(buf);
-			}
-
-			glDisableClientState(GL_VERTEX_ARRAY);
-			glBindBuffer(GL_ARRAY_BUFFER, 0);
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);*/
-			//g_dir = -g_pos;
+			ProgramTick();
+			g_dir = -g_pos;
 			g_dir.Normalize();
 			g_pDevice->SetViewLookAt(g_pos, ZFXVector(0, 0, 0), vU);
-			//g_pDevice->SetView3D(vR, vU, g_dir, g_pos);
-			//g_pDevice->GetVertexManager()->Render(nID);
-			
-			ZFXMatrix mWorld;
-			mWorld.Identity();
-			/*mWorld.Identity();
-			mWorld.Translate(-2.0f, 1.0f, 13.0f);
-			g_pDevice->SetWorldTransform(&mWorld);
-			hr = g_pMarder->Render(true, false);
 
-			mWorld.Translate(-1.0f, -5.0f, 15.0f);
-			g_pDevice->SetWorldTransform(&mWorld);
-			hr = g_pLeopard2->Render(true, false);
-			*/
-			mWorld.Translate(0.5, 0.5, 0);
-			g_pDevice->SetWorldTransform(&mWorld);
-			hr = g_pG3->Render(true, false);
+
+			//g_pDevice->BeginRendering(true, true, true);
+			//
+			//ZFXMatrix mWorld;
+			//mWorld.Identity();
+			///*mWorld.Identity();
+			//mWorld.Translate(-2.0f, 1.0f, 13.0f);
+			//g_pDevice->SetWorldTransform(&mWorld);
+			//hr = g_pMarder->Render(true, false);
+
+			//mWorld.Translate(-1.0f, -5.0f, 15.0f);
+			//g_pDevice->SetWorldTransform(&mWorld);
+			//hr = g_pLeopard2->Render(true, false);
+			//*/
+			//mWorld.Translate(0.5, 0.5, 0);
+			//g_pDevice->SetWorldTransform(&mWorld);
+			//hr = g_pG3->Render(true, false);
 			//g_pG3->Render(true, false);
 			//g_pLeopard2->Render(true, false);
 			//g_pMarder->Render(true, false);
 
-			g_pDevice->EndRendering();
+			//g_pDevice->EndRendering();
 
 			/*if (g_pDevice->IsWindowed())
 			{
-			g_pDevice->UseWindow(1);
-			g_pDevice->SetView3D(vU*-1.0f, vR, vD, vP);
-			ProgramTick();
+				g_pDevice->UseWindow(1);
+				g_pDevice->SetView3D(vU*-1.0f, vR, vD, vP);
+				ProgramTick();
 
-			g_pDevice->UseWindow(2);
-			g_pDevice->SetView3D(vR*-1.0f, vU*-1, vD, vP);
-			ProgramTick();
+				g_pDevice->UseWindow(2);
+				g_pDevice->SetView3D(vR*-1.0f, vU*-1, vD, vP);
+				ProgramTick();
 
-			g_pDevice->UseWindow(3);
-			g_pDevice->SetView3D(vU, vR*-1, vD, vP);
-			ProgramTick();
+				g_pDevice->UseWindow(3);
+				g_pDevice->SetView3D(vU, vR*-1, vD, vP);
+				ProgramTick();
 			}*/
 		}
 	}
@@ -402,9 +382,9 @@ HRESULT ProgramStartup(const char *chAPI)
 
 	fs = ptRes.x / 20;
 
-	ZFXVIEWPORT rc = { lx, 10, ldx, ldy };
-	g_pDevice->InitStage(30, NULL, 0);
-	g_pDevice->InitStage(30, &rc, 1);
+	ZFXVIEWPORT rc = { lx, 0, ldx, ldy };
+	g_pDevice->InitStage(60, NULL, 0);
+	g_pDevice->InitStage(60, &rc, 1);
 
 	if (strcmp(chAPI, "Direct3D") == 0)
 	{
@@ -479,45 +459,50 @@ HRESULT ProgramTick(void)
 
 	// set first viewport (whole window)
 	g_pDevice->SetMode(EMD_PERSPECTIVE, 0);
+	GLfloat f[16] = { 0.0 };
+	glGetFloatv(GL_MODELVIEW_MATRIX, f);
+	glGetFloatv(GL_PROJECTION_MATRIX, f);
 	g_pDevice->SetClearColor(0.7f, 0.7f, 1.0f);
 
 	// clear buffers and start scene
 	g_pDevice->BeginRendering(true, true, true);
 
-	/*mWorld.Translate(-2.0f, 1.0f, 13.0f);
+	mWorld.Translate(-1.0f, 1.0f, 3.0f);
 	g_pDevice->SetWorldTransform(&mWorld);
-	hr = g_pMarder->Render(true, false);*/
+	hr = g_pMarder->Render(true, false);
 
-	/*mWorld.Translate(-1.0f, -5.0f, 15.0f);
+	mWorld.Translate(-1.0f, -5.0f, 2.0f);
 	g_pDevice->SetWorldTransform(&mWorld);
-	hr = g_pLeopard2->Render(true, false);*/
+	hr = g_pLeopard2->Render(true, false);
 
-	/*mWorld.Translate(1.1f, -0.6f, 4.5f);
-	g_pDevice->SetWorldTransform(&mWorld);*/
+	mWorld.Translate(1.1f, -0.6f, 1.0f);
+	g_pDevice->SetWorldTransform(&mWorld);
 	hr = g_pG3->Render(true, false);
 
-	//g_pDevice->FadeScreen(0.0f, 0.0f, 0.0f, fA);
+	g_pDevice->FadeScreen(0.0f, 0.0f, 0.0f, fA);
 
-	//// render into second viewport
-	//g_pDevice->SetMode(EMD_PERSPECTIVE, 1);
-	//g_pDevice->SetClearColor(1.0f, 0.2f, 0.2f);
-	//g_pDevice->Clear(true, true, true);
+	// render into second viewport
+	g_pDevice->SetMode(EMD_PERSPECTIVE, 1);
+	glGetFloatv(GL_MODELVIEW_MATRIX, f);
+	glGetFloatv(GL_PROJECTION_MATRIX, f);
+	g_pDevice->SetClearColor(1.0f, 0.2f, 0.2f);
+	g_pDevice->Clear(true, true, true);
 
-	//mWorld.Translate(-2.0f, 1.0f, 13.0f);
-	//g_pDevice->SetWorldTransform(&mWorld);
-	//g_pMarder->Render(true, true);
+	mWorld.Translate(-2.0f, 1.0f, 3.0f);
+	g_pDevice->SetWorldTransform(&mWorld);
+	g_pMarder->Render(true, true);
 
-	//mWorld.Translate(-1.0f, -5.0f, 15.0f);
-	//g_pDevice->SetWorldTransform(&mWorld);
-	//g_pLeopard2->Render(true, true);
+	mWorld.Translate(-1.0f, -5.0f, 2.0f);
+	g_pDevice->SetWorldTransform(&mWorld);
+	g_pLeopard2->Render(true, true);
 
-	//mWorld.Translate(1.1f, -0.6f, 4.5f);
-	//g_pDevice->SetWorldTransform(&mWorld);
-	//g_pG3->Render(true, true);
+	mWorld.Translate(1.1f, -0.6f, 1.0f);
+	g_pDevice->SetWorldTransform(&mWorld);
+	g_pG3->Render(true, true);
 
-	//g_pDevice->FadeScreen(0.0f, 0.0f, 1.0f, 1.0f - fA);
+	g_pDevice->FadeScreen(0.0f, 0.0f, 0.0f, 1.0f - fA);
 
-	//g_pDevice->SetMode(EMD_PERSPECTIVE, 0);
+	g_pDevice->SetMode(EMD_PERSPECTIVE, 0);
 
 	/*if (g_pDevice->IsWindowed())
 		g_pDevice->DrawText(g_nFontID, 10, 10, 255, 255, 0, "ZFXEngine 2.0");

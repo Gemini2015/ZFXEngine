@@ -1389,8 +1389,8 @@ HRESULT ZFXOpenGLVCache::SetFVF(ZFXVERTEXID vid)
 		break;
 	case VID_UL:
 		glVertexPointer(3, GL_FLOAT, sizeof(LVERTEX), 0);
-		glColorPointer(4, GL_UNSIGNED_INT, sizeof(LVERTEX), (void*)(sizeof(float) * 3));
-		glClientActiveTexture(GL_TEXTURE0);
+		glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(LVERTEX), (void*)(sizeof(float) * 3));
+		/*glClientActiveTexture(GL_TEXTURE0);*/
 		glTexCoordPointer(2, GL_FLOAT, sizeof(LVERTEX), (void*)(sizeof(float) * 3 + sizeof(DWORD)));
 		break;
 	case VID_CA:
@@ -1400,16 +1400,16 @@ HRESULT ZFXOpenGLVCache::SetFVF(ZFXVERTEXID vid)
 		glTexCoordPointer(2, GL_FLOAT, sizeof(CVERTEX), (void*)(sizeof(float) * 6));
 		break;
 	case VID_3T:
-		glVertexPointer(3, GL_FLOAT, sizeof(VERTEX), 0);
-		glNormalPointer(GL_FLOAT, sizeof(VERTEX), (void*)(sizeof(float) * 3));
-		glClientActiveTexture(GL_TEXTURE0);
-		glTexCoordPointer(2, GL_FLOAT, sizeof(VERTEX), (void*)(sizeof(float) * 6));
+		glVertexPointer(3, GL_FLOAT, sizeof(VERTEX3T), 0);
+		glNormalPointer(GL_FLOAT, sizeof(VERTEX3T), (void*)(sizeof(float) * 3));
+		
+		glTexCoordPointer(2, GL_FLOAT, sizeof(VERTEX3T), (void*)(sizeof(float) * 6));
 		break;
 	case VID_TV:
-		glVertexPointer(3, GL_FLOAT, sizeof(VERTEX), 0);
-		glNormalPointer(GL_FLOAT, sizeof(VERTEX), (void*)(sizeof(float) * 3));
+		glVertexPointer(3, GL_FLOAT, sizeof(TVERTEX), 0);
+		glNormalPointer(GL_FLOAT, sizeof(TVERTEX), (void*)(sizeof(float) * 3));
 		glClientActiveTexture(GL_TEXTURE0);
-		glTexCoordPointer(2, GL_FLOAT, sizeof(VERTEX), (void*)(sizeof(float) * 6));
+		glTexCoordPointer(2, GL_FLOAT, sizeof(TVERTEX), (void*)(sizeof(float) * 6));
 		break;
 	default:
 		hr = E_INVALIDARG;

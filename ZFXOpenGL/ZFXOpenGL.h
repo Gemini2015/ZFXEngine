@@ -39,10 +39,13 @@ BOOL WINAPI DllEntryPoint(HINSTANCE hDll,
 }
 
 #else
-
 #define CHECK_ERROR {}
-
 #endif
+
+#define COLORDWORD(r,g,b,a) \
+	 ((DWORD)((((a)&0xff)<<24)|(((b)&0xff)<<16)|(((g)&0xff)<<8)|((r)&0xff)))
+#define FCOLOR2DWORD(r,g,b,a) \
+	COLORDWORD((DWORD)((r)*255.f),(DWORD)((g)*255.f),(DWORD)((b)*255.f),(DWORD)((a)*255.f))
 
 
 

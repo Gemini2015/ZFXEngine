@@ -1,5 +1,5 @@
+#include "ZFXOpenGL.h"
 #include "ZFXOpenGL_Skin.h"
-
 
 ZFXOpenGLSkinManager::ZFXOpenGLSkinManager()
 {

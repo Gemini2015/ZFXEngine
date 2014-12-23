@@ -74,8 +74,8 @@ void ZFXOpenGL::SetClippingPlanes(float fNear, float fFar)
 	X = -2 * m_fFar * m_fNear / (m_fFar - m_fNear);
 	m_mProjP[0]._33 = m_mProjP[1]._33 = Q;
 	m_mProjP[2]._33 = m_mProjP[3]._33 = Q;
-	m_mProjP[0]._34 = m_mProjP[1]._34 = X;
-	m_mProjP[2]._34 = m_mProjP[3]._34 = X;
+	m_mProjP[0]._43 = m_mProjP[1]._43 = X;
+	m_mProjP[2]._43 = m_mProjP[3]._43 = X;
 }
 
 HRESULT ZFXOpenGL::SetMode(ZFXENGINEMODE mode, int nStage)
@@ -966,10 +966,10 @@ HRESULT ZFXOpenGL::Init(HWND mainWnd, const HWND* childWnds, int nWndsNum, int n
 	m_dwWidth = rc.right - rc.left;
 	m_dwHeight = rc.bottom - rc.top;
 
-	/*glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHTING);
 
 	glShadeModel(GL_SMOOTH);
-
+	/*
 	glEnable(GL_CULL_FACE);
 
 	glFrontFace(GL_CCW);
@@ -1159,23 +1159,23 @@ HRESULT ZFXOpenGL::SetView3D(const ZFXVector &vcRight,
 	m_mView3D._33 = vcDir.z;
 	m_mView3D._43 = -(vcDir*vcPos);*/
 
-	m_mView3D._41 = m_mView3D._42 = m_mView3D._43 = 0.0f;
+	m_mView3D._14 = m_mView3D._24 = m_mView3D._34 = 0.0f;
 	m_mView3D._44 = 1.0f;
 
 	m_mView3D._11 = vcRight.x;
-	m_mView3D._12 = vcRight.y;
-	m_mView3D._13 = vcRight.z;
-	m_mView3D._14 = -(vcRight * vcPos);
+	m_mView3D._21 = vcRight.y;
+	m_mView3D._31 = vcRight.z;
+	m_mView3D._41 = -(vcRight * vcPos);
 
-	m_mView3D._21 = vcUp.x;
+	m_mView3D._12 = vcUp.x;
 	m_mView3D._22 = vcUp.y;
-	m_mView3D._23 = vcUp.z;
-	m_mView3D._24 = -(vcUp * vcPos);
+	m_mView3D._32 = vcUp.z;
+	m_mView3D._42 = -(vcUp * vcPos);
 
-	m_mView3D._31 = vcDir.x;
-	m_mView3D._32 = vcDir.y;
+	m_mView3D._13 = vcDir.x;
+	m_mView3D._23 = vcDir.y;
 	m_mView3D._33 = vcDir.z;
-	m_mView3D._34 = -(vcDir*vcPos);
+	m_mView3D._43 = -(vcDir*vcPos);
 
 	if (!m_bUseShaders)
 	{
@@ -1240,11 +1240,19 @@ void ZFXOpenGL::MakeGLMatrix(GLfloat gl_matrix[16], ZFXMatrix matrix)
 {
 	float *p = (float*)&matrix;
 	int x = 0;
-	for (int i = 0; i < 4; i++)
+	/*for (int i = 0; i < 4; i++)
 	{
 		for (int j = 0; j < 4; j++)
 		{
 			gl_matrix[x] = p[j * 4 + i];
+			x++;
+		}
+	}*/
+	for (int i = 0; i < 4; i++)
+	{
+		for (int j = 0; j < 4; j++)
+		{
+			gl_matrix[x] = p[x];
 			x++;
 		}
 	}
@@ -1384,8 +1392,8 @@ HRESULT ZFXOpenGL::CalcPerspProjMatrix(float fFov, float fAspect, int nStage)
 	m_mProjP[nStage]._11 = w;
 	m_mProjP[nStage]._22 = h;
 	m_mProjP[nStage]._33 = Q;
-	m_mProjP[nStage]._43 = -1.0f;
-	m_mProjP[nStage]._34 = -2 * m_fFar * m_fNear / (m_fFar - m_fNear);
+	m_mProjP[nStage]._43 = -2 * m_fFar * m_fNear / (m_fFar - m_fNear);
+	m_mProjP[nStage]._34 = -1.0f; 
 
 	return ZFX_OK;
 }

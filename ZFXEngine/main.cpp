@@ -44,7 +44,7 @@ ZFXModel *g_pG3 = NULL,
 *g_pLeopard2 = NULL,
 *g_pMarder = NULL;
 
-ZFXVector g_dir(0, 0, 1), g_pos(3, 0, 3);
+ZFXVector g_dir(0, 0, 1), g_pos(0, 0, 3);
 float eye[3] = { 0.0f, 0.0f, 1.0f };
 float distance = 3.0f;
 float xAngle = 0.0f;
@@ -184,7 +184,8 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance,
 
 	
 	g_dir.Normalize();
-	g_pDevice->SetView3D(vR, vU, g_dir, g_pos);
+	//g_pDevice->SetView3D(vR, vU, g_dir, g_pos);
+	g_pDevice->SetViewLookAt(g_pos, ZFXVector(0, 0, 1), vU);
 	GLfloat f[16] = { 0.0 };
 	glGetFloatv(GL_MODELVIEW_MATRIX, f);
 	glGetFloatv(GL_PROJECTION_MATRIX, f);
@@ -233,7 +234,21 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance,
 			//g_pDevice->SetView3D(vR, vU, g_dir, g_pos);
 			//g_pDevice->GetVertexManager()->Render(nID);
 			
-			g_pG3->Render(true, false);
+			ZFXMatrix mWorld;
+			mWorld.Identity();
+			/*mWorld.Identity();
+			mWorld.Translate(-2.0f, 1.0f, 13.0f);
+			g_pDevice->SetWorldTransform(&mWorld);
+			hr = g_pMarder->Render(true, false);
+
+			mWorld.Translate(-1.0f, -5.0f, 15.0f);
+			g_pDevice->SetWorldTransform(&mWorld);
+			hr = g_pLeopard2->Render(true, false);
+			*/
+			mWorld.Translate(0.5, 0.5, 0);
+			g_pDevice->SetWorldTransform(&mWorld);
+			hr = g_pG3->Render(true, false);
+			//g_pG3->Render(true, false);
 			//g_pLeopard2->Render(true, false);
 			//g_pMarder->Render(true, false);
 

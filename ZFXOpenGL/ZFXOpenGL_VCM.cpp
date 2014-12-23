@@ -203,7 +203,7 @@ HRESULT ZFXOpenGLVCacheManager::CreateStaticBuffer(ZFXVERTEXID VertexID,
 	m_pStaticBuffer[m_nStaticBufferNum].VertexBuffer = vertexbuffer;
 	
 	// Set FVF
-	ZFXOpenGLVCache::SetFVF(VertexID);
+	//ZFXOpenGLVCache::SetFVF(VertexID);
 
 	(*pnID) = m_nStaticBufferNum;
 	m_nStaticBufferNum++;
@@ -435,8 +435,9 @@ HRESULT ZFXOpenGLVCacheManager::Render(UINT nSBID)
 	CHECK_ERROR;
 
 	ZFXRENDERSTATE rs = m_pOpenGL->GetShadeMode();
-	ZFXOpenGLVCache::SetFVF(m_pStaticBuffer[nSBID].nVertexType);
+	
 	ZFXOpenGLVCache::SetClientStateEnable(m_pStaticBuffer[nSBID].nVertexType, true);
+	ZFXOpenGLVCache::SetFVF(m_pStaticBuffer[nSBID].nVertexType);
 
 	int nVertexNum = m_pStaticBuffer[nSBID].nVertexNum;
 	int nIndisNum = m_pStaticBuffer[nSBID].nIndisNum;

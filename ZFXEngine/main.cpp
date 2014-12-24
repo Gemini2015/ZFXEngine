@@ -435,7 +435,6 @@ HRESULT ProgramCleanup(void)
 HRESULT ProgramTick(void)
 {
 	HRESULT hr = ZFX_FAIL;
-	POINT   pt;
 	ZFXMatrix mWorld;
 	mWorld.Identity();
 

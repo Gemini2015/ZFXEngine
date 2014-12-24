@@ -1,5 +1,5 @@
 #include "ZFXOpenGL_VCM.h"
-
+#include "ZFXOpenGL.h"
 
 ZFXOpenGLVCacheManager::ZFXOpenGLVCacheManager(ZFXOpenGLSkinManager* pSkinMan,
 	ZFXOpenGL* pOpenGL, 
@@ -201,9 +201,6 @@ HRESULT ZFXOpenGLVCacheManager::CreateStaticBuffer(ZFXVERTEXID VertexID,
 	glBufferData(GL_ARRAY_BUFFER, size, pVerts, GL_STATIC_DRAW);
 	CHECK_ERROR;
 	m_pStaticBuffer[m_nStaticBufferNum].VertexBuffer = vertexbuffer;
-	
-	// Set FVF
-	//ZFXOpenGLVCache::SetFVF(VertexID);
 
 	(*pnID) = m_nStaticBufferNum;
 	m_nStaticBufferNum++;
@@ -291,27 +288,26 @@ HRESULT ZFXOpenGLVCacheManager::Render(UINT nSBID)
 {
 	HRESULT hr = ZFX_OK;
 
-	CHECK_ERROR;
-
-	m_dwActiveVCache = MAX_ID;
-
+	if (m_pStaticBuffer == NULL)
+	{
+		Log("Error Static Buffer NULL pointer");
+		return ZFX_FAIL;
+	}
 	if (nSBID >= MAX_ID)
 	{
 		Log("Error Invalid Static Buffer ID");
 		return ZFX_INVALIDPARAM;
 	}
 
+	m_dwActiveVCache = MAX_ID;
+
 	if (m_dwActiveStaticBuffer != nSBID)
 	{
 		if (m_pStaticBuffer[nSBID].bIndis)
 		{
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_pStaticBuffer[nSBID].IndisBuffer);
-			CHECK_ERROR;
 			glBindBuffer(GL_ARRAY_BUFFER, m_pStaticBuffer[nSBID].VertexBuffer);
-			CHECK_ERROR;
 			m_dwActiveStaticBuffer = nSBID;
-
-			CHECK_ERROR;
 		}
 	}
 	else if (m_dwActiveIndexBuffer != MAX_ID)
@@ -319,7 +315,6 @@ HRESULT ZFXOpenGLVCacheManager::Render(UINT nSBID)
 		if (m_pStaticBuffer[nSBID].bIndis)
 		{
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_pStaticBuffer[nSBID].IndisBuffer);
-			glEnableClientState(GL_ELEMENT_ARRAY_BUFFER);
 			CHECK_ERROR;
 		}
 		m_dwActiveIndexBuffer = MAX_ID;
@@ -327,97 +322,15 @@ HRESULT ZFXOpenGLVCacheManager::Render(UINT nSBID)
 
 	if (m_pOpenGL->GetActiveSkinID() != m_pStaticBuffer[nSBID].nSkinID)
 	{
-		GLuint texture = 0;
-		ZFXSKIN skin = m_pSkinMan->GetSkin(m_pStaticBuffer[nSBID].nSkinID);
-		ZFXMATERIAL *pMat = &m_pSkinMan->GetMaterial(skin.nMaterial);
-
-		if (m_pOpenGL->GetShadeMode() == RS_SHADE_SOLID)
-		{
-			if (!m_pOpenGL->IsUseShaders())
-			{
-				glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, pMat->cDiffuse.c);
-				glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, pMat->cAmbient.c);
-				glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, pMat->cSpecular.c);
-				glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, pMat->cEmissive.c);
-				glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, pMat->fPower);
-				CHECK_ERROR;
-			}
-			else
-			{
-				m_pOpenGL->SetShaderConstant(SHT_PIXEL, DAT_FLOAT, 1, 1, &pMat->cAmbient);
-				m_pOpenGL->SetShaderConstant(SHT_PIXEL, DAT_FLOAT, 2, 1, &pMat->cDiffuse);
-				m_pOpenGL->SetShaderConstant(SHT_PIXEL, DAT_FLOAT, 3, 1, &pMat->cEmissive);
-				m_pOpenGL->SetShaderConstant(SHT_PIXEL, DAT_FLOAT, 4, 1, &pMat->cSpecular);
-			}
-
-			if (m_pOpenGL->IsUseTextures())
-			{
-				for (int i = 0; i < 8; i++)
-				{
-					if (skin.nTexture[i] != ZFXOpenGLSkinManager::MAX_ID)
-					{
-						ZFXTEXTURE zfxtexture = m_pSkinMan->GetTexture(skin.nTexture[i]);
-						if (zfxtexture.pData == NULL)
-							continue;
-
-						GLuint texture = *(GLuint*)zfxtexture.pData;
-						glActiveTexture(GL_TEXTURE0 + i);
-						glEnable(GL_TEXTURE_2D);
-
-						glBindTexture(GL_TEXTURE_2D, texture);
-						CHECK_ERROR;
-						glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, m_pOpenGL->GetTextureOp(i));
-						CHECK_ERROR;
-					}
-					else break;
-				}
-			}
-			else
-			{
-				glBindTexture(GL_TEXTURE_2D, 0);
-				glActiveTexture(GL_TEXTURE0);
-				glDisable(GL_TEXTURE_2D);
-				CHECK_ERROR;
-			}
-		}
-		else // not solid 
-		{
-			ZFXCOLOR clrWire = m_pOpenGL->GetWireColor();
-			GLfloat clr[] = { 0.0f, 0.0f, 0.0f, 1.0f };
-			glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, clrWire.c);
-			//specular and emission default 0,0,0,1
-
-			glBindTexture(GL_TEXTURE_2D, 0);
-			glActiveTexture(GL_TEXTURE0);
-			glDisable(GL_TEXTURE_2D);
-			CHECK_ERROR;
-		}
-
-		if (skin.bAlpha)
-		{
-			glEnable(GL_ALPHA_TEST);
-			glAlphaFunc(GL_GEQUAL, 50 / 255.0);
-			glEnable(GL_BLEND);
-			glBlendFunc(GL_SRC_ALPHA, GL_DST_ALPHA);
-			CHECK_ERROR;
-		}
-		else
-		{
-			glDisable(GL_ALPHA_TEST);
-			glDisable(GL_BLEND);
-		}
-		m_pOpenGL->SetActiveSkinID(m_pStaticBuffer[nSBID].nSkinID);
+		hr = m_pOpenGL->ActiveSkin(m_pStaticBuffer[nSBID].nSkinID);
+		if (FAILED(hr))
+			return hr;
 	} // set device skin
 
 	if (!m_pOpenGL->IsUseShaders())
 	{
-		// Set FVF
-		/*glVertexPointer(3, GL_FLOAT, sizeof(VERTEX), 0);
-		glNormalPointer(GL_FLOAT, sizeof(VERTEX), (void*)(sizeof(float) * 3));
-		glClientActiveTexture(GL_TEXTURE0);
-		glEnable(GL_TEXTURE_2D);
-		glTexCoordPointer(2, GL_FLOAT, sizeof(VERTEX), (void*)(sizeof(float) * 6));
-		CHECK_ERROR;*/
+		// set FVF
+		ZFXOpenGLVCache::SetFVF(m_pStaticBuffer[nSBID].nVertexType);
 	}
 
 	if (m_pOpenGL->IsUseAdditiveBlending())
@@ -434,75 +347,24 @@ HRESULT ZFXOpenGLVCacheManager::Render(UINT nSBID)
 
 	CHECK_ERROR;
 
-	ZFXRENDERSTATE rs = m_pOpenGL->GetShadeMode();
-	
-	ZFXOpenGLVCache::SetClientStateEnable(m_pStaticBuffer[nSBID].nVertexType, true);
-	ZFXOpenGLVCache::SetFVF(m_pStaticBuffer[nSBID].nVertexType);
+	// Enable vertex array
+	hr = ZFXOpenGLVCache::SetClientStateEnable(m_pStaticBuffer[nSBID].nVertexType, true);
 
 	int nVertexNum = m_pStaticBuffer[nSBID].nVertexNum;
 	int nIndisNum = m_pStaticBuffer[nSBID].nIndisNum;
-	if (m_pStaticBuffer[nSBID].bIndis)
-	{
-		// index primitive
-		switch (rs)
-		{
-		case RS_SHADE_POINTS:     // render just vertices
-			glDrawArrays(GL_POINTS, 0, nVertexNum);
-			break;
-		case RS_SHADE_LINES:      // render two verts as one line
-			glDrawElements(GL_LINES, nIndisNum / 2, GL_UNSIGNED_SHORT, 0);
-			break;
-		case RS_SHADE_HULLWIRE:   // render poly hull as polyline
-			glDrawElements(GL_LINE_STRIP, nIndisNum, GL_UNSIGNED_SHORT, 0);
-			break;
-		case RS_SHADE_QUADS:
-			glDrawElements(GL_QUADS, nIndisNum , GL_UNSIGNED_SHORT, 0);
-			break;
-		case RS_SHADE_TRIWIRE:    // render triangulated wire
-		case RS_SHADE_SOLID:	   // render solid polygons
-		default:
-			// count 是索引点的数量，不是三角形的数量
-			glDrawElements(GL_TRIANGLES, nIndisNum, GL_UNSIGNED_SHORT, 0);	
-			break;
-		}
-	}
-	else
-	{
-		// non-index primitive
-		switch (rs)
-		{
-		case RS_SHADE_POINTS:     // render just vertices
-			glDrawArrays(GL_POINTS, 0, nVertexNum);
-			break;
-		case RS_SHADE_LINES:      // render two verts as one line
-			glDrawArrays(GL_LINES, 0, nVertexNum / 2);
-			break;
-		case RS_SHADE_HULLWIRE:   // render poly hull as polyline
-			glDrawArrays(GL_LINE_STRIP, 0, nVertexNum);
-			break;
-		case RS_SHADE_QUADS:
-			glDrawArrays(GL_QUADS, 0,nIndisNum );
-			break;
-		case RS_SHADE_TRIWIRE:    // render triangulated wire
-		case RS_SHADE_SOLID:	   // render solid polygons
-		default:
-			glDrawArrays(GL_TRIANGLES, 0, m_pStaticBuffer[nSBID].nTriangleNum);
-			break;
-		}
-	}
+	ZFXRENDERSTATE mode = m_pOpenGL->GetShadeMode();
+	
+	hr = DrawPrimitive(mode, nVertexNum, nIndisNum, m_pStaticBuffer[nSBID].bIndis);
 
-	ZFXOpenGLVCache::SetClientStateEnable(m_pStaticBuffer[nSBID].nVertexType, false);
+	hr = ZFXOpenGLVCache::SetClientStateEnable(m_pStaticBuffer[nSBID].nVertexType, false);
 	
 	CHECK_ERROR;
-	return ZFX_OK;
-
+	return hr;
 }
 
 HRESULT ZFXOpenGLVCacheManager::Render(UINT nSBID, UINT nIBID, UINT nSkin)
 {
 	HRESULT hr = ZFX_OK;
-
-	ZFXRENDERSTATE rs = m_pOpenGL->GetShadeMode();
 
 	m_dwActiveVCache = MAX_ID;
 	
@@ -515,96 +377,23 @@ HRESULT ZFXOpenGLVCacheManager::Render(UINT nSBID, UINT nIBID, UINT nSkin)
 	if (m_dwActiveStaticBuffer != nSBID)
 	{
 		glBindBuffer(GL_ARRAY_BUFFER, m_pStaticBuffer[nSBID].VertexBuffer);
+		m_dwActiveStaticBuffer = nSBID;
 	}
 	if (m_dwActiveIndexBuffer != nIBID)
 	{
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_pIndexBuffer[nIBID].IndisBuffer);
+		m_dwActiveIndexBuffer = nIBID;
 	}
 
 	if (m_pOpenGL->GetActiveSkinID() != nSkin)
 	{
-		GLuint texture = 0;
-		ZFXSKIN skin = m_pSkinMan->GetSkin(nSkin);
-		ZFXMATERIAL *pMat = &m_pSkinMan->GetMaterial(skin.nMaterial);
-
-		if (m_pOpenGL->GetShadeMode() == RS_SHADE_SOLID)
-		{
-			if (!m_pOpenGL->IsUseShaders())
-			{
-				glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, pMat->cDiffuse.c);
-				glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, pMat->cAmbient.c);
-				glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, pMat->cSpecular.c);
-				glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, pMat->cEmissive.c);
-				glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, pMat->fPower);
-
-			}
-			else
-			{
-				m_pOpenGL->SetShaderConstant(SHT_PIXEL, DAT_FLOAT, 1, 1, &pMat->cAmbient);
-				m_pOpenGL->SetShaderConstant(SHT_PIXEL, DAT_FLOAT, 2, 1, &pMat->cDiffuse);
-				m_pOpenGL->SetShaderConstant(SHT_PIXEL, DAT_FLOAT, 3, 1, &pMat->cEmissive);
-				m_pOpenGL->SetShaderConstant(SHT_PIXEL, DAT_FLOAT, 4, 1, &pMat->cSpecular);
-			}
-
-			if (m_pOpenGL->IsUseTextures())
-			{
-				for (int i = 0; i < 8; i++)
-				{
-					if (skin.nTexture[i] != ZFXOpenGLSkinManager::MAX_ID)
-					{
-						ZFXTEXTURE zfxtexture = m_pSkinMan->GetTexture(skin.nTexture[i]);
-						if (zfxtexture.pData == NULL)
-							continue;
-
-						GLuint texture = *(GLuint*)zfxtexture.pData;
-						glActiveTexture(GL_TEXTURE0 + i);
-						glEnable(GL_TEXTURE_2D);
-						glBindTexture(GL_TEXTURE_2D, texture);
-						glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_EXT);
-						glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_EXT, m_pOpenGL->GetTextureOp(i));
-
-					}
-					else break;
-				}
-			}
-			else
-			{
-				glBindTexture(GL_TEXTURE_2D, 0);
-				glActiveTexture(GL_TEXTURE0);
-				glDisable(GL_TEXTURE_2D);
-			}
-		}
-		else // not solid 
-		{
-			ZFXCOLOR clrWire = m_pOpenGL->GetWireColor();
-			GLfloat clr[] = { 0.0f, 0.0f, 0.0f, 1.0f };
-			glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, clrWire.c);
-			//specular and emission default 0,0,0,1
-
-			glBindTexture(GL_TEXTURE_2D, 0);
-			glActiveTexture(GL_TEXTURE0);
-			glDisable(GL_TEXTURE_2D);
-
-		}
-
-		if (skin.bAlpha)
-		{
-			glEnable(GL_ALPHA_TEST);
-			glAlphaFunc(GL_GEQUAL, 50 / 255.0);
-			glEnable(GL_BLEND);
-			glBlendFunc(GL_SRC_ALPHA, GL_DST_ALPHA);
-		}
-		else
-		{
-			glDisable(GL_ALPHA_TEST);
-			glDisable(GL_BLEND);
-		}
-		m_pOpenGL->SetActiveSkinID(nSkin);
+		m_pOpenGL->ActiveSkin(nSkin);
 	}// set skin
 
 	if (!m_pOpenGL->IsUseShaders())
 	{
 		// Set FVF
+		ZFXOpenGLVCache::SetFVF(m_pStaticBuffer[nSBID].nVertexType);
 	}
 
 	if (m_pOpenGL->IsUseAdditiveBlending())
@@ -621,34 +410,39 @@ HRESULT ZFXOpenGLVCacheManager::Render(UINT nSBID, UINT nIBID, UINT nSkin)
 
 	int nVertexNum = m_pStaticBuffer[nSBID].nVertexNum;
 	int nIndisNum = m_pStaticBuffer[nSBID].nIndisNum;
-	// index primitive
-	// 没有实现StartIndex
-	switch (rs)
-	{
-	case RS_SHADE_POINTS:     // render just vertices
-		glDrawArrays(GL_POINTS, 0, nVertexNum);
-		break;
-	case RS_SHADE_LINES:      // render two verts as one line
-		glDrawElements(GL_LINES, nIndisNum / 2, GL_UNSIGNED_SHORT, 0);
-		break;
-	case RS_SHADE_HULLWIRE:   // render poly hull as polyline
-		glDrawElements(GL_LINE_STRIP, nIndisNum, GL_UNSIGNED_SHORT, 0);
-		break;
-	case RS_SHADE_TRIWIRE:    // render triangulated wire
-	case RS_SHADE_SOLID:	   // render solid polygons
-	default:
-		glDrawElements(GL_TRIANGLES, nIndisNum / 3, GL_UNSIGNED_SHORT, 0);
-		break;
-	}
+	ZFXRENDERSTATE mode = m_pOpenGL->GetShadeMode();
+	//// index primitive
+	//// 没有实现StartIndex
+	//switch (rs)
+	//{
+	//case RS_SHADE_POINTS:     // render just vertices
+	//	glDrawArrays(GL_POINTS, 0, nVertexNum);
+	//	break;
+	//case RS_SHADE_LINES:      // render two verts as one line
+	//	glDrawElements(GL_LINES, nIndisNum / 2, GL_UNSIGNED_SHORT, 0);
+	//	break;
+	//case RS_SHADE_HULLWIRE:   // render poly hull as polyline
+	//	glDrawElements(GL_LINE_STRIP, nIndisNum, GL_UNSIGNED_SHORT, 0);
+	//	break;
+	//case RS_SHADE_TRIWIRE:    // render triangulated wire
+	//case RS_SHADE_SOLID:	   // render solid polygons
+	//default:
+	//	glDrawElements(GL_TRIANGLES, nIndisNum / 3, GL_UNSIGNED_SHORT, 0);
+	//	break;
+	//}
 
-	return ZFX_OK;
+	ZFXOpenGLVCache::SetClientStateEnable(m_pStaticBuffer[nSBID].nVertexType, true);
+
+	hr = DrawPrimitive(mode, nVertexNum, nIndisNum, true);
+
+	ZFXOpenGLVCache::SetClientStateEnable(m_pStaticBuffer[nSBID].nVertexType, false);
+
+	return hr;
 }
 
 HRESULT ZFXOpenGLVCacheManager::Render(UINT nSBID, UINT SkinID, UINT StartIndex, UINT NumVerts, UINT NumTrims)
 {
 	HRESULT hr = ZFX_OK;
-
-	ZFXRENDERSTATE rs = m_pOpenGL->GetShadeMode();
 
 	m_dwActiveVCache = MAX_ID;
 	if (nSBID >= m_nStaticBufferNum)
@@ -679,88 +473,13 @@ HRESULT ZFXOpenGLVCacheManager::Render(UINT nSBID, UINT SkinID, UINT StartIndex,
 
 	if (m_pOpenGL->GetActiveSkinID() != SkinID)
 	{
-		GLuint texture = 0;
-		ZFXSKIN skin = m_pSkinMan->GetSkin(SkinID);
-		ZFXMATERIAL *pMat = &m_pSkinMan->GetMaterial(skin.nMaterial);
-
-		if (m_pOpenGL->GetShadeMode() == RS_SHADE_SOLID)
-		{
-			if (!m_pOpenGL->IsUseShaders())
-			{
-				glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, pMat->cDiffuse.c);
-				glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, pMat->cAmbient.c);
-				glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, pMat->cSpecular.c);
-				glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, pMat->cEmissive.c);
-				glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, pMat->fPower);
-
-			}
-			else
-			{
-				m_pOpenGL->SetShaderConstant(SHT_PIXEL, DAT_FLOAT, 1, 1, &pMat->cAmbient);
-				m_pOpenGL->SetShaderConstant(SHT_PIXEL, DAT_FLOAT, 2, 1, &pMat->cDiffuse);
-				m_pOpenGL->SetShaderConstant(SHT_PIXEL, DAT_FLOAT, 3, 1, &pMat->cEmissive);
-				m_pOpenGL->SetShaderConstant(SHT_PIXEL, DAT_FLOAT, 4, 1, &pMat->cSpecular);
-			}
-
-			if (m_pOpenGL->IsUseTextures())
-			{
-				for (int i = 0; i < 8; i++)
-				{
-					if (skin.nTexture[i] != ZFXOpenGLSkinManager::MAX_ID)
-					{
-						ZFXTEXTURE zfxtexture = m_pSkinMan->GetTexture(skin.nTexture[i]);
-						if (zfxtexture.pData == NULL)
-							continue;
-
-						GLuint texture = *(GLuint*)zfxtexture.pData;
-						glActiveTexture(GL_TEXTURE0 + i);
-						glEnable(GL_TEXTURE_2D);
-						glBindTexture(GL_TEXTURE_2D, texture);
-						glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_EXT);
-						glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_EXT, m_pOpenGL->GetTextureOp(i));
-
-					}
-					else break;
-				}
-			}
-			else
-			{
-				glBindTexture(GL_TEXTURE_2D, 0);
-				glActiveTexture(GL_TEXTURE0);
-				glDisable(GL_TEXTURE_2D);
-			}
-		}
-		else // not solid 
-		{
-			ZFXCOLOR clrWire = m_pOpenGL->GetWireColor();
-			GLfloat clr[] = { 0.0f, 0.0f, 0.0f, 1.0f };
-			glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, clrWire.c);
-			//specular and emission default 0,0,0,1
-
-			glBindTexture(GL_TEXTURE_2D, 0);
-			glActiveTexture(GL_TEXTURE0);
-			glDisable(GL_TEXTURE_2D);
-
-		}
-
-		if (skin.bAlpha)
-		{
-			glEnable(GL_ALPHA_TEST);
-			glAlphaFunc(GL_GEQUAL, 50 / 255.0);
-			glEnable(GL_BLEND);
-			glBlendFunc(GL_SRC_ALPHA, GL_DST_ALPHA);
-		}
-		else
-		{
-			glDisable(GL_ALPHA_TEST);
-			glDisable(GL_BLEND);
-		}
-		m_pOpenGL->SetActiveSkinID(m_pStaticBuffer[nSBID].nSkinID);
+		m_pOpenGL->ActiveSkin(SkinID);
 	} // set device skin
 
 	if (!m_pOpenGL->IsUseShaders())
 	{
 		// Set FVF
+		ZFXOpenGLVCache::SetFVF(m_pStaticBuffer[nSBID].nVertexType);
 	}
 
 	if (m_pOpenGL->IsUseAdditiveBlending())
@@ -777,25 +496,31 @@ HRESULT ZFXOpenGLVCacheManager::Render(UINT nSBID, UINT SkinID, UINT StartIndex,
 
 	int nVertexNum = m_pStaticBuffer[nSBID].nVertexNum;
 	int nIndisNum = m_pStaticBuffer[nSBID].nIndisNum;
-	// index primitive
-	// 没有实现StartIndex
-	switch (rs)
-	{
-	case RS_SHADE_POINTS:     // render just vertices
-		glDrawArrays(GL_POINTS, 0, nVertexNum);
-		break;
-	case RS_SHADE_LINES:      // render two verts as one line
-		glDrawElements(GL_LINES, nIndisNum / 2, GL_UNSIGNED_SHORT, 0);
-		break;
-	case RS_SHADE_HULLWIRE:   // render poly hull as polyline
-		glDrawElements(GL_LINE_STRIP, nIndisNum, GL_UNSIGNED_SHORT, 0);
-		break;
-	case RS_SHADE_TRIWIRE:    // render triangulated wire
-	case RS_SHADE_SOLID:	   // render solid polygons
-	default:
-		glDrawElements(GL_TRIANGLES, nIndisNum / 3, GL_UNSIGNED_SHORT, 0);
-		break;
-	}
+	ZFXRENDERSTATE mode = m_pOpenGL->GetShadeMode();
+	//// index primitive
+	//// 没有实现StartIndex
+	//switch (rs)
+	//{
+	//case RS_SHADE_POINTS:     // render just vertices
+	//	glDrawArrays(GL_POINTS, 0, nVertexNum);
+	//	break;
+	//case RS_SHADE_LINES:      // render two verts as one line
+	//	glDrawElements(GL_LINES, nIndisNum / 2, GL_UNSIGNED_SHORT, 0);
+	//	break;
+	//case RS_SHADE_HULLWIRE:   // render poly hull as polyline
+	//	glDrawElements(GL_LINE_STRIP, nIndisNum, GL_UNSIGNED_SHORT, 0);
+	//	break;
+	//case RS_SHADE_TRIWIRE:    // render triangulated wire
+	//case RS_SHADE_SOLID:	   // render solid polygons
+	//default:
+	//	glDrawElements(GL_TRIANGLES, nIndisNum / 3, GL_UNSIGNED_SHORT, 0);
+	//	break;
+	//}
+	ZFXOpenGLVCache::SetClientStateEnable(m_pStaticBuffer[nSBID].nVertexType, true);
+
+	hr = DrawPrimitive(mode, nVertexNum, nIndisNum, true);
+
+	ZFXOpenGLVCache::SetClientStateEnable(m_pStaticBuffer[nSBID].nVertexType, false);
 
 	return ZFX_OK;
 }
@@ -808,8 +533,6 @@ HRESULT ZFXOpenGLVCacheManager::RenderNaked(UINT nVerts, const void *pVerts, boo
 	
 	glClientActiveTexture(GL_TEXTURE0);
 	glDisable(GL_TEXTURE_2D);
-	
-	// Set FVF
 
 	GLuint vertexbuffer;
 	glGenBuffers(1, &vertexbuffer);
@@ -817,8 +540,11 @@ HRESULT ZFXOpenGLVCacheManager::RenderNaked(UINT nVerts, const void *pVerts, boo
 	GLsizeiptr size = nVerts * sizeof(PVERTEX);
 	glBufferData(GL_ARRAY_BUFFER, size, pVerts, GL_STATIC_DRAW);
 	glVertexPointer(3, GL_FLOAT, sizeof(PVERTEX), 0);
+	glEnableClientState(GL_VERTEX_ARRAY);
 
-	glDrawArrays(GL_TRIANGLES, 0, nVerts / 3);
+	glDrawArrays(GL_TRIANGLES, 0, nVerts);
+
+	glDisableClientState(GL_VERTEX_ARRAY);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glDeleteBuffers(1, &vertexbuffer);
@@ -886,9 +612,14 @@ HRESULT ZFXOpenGLVCacheManager::RenderPoints(ZFXVERTEXID VertexID, UINT nVerts, 
 	else
 	{
 		// Set FVF
+		ZFXOpenGLVCache::SetFVF(VertexID);
 	}
 
+	ZFXOpenGLVCache::SetClientStateEnable(VertexID, true);
+
 	glDrawArrays(GL_POINTS, 0, nVerts);
+
+	ZFXOpenGLVCache::SetClientStateEnable(VertexID, false);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glDeleteBuffers(1, &vertexbuffer);
@@ -959,16 +690,21 @@ HRESULT ZFXOpenGLVCacheManager::RenderLines(ZFXVERTEXID VertexID, UINT nVerts, c
 	else
 	{
 		// Set FVF
+		ZFXOpenGLVCache::SetFVF(VertexID);
 	}
+
+	ZFXOpenGLVCache::SetClientStateEnable(VertexID, true);
 
 	if (!bStrip)
 	{
-		glDrawArrays(GL_LINES, 0, nVerts / 2);
+		glDrawArrays(GL_LINES, 0, nVerts);
 	}
 	else
 	{
 		glDrawArrays(GL_LINE_STRIP, 0, nVerts);
 	}
+
+	ZFXOpenGLVCache::SetClientStateEnable(VertexID, false);
 
 	glEnable(GL_LIGHTING);
 	return ZFX_OK;
@@ -992,10 +728,10 @@ HRESULT ZFXOpenGLVCacheManager::RenderLine(const float *fStart, const float *fEn
 	pVertex[1].y = fEnd[1];
 	pVertex[1].z = fEnd[2];
 
-	BYTE r = (pClr->fR * 255);
-	BYTE g = (pClr->fG * 255);
-	BYTE b = pClr->fB * 255;
-	BYTE a = pClr->fA * 255;
+	BYTE r = (BYTE)(pClr->fR * 255);
+	BYTE g = (BYTE)(pClr->fG * 255);
+	BYTE b = (BYTE)pClr->fB * 255;
+	BYTE a = (BYTE)pClr->fA * 255;
 	pVertex[0].Color = pVertex[1].Color = COLORDWORD(r, g, b, a);
 
 	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, pClr->c);
@@ -1011,11 +747,16 @@ HRESULT ZFXOpenGLVCacheManager::RenderLine(const float *fStart, const float *fEn
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
 	glBufferData(GL_ARRAY_BUFFER, 2 * sizeof(LVERTEX), pVertex, GL_STATIC_DRAW);
 
-	
 	glVertexPointer(3, GL_FLOAT, sizeof(LVERTEX), 0);
 	glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(LVERTEX), (void*)(3 * sizeof(float)));
+
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_COLOR_ARRAY);
 	
-	glDrawArrays(GL_LINES, 0, 1);
+	glDrawArrays(GL_LINES, 0, 2);
+
+	glDisableClientState(GL_VERTEX_ARRAY);
+	glDisableClientState(GL_COLOR_ARRAY);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glDeleteBuffers(1, &vertexbuffer);
@@ -1114,6 +855,68 @@ void ZFXOpenGLVCacheManager::Log(const char* fmt, ...)
 	GetLogger().Print(ch);
 }
 
+HRESULT ZFXOpenGLVCacheManager::DrawPrimitive(ZFXRENDERSTATE mode, int nVertexNum, int nIndisNum, bool bIndis)
+{
+	if (nVertexNum == 0 && nIndisNum == 0)
+	{
+		Log("Error DrawPrimitive nVertexNum and nIndisNum equal 0");
+		return ZFX_INVALIDPARAM;
+	}
+
+	HRESULT hr = ZFX_OK;
+	if (bIndis)
+	{
+		// index primitive
+		switch (mode)
+		{
+		case RS_SHADE_POINTS:     // render just vertices
+			glDrawArrays(GL_POINTS, 0, nVertexNum);
+			break;
+		case RS_SHADE_LINES:      // render two verts as one line
+			glDrawElements(GL_LINES, nIndisNum, GL_UNSIGNED_SHORT, 0);
+			break;
+		case RS_SHADE_HULLWIRE:   // render poly hull as polyline
+			glDrawElements(GL_LINE_STRIP, nIndisNum, GL_UNSIGNED_SHORT, 0);
+			break;
+		case RS_SHADE_QUADS:
+			glDrawElements(GL_QUADS, nIndisNum, GL_UNSIGNED_SHORT, 0);
+			break;
+		case RS_SHADE_TRIWIRE:    // render triangulated wire
+		case RS_SHADE_SOLID:	   // render solid polygons
+		default:
+			// count 是索引点的数量，不是三角形的数量
+			glDrawElements(GL_TRIANGLES, nIndisNum, GL_UNSIGNED_SHORT, 0);
+			break;
+		}
+	}
+	else
+	{
+		// non-index primitive
+		switch (mode)
+		{
+		case RS_SHADE_POINTS:     // render just vertices
+			glDrawArrays(GL_POINTS, 0, nVertexNum);
+			break;
+		case RS_SHADE_LINES:      // render two verts as one line
+			glDrawArrays(GL_LINES, 0, nVertexNum);
+			break;
+		case RS_SHADE_HULLWIRE:   // render poly hull as polyline
+			glDrawArrays(GL_LINE_STRIP, 0, nVertexNum);
+			break;
+		case RS_SHADE_QUADS:
+			glDrawArrays(GL_QUADS, 0, nIndisNum);
+			break;
+		case RS_SHADE_TRIWIRE:    // render triangulated wire
+		case RS_SHADE_SOLID:	   // render solid polygons
+		default:
+			glDrawArrays(GL_TRIANGLES, 0, nVertexNum);
+			break;
+		}
+	}
+	CHECK_ERROR_RETURN(hr);
+	return hr;
+}
+
 
 /************************************************************************/
 /* 
@@ -1147,7 +950,7 @@ ZFXOpenGLVCache::ZFXOpenGLVCache(UINT nVertsMax, UINT nIndisMax, UINT nStride, Z
 	GLsizeiptr size = nVertsMax * nStride;
 	glBufferData(GL_ARRAY_BUFFER, size, NULL, GL_DYNAMIC_DRAW);
 	
-	SetFVF(vid);
+	//SetFVF(vid);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IndexBuffer);
 	size = nIndisMax * sizeof(WORD);
@@ -1182,82 +985,7 @@ HRESULT ZFXOpenGLVCache::Flush(bool bUseShaders)
 
 	if (m_pVCMan->GetOpenGL()->GetActiveSkinID() != m_SkinID)
 	{
-		GLuint texture = 0;
-		ZFXMATERIAL *pMat = &m_pSkinMan->GetMaterial(m_Skin.nMaterial);
-
-		if (m_pVCMan->GetOpenGL()->GetShadeMode() == RS_SHADE_SOLID)
-		{
-			if (!m_pVCMan->GetOpenGL()->IsUseShaders())
-			{
-				glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, pMat->cDiffuse.c);
-				glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, pMat->cAmbient.c);
-				glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, pMat->cSpecular.c);
-				glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, pMat->cEmissive.c);
-				glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, pMat->fPower);
-
-			}
-			else
-			{
-				m_pVCMan->GetOpenGL()->SetShaderConstant(SHT_PIXEL, DAT_FLOAT, 1, 1, &pMat->cAmbient);
-				m_pVCMan->GetOpenGL()->SetShaderConstant(SHT_PIXEL, DAT_FLOAT, 2, 1, &pMat->cDiffuse);
-				m_pVCMan->GetOpenGL()->SetShaderConstant(SHT_PIXEL, DAT_FLOAT, 3, 1, &pMat->cEmissive);
-				m_pVCMan->GetOpenGL()->SetShaderConstant(SHT_PIXEL, DAT_FLOAT, 4, 1, &pMat->cSpecular);
-			}
-
-			if (m_pVCMan->GetOpenGL()->IsUseTextures())
-			{
-				for (int i = 0; i < 8; i++)
-				{
-					if (m_Skin.nTexture[i] != ZFXOpenGLSkinManager::MAX_ID)
-					{
-						ZFXTEXTURE zfxtexture = m_pSkinMan->GetTexture(m_Skin.nTexture[i]);
-						if (zfxtexture.pData == NULL)
-							continue;
-
-						GLuint texture = *(GLuint*)zfxtexture.pData;
-						glActiveTexture(GL_TEXTURE0 + i);
-						glEnable(GL_TEXTURE_2D);
-						glBindTexture(GL_TEXTURE_2D, texture);
-						glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_EXT);
-						glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_EXT, m_pVCMan->GetOpenGL()->GetTextureOp(i));
-
-					}
-					else break;
-				}
-			}
-			else
-			{
-				glBindTexture(GL_TEXTURE_2D, 0);
-				glActiveTexture(GL_TEXTURE0);
-				glDisable(GL_TEXTURE_2D);
-			}
-		}
-		else // not solid 
-		{
-			ZFXCOLOR clrWire = m_pVCMan->GetOpenGL()->GetWireColor();
-			GLfloat clr[] = { 0.0f, 0.0f, 0.0f, 1.0f };
-			glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, clrWire.c);
-			//specular and emission default 0,0,0,1
-
-			glBindTexture(GL_TEXTURE_2D, 0);
-			glActiveTexture(GL_TEXTURE0);
-			glDisable(GL_TEXTURE_2D);
-
-		}
-
-		if (m_Skin.bAlpha)
-		{
-			glEnable(GL_ALPHA_TEST);
-			glAlphaFunc(GL_GEQUAL, 50 / 255.0);
-			glEnable(GL_BLEND);
-			glBlendFunc(GL_SRC_ALPHA, GL_DST_ALPHA);
-		}
-		else
-		{
-			glDisable(GL_ALPHA_TEST);
-			glDisable(GL_BLEND);
-		}
-		m_pVCMan->GetOpenGL()->SetActiveSkinID(m_SkinID);
+		m_pVCMan->GetOpenGL()->ActiveSkin(m_SkinID);
 	} // set device skin
 
 
@@ -1273,25 +1001,13 @@ HRESULT ZFXOpenGLVCache::Flush(bool bUseShaders)
 		glBlendFunc(GL_ZERO, GL_ONE);
 	}
 
-	ZFXRENDERSTATE rs = m_pVCMan->GetOpenGL()->GetShadeMode();
+	SetClientStateEnable(m_vid, true);
 
-	switch (rs)
-	{
-	case RS_SHADE_POINTS:     // render just vertices
-		glDrawArrays(GL_POINTS, 0, m_nVertexNum);
-		break;
-	case RS_SHADE_LINES:      // render two verts as one line
-		glDrawElements(GL_LINES, m_nIndisNum / 2, GL_UNSIGNED_SHORT, 0);
-		break;
-	case RS_SHADE_HULLWIRE:   // render poly hull as polyline
-		glDrawElements(GL_LINE_STRIP, m_nIndisNum, GL_UNSIGNED_SHORT, 0);
-		break;
-	case RS_SHADE_TRIWIRE:    // render triangulated wire
-	case RS_SHADE_SOLID:	   // render solid polygons
-	default:
-		glDrawElements(GL_TRIANGLES, m_nIndisNum / 3, GL_UNSIGNED_SHORT, 0);
-		break;
-	}
+	ZFXRENDERSTATE mode = m_pVCMan->GetOpenGL()->GetShadeMode();
+	m_pVCMan->DrawPrimitive(mode, m_nVertexNum, m_nIndisNum, true);
+
+	SetClientStateEnable(m_vid, false);
+	
 	m_nIndisNum = 0;
 	m_nVertexNum = 0;
 	return ZFX_OK;

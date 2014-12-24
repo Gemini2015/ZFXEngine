@@ -111,6 +111,7 @@ public:
 		return m_pOpenGL;
 	}
 
+	HRESULT DrawPrimitive(ZFXRENDERSTATE mode, int nVertexNum, int nIndisNum, bool bIndis);
 
 private:
 	ZFXOpenGLSkinManager* m_pSkinMan;

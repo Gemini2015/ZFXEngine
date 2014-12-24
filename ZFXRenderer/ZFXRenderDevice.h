@@ -94,6 +94,8 @@ public:
 		UCHAR *NumKeys) = 0;
 
 	virtual ZFXTEXTURE GetTexture(UINT nTexID) = 0;
+
+	virtual HRESULT ActiveSkin(UINT nSkinID) = 0;
 };
 /*----------------------------------------------------------------*/
 

@@ -1,7 +1,7 @@
 #include "ZFXOpenGL.h"
 #include "ZFXOpenGL_Skin.h"
 
-ZFXOpenGLSkinManager::ZFXOpenGLSkinManager()
+ZFXOpenGLSkinManager::ZFXOpenGLSkinManager(ZFXOpenGL *pOpenGL)
 {
 	m_nNumMaterials = 0;
 	m_nNumTextures = 0;
@@ -9,6 +9,9 @@ ZFXOpenGLSkinManager::ZFXOpenGLSkinManager()
 	m_pMaterials = NULL;
 	m_pTextures = NULL;
 	m_pSkins = NULL;
+
+	m_pOpenGL = pOpenGL;
+
 	Log("Skin Manager Create");
 }
 
@@ -848,4 +851,91 @@ ZFXTEXTURE ZFXOpenGLSkinManager::GetTexture(UINT nTexID)
 		ZFXTEXTURE EmptyTexture;
 		return EmptyTexture;
 	}
+}
+
+HRESULT ZFXOpenGLSkinManager::ActiveSkin(UINT nSkinID)
+{
+	GLuint texture = 0;
+	ZFXSKIN skin = GetSkin(nSkinID);
+	ZFXMATERIAL *pMat = &GetMaterial(skin.nMaterial);
+	HRESULT hr = ZFX_OK;
+
+	if (m_pOpenGL->GetShadeMode() == RS_SHADE_SOLID)
+	{
+		if (!m_pOpenGL->IsUseShaders())
+		{
+			glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, pMat->cDiffuse.c);
+			glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, pMat->cAmbient.c);
+			glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, pMat->cSpecular.c);
+			glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, pMat->cEmissive.c);
+			glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, pMat->fPower);
+			CHECK_ERROR;
+		}
+		else
+		{
+			m_pOpenGL->SetShaderConstant(SHT_PIXEL, DAT_FLOAT, 1, 1, &pMat->cAmbient);
+			m_pOpenGL->SetShaderConstant(SHT_PIXEL, DAT_FLOAT, 2, 1, &pMat->cDiffuse);
+			m_pOpenGL->SetShaderConstant(SHT_PIXEL, DAT_FLOAT, 3, 1, &pMat->cEmissive);
+			m_pOpenGL->SetShaderConstant(SHT_PIXEL, DAT_FLOAT, 4, 1, &pMat->cSpecular);
+		}
+
+		if (m_pOpenGL->IsUseTextures())
+		{
+			for (int i = 0; i < 8; i++)
+			{
+				if (skin.nTexture[i] != ZFXOpenGLSkinManager::MAX_ID)
+				{
+					ZFXTEXTURE zfxtexture = GetTexture(skin.nTexture[i]);
+					if (zfxtexture.pData == NULL)
+						continue;
+
+					GLuint texture = *(GLuint*)zfxtexture.pData;
+					glActiveTexture(GL_TEXTURE0 + i);
+					glEnable(GL_TEXTURE_2D);
+
+					glBindTexture(GL_TEXTURE_2D, texture);
+					CHECK_ERROR;
+					glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, m_pOpenGL->GetTextureOp(i));
+					CHECK_ERROR;
+				}
+				else break;
+			}
+		}
+		else
+		{
+			glBindTexture(GL_TEXTURE_2D, 0);
+			glActiveTexture(GL_TEXTURE0);
+			glDisable(GL_TEXTURE_2D);
+			CHECK_ERROR;
+		}
+	}
+	else // not solid 
+	{
+		ZFXCOLOR clrWire = m_pOpenGL->GetWireColor();
+		GLfloat clr[] = { 0.0f, 0.0f, 0.0f, 1.0f };
+		glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, clrWire.c);
+		//specular and emission default 0,0,0,1
+
+		glBindTexture(GL_TEXTURE_2D, 0);
+		glActiveTexture(GL_TEXTURE0);
+		glDisable(GL_TEXTURE_2D);
+		CHECK_ERROR;
+	}
+
+	if (skin.bAlpha)
+	{
+		glEnable(GL_ALPHA_TEST);
+		glAlphaFunc(GL_GEQUAL, 50 / 255.0);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_DST_ALPHA);
+		CHECK_ERROR;
+	}
+	else
+	{
+		glDisable(GL_ALPHA_TEST);
+		glDisable(GL_BLEND);
+	}
+	
+	CHECK_ERROR_RETURN(hr);
+	return hr;
 }

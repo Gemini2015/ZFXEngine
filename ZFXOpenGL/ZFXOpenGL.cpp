@@ -97,16 +97,15 @@ HRESULT ZFXOpenGL::SetMode(ZFXENGINEMODE mode, int nStage)
 	glViewport(x, y, width, height);
 	glScissor(x, y, width, height);
 
-	GLfloat mat[16];
-
 	if (mode == EMD_TWOD)
 	{
 		if (!m_bUseShaders)
 		{
+			float *mat = NULL;
 			glMatrixMode(GL_PROJECTION);
-			MakeGLMatrix(mat, m_mProj2D);
+			mat = (float*)&m_mProj2D;
 			glLoadMatrixf(mat);
-			MakeGLMatrix(mat, m_mView2D * m_mWorld2D);
+			mat = (float*)&(m_mView2D * m_mWorld2D);
 			glMatrixMode(GL_MODELVIEW);
 			glLoadMatrixf(mat);
 		}
@@ -116,19 +115,19 @@ HRESULT ZFXOpenGL::SetMode(ZFXENGINEMODE mode, int nStage)
 		if (!m_bUseShaders)
 		{
 			glMatrixMode(GL_MODELVIEW);
-			MakeGLMatrix(mat, m_mView3D * m_mWorld3D);
+			float* mat = (float*)&(m_mView3D * m_mWorld3D);
 			glLoadMatrixf(mat);
 
 			if (m_Mode == EMD_PERSPECTIVE)
 			{
 				glMatrixMode(GL_PROJECTION);
-				MakeGLMatrix(mat, m_mProjP[nStage]);
+				mat = (float*)&m_mProjP[nStage];
 				glLoadMatrixf(mat);
 			}
 			else
 			{
 				glMatrixMode(GL_PROJECTION);
-				MakeGLMatrix(mat, m_mProjO[nStage]);
+				mat = (float*)&m_mProjO[nStage];
 				glLoadMatrixf(mat);
 			}
 		}
@@ -382,8 +381,7 @@ void ZFXOpenGL::SetWorldTransform(const ZFXMatrix* m)
 	{
 		m_mWorld3D = *m;
 	}
-	GLfloat mat[16];
-	MakeGLMatrix(mat, m_mView3D * m_mWorld3D);
+	float *mat = (float*)&(m_mView3D * m_mWorld3D);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadMatrixf(mat);
 
@@ -394,7 +392,6 @@ void ZFXOpenGL::SetWorldTransform(const ZFXMatrix* m)
 		// 将mvp 传给 shader
 		throw std::logic_error("MVP shader Update");
 	}
-	//throw std::logic_error("The method or operation is not implemented.");
 }
 
 void ZFXOpenGL::SetBackfaceCulling(ZFXRENDERSTATE rs)
@@ -671,8 +668,7 @@ HRESULT ZFXOpenGL::SetLight(const ZFXLIGHT* pLight, UCHAR nStage)
 {
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
-	GLfloat mat[16];
-	MakeGLMatrix(mat, m_mView3D * m_mWorld3D);
+	float *mat = (float*)&(m_mView3D * m_mWorld3D);
 	glLoadMatrixf(mat);
 
 	GLenum gl_index = GL_LIGHT0 + nStage;
@@ -686,7 +682,7 @@ HRESULT ZFXOpenGL::SetLight(const ZFXLIGHT* pLight, UCHAR nStage)
 	switch (pLight->Type)
 	{
 	case LGT_SPOT:
-		glLightf(gl_index, GL_SPOT_CUTOFF, RADIAN2DEGREE(pLight->fPhi));
+		glLightf(gl_index, GL_SPOT_CUTOFF, (float)RADIAN2DEGREE(pLight->fPhi));
 		glLightf(gl_index, GL_SPOT_EXPONENT, 1.0f);
 		break;
 	default:
@@ -1095,7 +1091,7 @@ HRESULT ZFXOpenGL::Go(void)
 	m_bRunning = true;
 
 	m_ShadeMode = RS_SHADE_SOLID;
-	m_pSkinMan = new ZFXOpenGLSkinManager();
+	m_pSkinMan = new ZFXOpenGLSkinManager(this);
 
 	m_pVertexMan = new ZFXOpenGLVCacheManager((ZFXOpenGLSkinManager*)m_pSkinMan, this, 8192, 8192);
 
@@ -1153,7 +1149,7 @@ void ZFXOpenGL::Release(void)
 
 	if (m_bWindowed)
 	{
-		for (int i = 0; i < m_nNumhWnd; i++)
+		for (UINT i = 0; i < m_nNumhWnd; i++)
 		{
 			if (m_hWnd[i] && m_hDC[i])
 				ReleaseDC(m_hWnd[i], m_hDC[i]);
@@ -1192,10 +1188,6 @@ void ZFXOpenGL::UseShaders(bool b)
 	if (!m_bUseShaders)
 	{
 		glUseProgram(0);
-	}
-	else
-	{
-		
 	}
 
 	CHECK_ERROR;
@@ -1242,24 +1234,6 @@ HRESULT ZFXOpenGL::SetView3D(const ZFXVector &vcRight,
 {
 	if (!m_bRunning) return E_FAIL;
 
-	/*m_mView3D._14 = m_mView3D._24 = m_mView3D._34 = 0.0f;
-	m_mView3D._44 = 1.0f;
-
-	m_mView3D._11 = vcRight.x;
-	m_mView3D._21 = vcRight.y;
-	m_mView3D._31 = vcRight.z;
-	m_mView3D._41 = -(vcRight * vcPos);
-
-	m_mView3D._12 = vcUp.x;
-	m_mView3D._22 = vcUp.y;
-	m_mView3D._31 = vcUp.z;
-	m_mView3D._42 = -(vcUp * vcPos);
-
-	m_mView3D._13 = vcDir.x;
-	m_mView3D._23 = vcDir.y;
-	m_mView3D._33 = vcDir.z;
-	m_mView3D._43 = -(vcDir*vcPos);*/
-
 	m_mView3D._14 = m_mView3D._24 = m_mView3D._34 = 0.0f;
 	m_mView3D._44 = 1.0f;
 
@@ -1280,8 +1254,7 @@ HRESULT ZFXOpenGL::SetView3D(const ZFXVector &vcRight,
 
 	if (!m_bUseShaders)
 	{
-		GLfloat mat[16];
-		MakeGLMatrix(mat, m_mView3D * m_mWorld3D);
+		float *mat = (float*)&(m_mView3D * m_mWorld3D);
 		glMatrixMode(GL_MODELVIEW);
 		glLoadMatrixf(mat);
 	}
@@ -1337,28 +1310,6 @@ HRESULT ZFXOpenGL::SetViewLookAt(const ZFXVector& vcPos, const ZFXVector& vcPoin
 	return SetView3D(vcRight, vcUp, vcDir, vcPos);
 }
 
-void ZFXOpenGL::MakeGLMatrix(GLfloat gl_matrix[16], ZFXMatrix matrix)
-{
-	float *p = (float*)&matrix;
-	int x = 0;
-	/*for (int i = 0; i < 4; i++)
-	{
-		for (int j = 0; j < 4; j++)
-		{
-			gl_matrix[x] = p[j * 4 + i];
-			x++;
-		}
-	}*/
-	for (int i = 0; i < 4; i++)
-	{
-		for (int j = 0; j < 4; j++)
-		{
-			gl_matrix[x] = p[x];
-			x++;
-		}
-	}
-}
-
 void ZFXOpenGL::Prepare2D(void)
 {
 	m_mProj2D.Identity();
@@ -1366,9 +1317,9 @@ void ZFXOpenGL::Prepare2D(void)
 	m_mWorld2D.Identity();
 
 	// orthogonal projection matrix
-	float left = m_VP[m_nStage].X;
+	float left = (float)m_VP[m_nStage].X;
 	float right = left + m_VP[m_nStage].Width;
-	float bottom = m_VP[m_nStage].Y;
+	float bottom = (float)m_VP[m_nStage].Y;
 	float top = bottom + m_VP[m_nStage].Height;
 
 	left /= m_dwWidth;
@@ -1459,9 +1410,9 @@ void ZFXOpenGL::CalcWorldViewProjMatrix(void)
 
 HRESULT ZFXOpenGL::CalcPerspProjMatrix(int nStage)
 {
-	float left = m_VP[nStage].X;
+	float left = (float)m_VP[nStage].X;
 	float right = left + m_VP[nStage].Width;
-	float bottom = m_VP[nStage].Y;
+	float bottom = (float)m_VP[nStage].Y;
 	float top = bottom + m_VP[nStage].Height;
 
 	if (nStage < 0 || nStage >= 4)
@@ -1496,7 +1447,7 @@ HRESULT ZFXOpenGL::CalcPerspProjMatrix(float fFov, float fAspect, int nStage)
 	if (fabs(m_fFar - m_fNear) < 0.01f)
 		return ZFX_FAIL;
 
-	fFov = DEGREE2RADIAN(fFov);
+	fFov = (float)DEGREE2RADIAN(fFov);
 
 	float sinFOV2 = sinf(fFov / 2);
 
@@ -1521,9 +1472,9 @@ HRESULT ZFXOpenGL::CalcPerspProjMatrix(float fFov, float fAspect, int nStage)
 
 HRESULT ZFXOpenGL::CalcOrthoProjMatrix(int nStage)
 {
-	float left = m_VP[nStage].X;
+	float left = (float)m_VP[nStage].X;
 	float right = left + m_VP[nStage].Width;
-	float bottom = m_VP[nStage].Y;
+	float bottom = (float)m_VP[nStage].Y;
 	float top = bottom + m_VP[nStage].Height;
 
 	if (nStage < 0 || nStage >= 4)
@@ -1597,17 +1548,12 @@ void ZFXOpenGL::Log(char *chString, ...)
 	va_start(args, chString);
 	vsprintf_s(ch, chString, args);
 	va_end(args);
-
-	/*fprintf(m_pLog, "[%s]: ", "OpenGL");
-	fprintf(m_pLog, ch);
-	fprintf(m_pLog, "\n");*/
 	
 	GetLogger().Print(ch);
 } // Log
 
 std::string ZFXOpenGL::GetName()
 {
-	//static std::string APIName("OpenGL Device");
 	return m_name;
 }
 
@@ -1620,7 +1566,7 @@ bool ZFXOpenGL::ActivateGLTextureUnit(UCHAR n)
 	glGetIntegerv(GL_MAX_TEXTURE_UNITS, &max_unit);
 	if (GLEW_VERSION_1_3 && n < max_unit)
 	{
-		glActiveTexture(GL_TEXTURE0 + max_unit);
+		glActiveTexture(GL_TEXTURE0 + n);
 		m_nActivateTextureUnit = n;
 		CHECK_ERROR;
 		return true;
@@ -1639,6 +1585,21 @@ GLenum ZFXOpenGL::GetTextureOp(int n)
 		return GL_NONE;
 	}
 	else return m_TextureOp[n];
+}
+
+HRESULT ZFXOpenGL::ActiveSkin(UINT nSkinID)
+{
+	if (m_pSkinMan == NULL)
+		return ZFX_FAIL;
+	HRESULT hr = ZFX_OK;
+	hr = m_pSkinMan->ActiveSkin(nSkinID);
+	if (!FAILED(hr))
+	{
+		return hr;
+	}
+
+	m_nActiveSkin = nSkinID;
+	return hr;
 }
 
 

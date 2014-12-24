@@ -20,7 +20,7 @@ public:
 		MAX_ID = 65535,
 	};
 
-	ZFXOpenGLSkinManager();
+	ZFXOpenGLSkinManager(ZFXOpenGL *pOpenGL);
 	~ZFXOpenGLSkinManager();
 
 	virtual void Reset(void) override;
@@ -80,6 +80,8 @@ public:
 	virtual ZFXTEXTURE GetTexture(UINT nTexID) override;
 
 protected:
+	ZFXOpenGL* m_pOpenGL;
+
 	void Log(char *fmt, ...);
 
 	HRESULT CreateTexture(ZFXTEXTURE *pTexture, bool bAlpha);
@@ -87,7 +89,7 @@ protected:
 	HRESULT SetAlphaKey(GLuint texture, UCHAR R, UCHAR G, UCHAR B, UCHAR A);
 	HRESULT SetTransparency(GLuint texture, UCHAR alpha);
 
-	
+	HRESULT ActiveSkin(UINT nSkinID);
 
 };
 

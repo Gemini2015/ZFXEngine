@@ -72,6 +72,8 @@ public:
 
 	ZFXTEXTURE  GetTexture(UINT nTexID);
 
+	virtual HRESULT ActiveSkin(UINT nSkinID) override;
+
 protected:
 	LPDIRECT3DDEVICE9  m_pDevice;
 	FILE              *m_pLog;
@@ -85,6 +87,9 @@ protected:
 		UCHAR Alpha);
 	DWORD   MakeD3DColor(UCHAR R, UCHAR G, UCHAR B, UCHAR A);
 	void    Log(char *, ...);
+
+	
+
 };
 
 #endif

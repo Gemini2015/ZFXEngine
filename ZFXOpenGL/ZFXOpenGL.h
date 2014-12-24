@@ -38,8 +38,25 @@ BOOL WINAPI DllEntryPoint(HINSTANCE hDll,
 		 Log("OpenGL Error > File:%s Line:%d Error:%d",__FILE__, __LINE__, error);\
 }
 
+#define CHECK_ERROR_RETURN(hr) {\
+	GLenum error = glGetError();\
+	if(error != GL_NO_ERROR)\
+			{\
+		Log("OpenGL Error > File:%s Line:%d Error:%d",__FILE__, __LINE__, error);\
+		hr = ZFX_FAIL;\
+			}\
+}
+
 #else
+
 #define CHECK_ERROR {}
+
+#define CHECK_ERROR_RETURN(hr) {\
+	GLenum error = glGetError();\
+	if(error != GL_NO_ERROR)\
+		hr = ZFX_FAIL;\
+}
+
 #endif
 
 #define COLORDWORD(r,g,b,a) \
@@ -61,8 +78,6 @@ public:
 	~ZFXOpenGL();
 
 	std::string GetName();
-
-	void MakeGLMatrix(GLfloat gl_matrix[16], ZFXMatrix matrix);
 
 	ZFXSkinManager* GetSkinManager(void)
 	{
@@ -208,6 +223,8 @@ public:
 	}
 
 	GLenum GetTextureOp(int n);
+	
+	HRESULT ActiveSkin(UINT nSkinID);
 
 private:
 	HINSTANCE m_hDLL;
@@ -253,6 +270,8 @@ private:
 	bool InitPixelFormat(int nHWnd);
 
 	HRESULT Go(void);
+
+	
 
 	void Log(char *, ...);
 };

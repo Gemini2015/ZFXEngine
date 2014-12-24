@@ -661,7 +661,6 @@ HRESULT ZFXD3DVCManager::Render(UINT nID)
 				m_pSB[nID].nNumTris);
 		}
 	}
-
 	return hr;
 } // Render
 /*----------------------------------------------------------------*/

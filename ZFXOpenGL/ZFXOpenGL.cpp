@@ -855,6 +855,8 @@ void ZFXOpenGL::FadeScreen(float fR, float fG, float fB, float fA)
 		glFlush();
 
 	SetActiveSkinID(MAX_ID);
+	m_pVertexMan->InvalidateStates();
+	glBindVertexArray(0);
 	
 	LVERTEX v[4];
 	DWORD dwColor = FCOLOR2DWORD(fR, fG, fB, fA);
@@ -933,6 +935,7 @@ void ZFXOpenGL::FadeScreen(float fR, float fG, float fB, float fA)
 	glDrawArrays(GL_QUADS, 0, 4);
 
 	ZFXOpenGLVCache::SetClientStateEnable(VID_UL, false);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glDeleteBuffers(1, &vertexbuffer);
 
 	glFlush();

@@ -16,6 +16,7 @@ typedef struct ZFXSTATICBUFFER_TYPE
 	ZFXVERTEXID nVertexType;
 	GLuint VertexBuffer;
 	GLuint IndisBuffer;
+	GLuint VertexArray;
 }ZFXSTATICBUFFER;
 
 typedef struct ZFXINDEXBUFFER_TYPE
@@ -99,11 +100,26 @@ public:
 
 	void SetActiveVCache(DWORD id)
 	{
+		// VCache StaticBuffer 只能有一个处于激活状态
+		if(id != MAX_ID)
+			m_dwActiveStaticBuffer = MAX_ID;
 		m_dwActiveVCache = id;
+		
 	}
 	DWORD GetActiveVCache()
 	{
 		return m_dwActiveVCache;
+	}
+
+	void SetActiveStaticBuffer(DWORD id)
+	{
+		if(id != MAX_ID)
+			m_dwActiveVCache = MAX_ID;
+		m_dwActiveStaticBuffer = id;
+	}
+	DWORD GetActiveStaticBuffer()
+	{
+		return m_dwActiveStaticBuffer;
 	}
 
 	ZFXOpenGL* GetOpenGL()
@@ -175,9 +191,11 @@ public:
 	}
 
 	static HRESULT SetFVF(ZFXVERTEXID vid);
+	static HRESULT SetVertexAttrib(ZFXVERTEXID vid);
 	static HRESULT SetClientStateEnable(ZFXVERTEXID vid, bool bEnable);
 
 private:
+	GLuint m_VertexArray;
 	GLuint m_VertexBuffer;
 	GLuint m_IndexBuffer;
 	ZFXOpenGLSkinManager *m_pSkinMan;

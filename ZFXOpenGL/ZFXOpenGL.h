@@ -64,6 +64,7 @@ BOOL WINAPI DllEntryPoint(HINSTANCE hDll,
 #define FCOLOR2DWORD(r,g,b,a) \
 	COLORDWORD((DWORD)((r)*255.f),(DWORD)((g)*255.f),(DWORD)((b)*255.f),(DWORD)((a)*255.f))
 
+#define BUFFER_OFFSET(offset) ((void*)(offset))
 
 
 class ZFXOpenGL :

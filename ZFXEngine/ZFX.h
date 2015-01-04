@@ -111,6 +111,16 @@ typedef enum ZFXVERTEXID_TYPE {
 	VID_TV        // like UU but with tangent vector
 } ZFXVERTEXID;
 
+typedef enum VERTEX_ATTRIB_TYPE
+{
+	VAT_POSITION = 0,
+	VAT_COLOR = 1,
+	VAT_NORMAL = 2,
+	VAT_TEXTURE_COORD1 = 3,
+	VAT_TEXTURE_COORD2 = 4, 
+	VAT_TEXTURE_COORD3 = 5,
+};
+
 typedef enum ZFXENGINEMODE_TYPE {
 	EMD_PERSPECTIVE,      // perspective projection
 	EMD_TWOD,             // world coords equal to screen coords

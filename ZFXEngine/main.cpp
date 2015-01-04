@@ -188,7 +188,11 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance,
 	GLfloat f[16] = { 0.0 };
 	glGetFloatv(GL_MODELVIEW_MATRIX, f);
 	glGetFloatv(GL_PROJECTION_MATRIX, f);
-
+	
+	//ZFXCOLOR color;
+	color.fR = 1.0f;
+	color.fA = 1.0f;
+	g_pDevice->SetShadeMode(RS_SHADE_SOLID, 1.0f, &color);
 	while (!g_bDone)
 	{
 		while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
@@ -474,7 +478,8 @@ HRESULT ProgramTick(void)
 	g_pDevice->SetWorldTransform(&mWorld);
 	hr = g_pLeopard2->Render(true, false);
 
-	mWorld.Translate(1.1f, -0.6f, 1.0f);
+	mWorld.Identity();
+	//mWorld.Translate(1.1f, -0.6f, 1.0f);
 	g_pDevice->SetWorldTransform(&mWorld);
 	hr = g_pG3->Render(true, false);
 

@@ -173,6 +173,11 @@ HRESULT ZFXOpenGLVCacheManager::CreateStaticBuffer(ZFXVERTEXID VertexID,
 		return ZFX_INVALIDID;	// 返回是否会发生内存溢出？
 	}
 
+	GLuint vao = 0;
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
+	m_pStaticBuffer[m_nStaticBufferNum].VertexArray = vao;
+
 	if (nIndis > 0)
 	{
 		m_pStaticBuffer[m_nStaticBufferNum].bIndis = true;
@@ -201,6 +206,9 @@ HRESULT ZFXOpenGLVCacheManager::CreateStaticBuffer(ZFXVERTEXID VertexID,
 	glBufferData(GL_ARRAY_BUFFER, size, pVerts, GL_STATIC_DRAW);
 	CHECK_ERROR;
 	m_pStaticBuffer[m_nStaticBufferNum].VertexBuffer = vertexbuffer;
+
+	ZFXOpenGLVCache::SetFVF(VertexID);
+	ZFXOpenGLVCache::SetVertexAttrib(VertexID);
 
 	(*pnID) = m_nStaticBufferNum;
 	m_nStaticBufferNum++;
@@ -299,18 +307,15 @@ HRESULT ZFXOpenGLVCacheManager::Render(UINT nSBID)
 		return ZFX_INVALIDPARAM;
 	}
 
-	m_dwActiveVCache = MAX_ID;
-
-	if (m_dwActiveStaticBuffer != nSBID)
+	if (GetActiveStaticBuffer() != nSBID)
 	{
 		if (m_pStaticBuffer[nSBID].bIndis)
 		{
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_pStaticBuffer[nSBID].IndisBuffer);
-			glBindBuffer(GL_ARRAY_BUFFER, m_pStaticBuffer[nSBID].VertexBuffer);
-			m_dwActiveStaticBuffer = nSBID;
+			glBindVertexArray(m_pStaticBuffer[nSBID].VertexArray);
+			SetActiveStaticBuffer(nSBID);
 		}
 	}
-	else if (m_dwActiveIndexBuffer != MAX_ID)
+	/*else if (m_dwActiveIndexBuffer != MAX_ID)
 	{
 		if (m_pStaticBuffer[nSBID].bIndis)
 		{
@@ -318,7 +323,7 @@ HRESULT ZFXOpenGLVCacheManager::Render(UINT nSBID)
 			CHECK_ERROR;
 		}
 		m_dwActiveIndexBuffer = MAX_ID;
-	}
+	}*/
 
 	if (m_pOpenGL->GetActiveSkinID() != m_pStaticBuffer[nSBID].nSkinID)
 	{
@@ -326,12 +331,6 @@ HRESULT ZFXOpenGLVCacheManager::Render(UINT nSBID)
 		if (FAILED(hr))
 			return hr;
 	} // set device skin
-
-	if (!m_pOpenGL->IsUseShaders())
-	{
-		// set FVF
-		ZFXOpenGLVCache::SetFVF(m_pStaticBuffer[nSBID].nVertexType);
-	}
 
 	if (m_pOpenGL->IsUseAdditiveBlending())
 	{
@@ -344,11 +343,12 @@ HRESULT ZFXOpenGLVCacheManager::Render(UINT nSBID)
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_ZERO, GL_ONE);
 	}
-
 	CHECK_ERROR;
 
-	// Enable vertex array
-	hr = ZFXOpenGLVCache::SetClientStateEnable(m_pStaticBuffer[nSBID].nVertexType, true);
+	if (!m_pOpenGL->IsUseShaders())
+	{
+		hr = ZFXOpenGLVCache::SetClientStateEnable(m_pStaticBuffer[nSBID].nVertexType, true);
+	}
 
 	int nVertexNum = m_pStaticBuffer[nSBID].nVertexNum;
 	int nIndisNum = m_pStaticBuffer[nSBID].nIndisNum;
@@ -356,7 +356,10 @@ HRESULT ZFXOpenGLVCacheManager::Render(UINT nSBID)
 	
 	hr = DrawPrimitive(mode, nVertexNum, nIndisNum, m_pStaticBuffer[nSBID].bIndis);
 
-	hr = ZFXOpenGLVCache::SetClientStateEnable(m_pStaticBuffer[nSBID].nVertexType, false);
+	if (!m_pOpenGL->IsUseShaders())
+	{
+		hr = ZFXOpenGLVCache::SetClientStateEnable(m_pStaticBuffer[nSBID].nVertexType, false);
+	}
 	
 	CHECK_ERROR;
 	return hr;
@@ -833,7 +836,7 @@ void ZFXOpenGLVCacheManager::InvalidateStates(void)
 	m_pOpenGL->SetActiveSkinID(MAX_ID);
 	m_dwActiveStaticBuffer = MAX_ID;
 	m_dwActiveIndexBuffer = MAX_ID;
-	// m_dwActiveVCache = MAX_ID;
+	m_dwActiveVCache = MAX_ID;
 }
 
 ZFXRENDERSTATE ZFXOpenGLVCacheManager::GetShadeMode(void)
@@ -943,6 +946,9 @@ ZFXOpenGLVCache::ZFXOpenGLVCache(UINT nVertsMax, UINT nIndisMax, UINT nStride, Z
 	memset(m_Skin.nTexture, ZFXOpenGLSkinManager::MAX_ID, 8 * sizeof(UINT));
 	m_SkinID = ZFXOpenGLSkinManager::MAX_ID;
 
+	glGenVertexArrays(1, &m_VertexArray);
+	glBindVertexArray(m_VertexArray);
+
 	glGenBuffers(1, &m_VertexBuffer);
 	glGenBuffers(1, &m_IndexBuffer);
 
@@ -950,15 +956,22 @@ ZFXOpenGLVCache::ZFXOpenGLVCache(UINT nVertsMax, UINT nIndisMax, UINT nStride, Z
 	GLsizeiptr size = nVertsMax * nStride;
 	glBufferData(GL_ARRAY_BUFFER, size, NULL, GL_DYNAMIC_DRAW);
 	
-	//SetFVF(vid);
+	SetFVF(vid);
+	SetVertexAttrib(vid);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IndexBuffer);
 	size = nIndisMax * sizeof(WORD);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, NULL, GL_DYNAMIC_DRAW);
+
+	m_pVCMan->SetActiveVCache(m_dwID);
+	//glBindVertexArray(0);
 }
 
 ZFXOpenGLVCache::~ZFXOpenGLVCache()
 {
+	if (glIsVertexArray(m_VertexArray))
+		glDeleteVertexArrays(1, &m_VertexArray);
+
 	if (glIsBuffer(m_VertexBuffer))
 		glDeleteBuffers(1, &m_VertexBuffer);
 
@@ -971,18 +984,14 @@ HRESULT ZFXOpenGLVCache::Flush(bool bUseShaders)
 	if (m_nVertexNum <= 0) return ZFX_OK;
 	if (!m_pVCMan) return ZFX_FAIL;
 
+	// 激活 VCache
 	if (m_pVCMan->GetActiveVCache() != m_dwID)
 	{
-		if (!bUseShaders)
-		{
-			SetFVF(m_vid);
-		}
-
-		glBindBuffer(GL_ARRAY_BUFFER, m_VertexBuffer);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IndexBuffer);
+		glBindVertexArray(m_VertexArray);
 		m_pVCMan->SetActiveVCache(m_dwID);
 	}
 
+	// 激活 Skin
 	if (m_pVCMan->GetOpenGL()->GetActiveSkinID() != m_SkinID)
 	{
 		m_pVCMan->GetOpenGL()->ActiveSkin(m_SkinID);
@@ -1001,12 +1010,22 @@ HRESULT ZFXOpenGLVCache::Flush(bool bUseShaders)
 		glBlendFunc(GL_ZERO, GL_ONE);
 	}
 
-	SetClientStateEnable(m_vid, true);
+	if (!bUseShaders)
+	{
+		SetClientStateEnable(m_vid, true);
+	}
 
 	ZFXRENDERSTATE mode = m_pVCMan->GetOpenGL()->GetShadeMode();
 	m_pVCMan->DrawPrimitive(mode, m_nVertexNum, m_nIndisNum, true);
 
-	SetClientStateEnable(m_vid, false);
+	if(!bUseShaders)
+		SetClientStateEnable(m_vid, false);
+
+	/*
+		本来此处绘制完成之后应该解绑定，但是上面会设置 SetActiveVCache，
+		如果此处解绑定，那么 activeVCache 就没什么意义了。
+	*/
+	//glBindVertexArray(0);
 	
 	m_nIndisNum = 0;
 	m_nVertexNum = 0;
@@ -1039,9 +1058,22 @@ HRESULT ZFXOpenGLVCache::Add(UINT nVerts, UINT nIndis, const void *pVerts, const
 		Log("VCache Invalid Vertex Buffer");
 		return ZFX_FAIL;
 	}
+
+	if (!glIsVertexArray(m_VertexArray))
+	{
+		Log("VCache Invalid Vertex Array");
+		return ZFX_FAIL;
+	}
+
+	if (m_pVCMan->GetActiveVCache() != m_dwID)
+	{
+		glBindVertexArray(m_VertexArray);
+		m_pVCMan->SetActiveVCache(m_dwID);
+	}
+
 	GLintptr offset = m_nVertexNum * m_nStride;
 	GLsizeiptr size = nVerts * m_nStride;
-	glBindBuffer(GL_ARRAY_BUFFER, m_VertexBuffer);
+	//glBindBuffer(GL_ARRAY_BUFFER, m_VertexBuffer);
 	glBufferSubData(GL_ARRAY_BUFFER, offset, size, pVerts);
 
 	if (!glIsBuffer(m_IndexBuffer))
@@ -1051,7 +1083,7 @@ HRESULT ZFXOpenGLVCache::Add(UINT nVerts, UINT nIndis, const void *pVerts, const
 	}
 	offset = m_nVertexNum * sizeof(WORD);
 	size = nIndis * sizeof(WORD);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IndexBuffer);
+	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IndexBuffer);
 	glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, offset, size, pIndis);
 
 	return ZFX_OK;
@@ -1090,6 +1122,7 @@ void ZFXOpenGLVCache::Log(const char* fmt, ...)
 
 HRESULT ZFXOpenGLVCache::SetFVF(ZFXVERTEXID vid)
 {
+	// bind vertex array
 	HRESULT hr = ZFX_OK;
 	switch (vid)
 	{
@@ -1187,5 +1220,62 @@ HRESULT ZFXOpenGLVCache::SetClientStateEnable(ZFXVERTEXID vid, bool bEnable)
 	}
 	
 	return ZFX_OK;
+}
+
+HRESULT ZFXOpenGLVCache::SetVertexAttrib(ZFXVERTEXID vid)
+{
+	// bind vertex array
+	HRESULT hr = ZFX_OK;
+	switch (vid)
+	{
+	case VID_PS:
+		glVertexAttribPointer(VAT_POSITION, 3, GL_FLOAT, GL_FALSE, sizeof(PVERTEX), BUFFER_OFFSET(0));
+		glEnableVertexAttribArray(VAT_POSITION);
+		break;
+	case VID_UU:
+		glVertexAttribPointer(VAT_POSITION, 3, GL_FLOAT, GL_FALSE, sizeof(VERTEX), BUFFER_OFFSET(0));
+		glVertexAttribPointer(VAT_NORMAL, 3, GL_FLOAT, GL_FALSE, sizeof(VERTEX), BUFFER_OFFSET(3 * sizeof(GLfloat)));
+		glVertexAttribPointer(VAT_TEXTURE_COORD1, 2, GL_FLOAT, GL_FALSE, sizeof(VERTEX), BUFFER_OFFSET(6 * sizeof(GLfloat)));
+		glEnableVertexAttribArray(VAT_POSITION);
+		glEnableVertexAttribArray(VAT_NORMAL);
+		glEnableVertexAttribArray(VAT_TEXTURE_COORD1);
+		break;
+	case VID_UL:
+		glVertexAttribPointer(VAT_POSITION, 3, GL_FLOAT, GL_FALSE, sizeof(LVERTEX), BUFFER_OFFSET(0));
+		glVertexAttribPointer(VAT_COLOR, 4, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(LVERTEX), BUFFER_OFFSET(3 * sizeof(GLfloat)));
+		glVertexAttribPointer(VAT_TEXTURE_COORD1, 2, GL_FLOAT, GL_FALSE, sizeof(LVERTEX), BUFFER_OFFSET(3 * sizeof(GLfloat) + sizeof(DWORD)));
+		glEnableVertexAttribArray(VAT_POSITION);
+		glEnableVertexAttribArray(VAT_COLOR);
+		glEnableVertexAttribArray(VAT_TEXTURE_COORD1);
+		break;
+	case VID_CA:
+		glVertexAttribPointer(VAT_POSITION, 3, GL_FLOAT, GL_FALSE, sizeof(CVERTEX), BUFFER_OFFSET(0));
+		glVertexAttribPointer(VAT_NORMAL, 3, GL_FLOAT, GL_FALSE, sizeof(CVERTEX), BUFFER_OFFSET(3 * sizeof(GLfloat)));
+		glVertexAttribPointer(VAT_TEXTURE_COORD1, 2, GL_FLOAT, GL_FALSE, sizeof(CVERTEX), BUFFER_OFFSET(6 * sizeof(GLfloat)));
+		glEnableVertexAttribArray(VAT_POSITION);
+		glEnableVertexAttribArray(VAT_NORMAL);
+		glEnableVertexAttribArray(VAT_TEXTURE_COORD1);
+		break;
+	case VID_3T:
+		glVertexAttribPointer(VAT_POSITION, 3, GL_FLOAT, GL_FALSE, sizeof(VERTEX3T), BUFFER_OFFSET(0));
+		glVertexAttribPointer(VAT_NORMAL, 3, GL_FLOAT, GL_FALSE, sizeof(VERTEX3T), BUFFER_OFFSET(3 * sizeof(GLfloat)));
+		glVertexAttribPointer(VAT_TEXTURE_COORD1, 2, GL_FLOAT, GL_FALSE, sizeof(VERTEX3T), BUFFER_OFFSET(6 * sizeof(GLfloat)));
+		glEnableVertexAttribArray(VAT_POSITION);
+		glEnableVertexAttribArray(VAT_NORMAL);
+		glEnableVertexAttribArray(VAT_TEXTURE_COORD1);
+		break;
+	case VID_TV:
+		glVertexAttribPointer(VAT_POSITION, 3, GL_FLOAT, GL_FALSE, sizeof(TVERTEX), BUFFER_OFFSET(0));
+		glVertexAttribPointer(VAT_NORMAL, 3, GL_FLOAT, GL_FALSE, sizeof(TVERTEX), BUFFER_OFFSET(3 * sizeof(GLfloat)));
+		glVertexAttribPointer(VAT_TEXTURE_COORD1, 2, GL_FLOAT, GL_FALSE, sizeof(TVERTEX), BUFFER_OFFSET(6 * sizeof(GLfloat)));
+		glEnableVertexAttribArray(VAT_POSITION);
+		glEnableVertexAttribArray(VAT_NORMAL);
+		glEnableVertexAttribArray(VAT_TEXTURE_COORD1);
+		break;
+	default:
+		hr = E_INVALIDARG;
+		break;
+	}
+	return hr;
 }
 

@@ -1196,7 +1196,10 @@ void ZFXOpenGL::UseShaders(bool b)
 	CHECK_ERROR;
 }
 
-HRESULT ZFXOpenGL::SetShaderConstant(ZFXSHADERTYPE, ZFXDATATYPE, UINT, UINT, const void*)
+HRESULT ZFXOpenGL::SetShaderConstant(ZFXSHADERTYPE sht,
+	ZFXDATATYPE dat,
+	UINT nReg, UINT nNum,
+	const void *pData)
 {
 	return ZFX_OK;
 }

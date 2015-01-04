@@ -110,6 +110,7 @@ GLSLManager::GLSLManager()
 	m_nShaderNum = 0;
 	m_nCurrentFShader = -1;
 	m_nCurrentFShader = -1;
+	m_CurrentProgram = 0;
 	m_vProgram.clear();
 }
 
@@ -196,6 +197,10 @@ HRESULT GLSLManager::CreateShader(const void* pData, GLenum type, bool bLoadFrom
 	return ZFX_OK;
 }
 
+/*
+	若 vshader 和 fshader 组成的program已存在，则返回program对象
+	否则创建新的program对象
+*/
 HRESULT GLSLManager::CreateProgram(int nVShader /*= -1*/, int nFShader /*= -1*/, GLuint *program /*= NULL*/)
 {
 	if (nVShader == -1 && nFShader == -1)
@@ -250,7 +255,14 @@ HRESULT GLSLManager::CreateProgram(int nVShader /*= -1*/, int nFShader /*= -1*/,
 HRESULT GLSLManager::UseShader(int nVShader /*= -1*/, int nFShader /*= -1*/)
 {
 	if (nVShader == -1 && nFShader == -1)
-		return E_INVALIDARG;
+	{
+		// disable shader
+		glUseProgram(0);
+		m_CurrentProgram = 0;
+		m_nCurrentVShader = -1;
+		m_nCurrentFShader = -1;
+		return ZFX_OK;
+	}
 
 	if (nVShader == m_nCurrentVShader &&
 		nFShader == m_nCurrentFShader && m_bProgramCreated)
@@ -267,7 +279,7 @@ HRESULT GLSLManager::UseShader(int nVShader /*= -1*/, int nFShader /*= -1*/)
 	glUseProgram(program);
 	m_nCurrentFShader = nVShader;
 	m_nCurrentFShader = nFShader;
-
+	m_CurrentProgram = program;
 	return ZFX_OK;
 }
 
@@ -303,17 +315,21 @@ HRESULT GLSLManager::ActivateShader(UINT id, GLenum type)
 		return ZFX_OK;
 
 	GLSLShader* pShader = m_Shader[id];
-	if (pShader && pShader->m_type == type
-		&& pShader->m_bCompiled == true)
+	if (type == GL_VERTEX_SHADER)
 	{
 		m_nCurrentVShader = id;
-		m_bProgramCreated = false;
-		return ZFX_OK;
 	}
 	else
 	{
-		return E_FAIL;
+		m_nCurrentFShader = id;
 	}
+
+	GLuint program;
+	CreateProgram(m_nCurrentVShader, m_nCurrentFShader, &program);
+	glUseProgram(program);
+	m_CurrentProgram = program;
+
+	return ZFX_OK;
 }
 
 

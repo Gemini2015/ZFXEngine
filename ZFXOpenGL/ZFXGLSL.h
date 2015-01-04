@@ -49,6 +49,7 @@ public:
 
 	int m_nCurrentVShader;
 	int m_nCurrentFShader;
+	GLuint m_CurrentProgram;
 	bool m_bProgramCreated;
 
 	GLSLManager();
@@ -58,6 +59,10 @@ public:
 	HRESULT CreateProgram(int nVShader = -1, int nFShader = -1, GLuint *program = NULL);
 	HRESULT UseShader(int nVShader = -1, int nFShader = -1);
 	HRESULT ActivateShader(UINT id, GLenum type);
+	GLuint GetActiveProgram()
+	{
+		return m_CurrentProgram;
+	}
 	GLuint FindProgram(GLuint vshader = 0, GLuint fshader = 0);
 };
 

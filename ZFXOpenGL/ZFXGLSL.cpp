@@ -280,6 +280,9 @@ HRESULT GLSLManager::UseShader(int nVShader /*= -1*/, int nFShader /*= -1*/)
 	m_nCurrentFShader = nVShader;
 	m_nCurrentFShader = nFShader;
 	m_CurrentProgram = program;
+
+	CollectConstant(program);
+
 	return ZFX_OK;
 }
 
@@ -329,7 +332,101 @@ HRESULT GLSLManager::ActivateShader(UINT id, GLenum type)
 	glUseProgram(program);
 	m_CurrentProgram = program;
 
+	CollectConstant(program);
+
 	return ZFX_OK;
+}
+
+HRESULT GLSLManager::CollectConstant(GLuint program)
+{
+	if (!glIsProgram(program))
+	{
+		return ZFX_INVALIDPARAM;
+	}
+
+	m_ConstantList.clear();
+
+	GLint num = 0;
+	glGetProgramiv(program, GL_ACTIVE_UNIFORMS, &num);
+
+	for (int i = 0; i < num; i++)
+	{
+		char buf[MAX_PATH] = {0};
+		GLsizei length = 0;
+		GLsizei size = 0;
+		GLenum type = 0;
+		glGetActiveUniform(program, i, MAX_PATH, &length, &size, &type, buf);
+
+		if (length > 0)
+		{
+
+			GLint location = glGetUniformLocation(program, buf);
+			if (location >= 0)
+			{
+				GLSLConstant constant;
+				constant.name.assign(buf);
+				constant.size = size;
+				constant.type = type;
+				constant.location = location;
+
+				m_ConstantList[constant.name] = constant;
+			}
+		}
+	}
+}
+
+HRESULT GLSLManager::SetNamedConstant(std::string name, float v)
+{
+	if (!glIsProgram(m_CurrentProgram))
+		return E_FAIL;
+	ConstantList_Map::iterator it = m_ConstantList.find(name);
+	if (it == m_ConstantList.end())
+	{
+		return E_FAIL;
+	}
+
+	GLSLConstant constant = it->second;
+
+	if (constant.type == GL_FLOAT)
+	{
+		glUniform1f(constant.location, v);
+	}
+}
+
+HRESULT GLSLManager::SetNamedConstant(std::string name, ZFXMatrix m)
+{
+	if (!glIsProgram(m_CurrentProgram))
+		return E_FAIL;
+	ConstantList_Map::iterator it = m_ConstantList.find(name);
+	if (it == m_ConstantList.end())
+	{
+		return E_FAIL;
+	}
+
+	GLSLConstant constant = it->second;
+
+	if (constant.type == GL_FLOAT_MAT4)
+	{
+		glUniformMatrix4fv(constant.location, 1, GL_FALSE, &m._11);
+	}
+}
+
+HRESULT GLSLManager::SetNamedConstant(std::string name, int i)
+{
+	if (!glIsProgram(m_CurrentProgram))
+		return E_FAIL;
+	ConstantList_Map::iterator it = m_ConstantList.find(name);
+	if (it == m_ConstantList.end())
+	{
+		return E_FAIL;
+	}
+
+	GLSLConstant constant = it->second;
+
+	if (constant.type == GL_INT)
+	{
+		glUniform1i(constant.location, i);
+	}
 }
 
 

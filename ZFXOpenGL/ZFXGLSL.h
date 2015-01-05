@@ -9,6 +9,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 
 #define MAX_SHADER_NUM (MAX_SHADER * 2)
 
@@ -40,6 +41,14 @@ public:
 	HRESULT CreateProgram(GLuint vshader = 0, GLuint fshader = 0);
 };
 
+typedef struct GLSLConstant_Type
+{
+	std::string name;
+	GLsizei size;
+	GLenum type;
+	GLuint location;
+} GLSLConstant;
+
 class GLSLManager
 {
 public:
@@ -51,6 +60,9 @@ public:
 	int m_nCurrentFShader;
 	GLuint m_CurrentProgram;
 	bool m_bProgramCreated;
+
+	typedef std::map<std::string, GLSLConstant> ConstantList_Map;
+	ConstantList_Map m_ConstantList;
 
 	GLSLManager();
 	~GLSLManager();
@@ -64,6 +76,12 @@ public:
 		return m_CurrentProgram;
 	}
 	GLuint FindProgram(GLuint vshader = 0, GLuint fshader = 0);
+	
+
+	HRESULT CollectConstant(GLuint program);
+	HRESULT SetNamedConstant(std::string name, int i);
+	HRESULT SetNamedConstant(std::string name, float v);
+	HRESULT SetNamedConstant(std::string name, ZFXMatrix m);
 };
 
 #endif

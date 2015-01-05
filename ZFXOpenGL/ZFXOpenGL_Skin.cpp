@@ -892,8 +892,19 @@ HRESULT ZFXOpenGLSkinManager::ActiveSkin(UINT nSkinID)
 					GLuint texture = *(GLuint*)zfxtexture.pData;
 					glActiveTexture(GL_TEXTURE0 + i);
 					glEnable(GL_TEXTURE_2D);
-
 					glBindTexture(GL_TEXTURE_2D, texture);
+
+					if (m_pOpenGL->IsUseShaders())
+					{
+						//gluniform1
+						if (m_pOpenGL->GetGLSLManager())
+						{
+							char buf[MAX_PATH];
+							sprintf_s(buf, "tex_sample%d", i);
+							m_pOpenGL->GetGLSLManager()->SetNamedConstant(buf, i);
+						}
+					}
+
 					CHECK_ERROR;
 					glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, m_pOpenGL->GetTextureOp(i));
 					CHECK_ERROR;

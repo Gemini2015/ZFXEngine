@@ -227,6 +227,11 @@ public:
 	
 	HRESULT ActiveSkin(UINT nSkinID);
 
+	GLSLManager* GetGLSLManager()
+	{
+		return m_pGLSLManager;
+	}
+
 private:
 	HINSTANCE m_hDLL;
 	HDC m_hDC[MAX_3DHWND];
@@ -267,6 +272,7 @@ private:
 	HRESULT CalcPerspProjMatrix(int nStage);
 	HRESULT CalcPerspProjMatrix(float fFov, float fAspect, int nStage);
 	HRESULT CalcOrthoProjMatrix(int nStage);
+	HRESULT SetMVPUniform();
 
 	bool InitPixelFormat(int nHWnd);
 

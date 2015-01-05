@@ -387,11 +387,7 @@ void ZFXOpenGL::SetWorldTransform(const ZFXMatrix* m)
 
 	CalcWorldViewProjMatrix();
 
-	if (m_bCanDoShaders)
-	{
-		// 将mvp 传给 shader
-		throw std::logic_error("MVP shader Update");
-	}
+	SetMVPUniform();
 }
 
 void ZFXOpenGL::SetBackfaceCulling(ZFXRENDERSTATE rs)
@@ -1264,7 +1260,11 @@ HRESULT ZFXOpenGL::SetView3D(const ZFXVector &vcRight,
 		glMatrixMode(GL_MODELVIEW);
 		glLoadMatrixf(mat);
 	}
-	CHECK_ERROR;
+	// view changed so recalculate combomatrix
+	CalcViewProjMatrix();
+	CalcWorldViewProjMatrix();
+
+	SetMVPUniform();
 	return ZFX_OK;
 }
 
@@ -1606,6 +1606,15 @@ HRESULT ZFXOpenGL::ActiveSkin(UINT nSkinID)
 
 	m_nActiveSkin = nSkinID;
 	return hr;
+}
+
+HRESULT ZFXOpenGL::SetMVPUniform()
+{
+	if (m_bCanDoShaders && m_bUseShaders)
+	{
+		m_pGLSLManager->SetNamedConstant("mvp", m_mWorldViewProj);
+	}
+	return ZFX_OK;
 }
 
 

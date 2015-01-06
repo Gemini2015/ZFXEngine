@@ -878,6 +878,12 @@ HRESULT ZFXD3D::SetShaderConstant(ZFXSHADERTYPE sht,
 /*----------------------------------------------------------------*/
 
 
+HRESULT ZFXD3D::SetShaderConstant(ZFXSHADERTYPE shadertype, ZFXDATATYPE datatype, const char* name, const void* data)
+{
+	return ZFX_OK;
+}
+
+
 /**
  * Create a vertex shader object for the direct3d device.
  * -> IN: void* - whether file name or shader data stream

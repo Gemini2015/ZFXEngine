@@ -236,6 +236,10 @@ public:
 	bool      CanDoShaders(void) { return m_bCanDoShaders; }
 	bool      IsUseShaders(void)  { return m_bUseShaders; }
 	HRESULT   SetShaderConstant(ZFXSHADERTYPE, ZFXDATATYPE, UINT, UINT, const void*);
+
+	HRESULT SetShaderConstant(ZFXSHADERTYPE shadertype, ZFXDATATYPE datatype, const char* name, const void* data);
+	
+
 	HRESULT   SetView3D(const ZFXVector&, const ZFXVector&,
 		const ZFXVector&, const ZFXVector&);
 	HRESULT   SetViewLookAt(const ZFXVector&, const ZFXVector&,

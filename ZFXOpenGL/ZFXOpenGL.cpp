@@ -1200,6 +1200,35 @@ HRESULT ZFXOpenGL::SetShaderConstant(ZFXSHADERTYPE sht,
 	return ZFX_OK;
 }
 
+HRESULT ZFXOpenGL::SetShaderConstant(ZFXSHADERTYPE shadertype, ZFXDATATYPE datatype, const char* name, const void* data)
+{
+	if (m_bCanDoShaders && m_bUseShaders)
+	{
+		if (name == NULL || data == NULL || strlen(name) == 0)
+			return ZFX_INVALIDPARAM;
+
+		HRESULT hr = ZFX_OK;
+		switch (datatype)
+		{
+		DAT_BOOL:
+			m_pGLSLManager->SetNamedConstant(name, *(int*)data);
+			break;
+		DAT_INT:
+			m_pGLSLManager->SetNamedConstant(name, *(int*)data);
+			break;
+		DAT_FLOAT:
+			m_pGLSLManager->SetNamedConstant(name, *(float*)data);
+			break;
+		default:
+			hr = ZFX_INVALIDPARAM;
+			break;
+		}
+
+		return hr;
+	}
+	return ZFX_FAIL;
+}
+
 void ZFXOpenGL::UseAdditiveBlending(bool b)
 {
 	if (m_bAdditive == b)

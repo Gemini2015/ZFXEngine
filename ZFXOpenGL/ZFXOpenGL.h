@@ -129,6 +129,9 @@ public:
 	HRESULT SetShaderConstant(ZFXSHADERTYPE, ZFXDATATYPE,
 		UINT, UINT, const void*);
 
+	HRESULT SetShaderConstant(ZFXSHADERTYPE shadertype,
+		ZFXDATATYPE datatype, const char* name, const void* data);
+
 	void UseAdditiveBlending(bool);
 	bool IsUseAdditiveBlending(void)
 	{

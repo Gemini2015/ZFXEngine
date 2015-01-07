@@ -27,6 +27,9 @@
     <ClInclude Include="ZFXD3D_vcache.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="HLSLShaderManager.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ZFXD3D_enum.cpp">
@@ -48,6 +51,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="ZFXD3D_text.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="HLSLShaderManager.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

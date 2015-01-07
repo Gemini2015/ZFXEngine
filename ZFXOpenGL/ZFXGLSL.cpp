@@ -122,8 +122,8 @@ HRESULT GLSLShaderObject::Compile(void)
 	return ZFX_OK;
 }
 
-GLSLShaderManager::GLSLShaderManager()
-	: IShaderManager()
+GLSLShaderManager::GLSLShaderManager(ZFXOpenGL *pOpenGL)
+	: IShaderManager((ZFXRenderDevice*)pOpenGL)
 {
 	m_ActiveProgram = NULL;
 }
@@ -332,6 +332,8 @@ HRESULT GLSLShaderManager::CollectConstant(GLuint program)
 			}
 		}
 	}
+
+	return ZFX_OK;
 }
 
 HRESULT GLSLShaderManager::SetNamedConstant(std::string name, bool val)
@@ -352,6 +354,7 @@ HRESULT GLSLShaderManager::SetNamedConstant(std::string name, bool val)
 	{
 		glUniform1i(constant.location, val);
 	}
+	return ZFX_OK;
 }
 
 HRESULT GLSLShaderManager::SetNamedConstant(std::string name, int val)
@@ -372,6 +375,7 @@ HRESULT GLSLShaderManager::SetNamedConstant(std::string name, int val)
 	{
 		glUniform1i(constant.location, val);
 	}
+	return ZFX_OK;
 }
 
 HRESULT GLSLShaderManager::SetNamedConstant(std::string name, float val)
@@ -392,6 +396,7 @@ HRESULT GLSLShaderManager::SetNamedConstant(std::string name, float val)
 	{
 		glUniform1f(constant.location, val);
 	}
+	return ZFX_OK;
 }
 
 HRESULT GLSLShaderManager::SetNamedConstant(std::string name, ZFXMatrix m)
@@ -412,6 +417,7 @@ HRESULT GLSLShaderManager::SetNamedConstant(std::string name, ZFXMatrix m)
 	{
 		glUniformMatrix4fv(constant.location, 1, GL_FALSE, &m._11);
 	}
+	return ZFX_OK;
 }
 
 

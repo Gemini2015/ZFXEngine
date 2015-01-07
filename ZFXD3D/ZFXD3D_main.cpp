@@ -265,7 +265,7 @@ void ZFXD3D::FadeScreen(float fR, float fG, float fB, float fA)
 	SetView3D(ZFXVector(1, 0, 0), ZFXVector(0, 1, 0),
 		ZFXVector(0, 0, 1), ZFXVector(0, 0, 0));
 
-	UseShaders(false);
+	m_pShaderManager->EnableShader(false);
 	m_pDevice->SetTexture(0, NULL);
 	//   m_pDevice->SetStreamSource(0, NULL, 0, sizeof(LVERTEX));
 	//   m_pDevice->SetIndices(NULL);

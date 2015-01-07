@@ -18,7 +18,8 @@
 #include "ZFXRenderDevice.h"    // Interface Schablone
 #include "zfx3d.h"              // zfx 3d math library
 #include "ZFXD3D_vcache.h"         // vertex cache (dynamic IB/VB)
-
+#include "ZFXShaderManager.h"
+#include "HLSLShaderManager.h"
 
 BOOL WINAPI DllEntryPoint(HINSTANCE hDll,
 	DWORD     fdwReason,
@@ -232,12 +233,12 @@ public:
 	bool      IsUseColorBuffer(void)  { return m_bColorBuffer; }
 	void      UseTextures(bool);
 	bool      IsUseTextures(void) { return m_bTextures; }
-	void      UseShaders(bool);
+	/*void      UseShaders(bool);
 	bool      CanDoShaders(void) { return m_bCanDoShaders; }
-	bool      IsUseShaders(void)  { return m_bUseShaders; }
-	HRESULT   SetShaderConstant(ZFXSHADERTYPE, ZFXDATATYPE, UINT, UINT, const void*);
+	bool      IsUseShaders(void)  { return m_bUseShaders; }*/
+	/*HRESULT   SetShaderConstant(ZFXSHADERTYPE, ZFXDATATYPE, UINT, UINT, const void*);
 
-	HRESULT SetShaderConstant(ZFXSHADERTYPE shadertype, ZFXDATATYPE datatype, const char* name, const void* data);
+	HRESULT SetShaderConstant(ZFXSHADERTYPE shadertype, ZFXDATATYPE datatype, const char* name, const void* data);*/
 	
 
 	HRESULT   SetView3D(const ZFXVector&, const ZFXVector&,

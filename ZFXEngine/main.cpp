@@ -527,7 +527,7 @@ HRESULT BuildAndSetShader(void)
 {
 	UINT nID = 0;
 
-	if (!g_pDevice->CanDoShaders())
+	if (!g_pDevice->GetShaderManager()->IsCanUseShader())
 		return S_OK;
 
 	/*if (FAILED(g_pDevice->CreateVShader("test.vsh", 0,

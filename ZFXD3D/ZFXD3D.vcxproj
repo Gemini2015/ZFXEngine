@@ -80,12 +80,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="HLSLShaderManager.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="ZFXD3D.h" />
     <ClInclude Include="ZFXD3D_skinman.h" />
     <ClInclude Include="ZFXD3D_vcache.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="HLSLShaderManager.cpp" />
     <ClCompile Include="ZFXD3D_text.cpp" />
     <ClCompile Include="ZFXD3D_enum.cpp" />
     <ClCompile Include="ZFXD3D_init.cpp" />

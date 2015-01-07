@@ -731,27 +731,27 @@ void ZFXD3D::PrepareShaderStuff(void) {
 /**
  * Switch use of shaders on and off if shaders are possible.
  */
-void ZFXD3D::UseShaders(bool b) {
-	if (!m_bCanDoShaders) return;
-
-	if (m_bUseShaders == b) return;
-
-	// clear all vertex caches
-	m_pVertexMan->ForcedFlushAll();
-	m_pVertexMan->InvalidateStates();
-
-	m_bUseShaders = b;
-
-	// deactivate use of shaders
-	if (!m_bUseShaders) {
-		m_pDevice->SetVertexShader(NULL);
-		m_pDevice->SetPixelShader(NULL);
-		m_pDevice->SetVertexDeclaration(NULL);
-	}
-	else {
-		m_pDevice->SetFVF(0);
-	}
-} // UseShaders
+//void ZFXD3D::UseShaders(bool b) {
+//	if (!m_bCanDoShaders) return;
+//
+//	if (m_bUseShaders == b) return;
+//
+//	// clear all vertex caches
+//	m_pVertexMan->ForcedFlushAll();
+//	m_pVertexMan->InvalidateStates();
+//
+//	m_bUseShaders = b;
+//
+//	// deactivate use of shaders
+//	if (!m_bUseShaders) {
+//		m_pDevice->SetVertexShader(NULL);
+//		m_pDevice->SetPixelShader(NULL);
+//		m_pDevice->SetVertexDeclaration(NULL);
+//	}
+//	else {
+//		m_pDevice->SetFVF(0);
+//	}
+//} // UseShaders
 /*----------------------------------------------------------------*/
 
 
@@ -831,57 +831,57 @@ void ZFXD3D::UseShaders(bool b) {
  * (pixel or vertex) and which type of data is the input. vertex
  * shader registers from 0-20 are reserved and create an error.
  */
-HRESULT ZFXD3D::SetShaderConstant(ZFXSHADERTYPE sht,
-	ZFXDATATYPE dat,
-	UINT nReg, UINT nNum,
-	const void *pData) {
-	if (!m_bCanDoShaders) return ZFX_NOSHADERSUPPORT;
-
-	if (sht == SHT_VERTEX) {
-		if (nReg < 20) return ZFX_INVALIDPARAM;
-
-		switch (dat) {
-		case DAT_BOOL:
-			m_pDevice->SetVertexShaderConstantB(
-				nReg, (BOOL*)pData, nNum);
-			break;
-		case DAT_INT:
-			m_pDevice->SetVertexShaderConstantI(
-				nReg, (int*)pData, nNum);
-			break;
-		case DAT_FLOAT:
-			m_pDevice->SetVertexShaderConstantF(
-				nReg, (float*)pData, nNum);
-			break;
-		default: return ZFX_FAIL;
-		} // switch
-	}
-	else {
-		switch (dat) {
-		case DAT_BOOL:
-			m_pDevice->SetPixelShaderConstantB(
-				nReg, (BOOL*)pData, nNum);
-			break;
-		case DAT_INT:
-			m_pDevice->SetPixelShaderConstantI(
-				nReg, (int*)pData, nNum);
-			break;
-		case DAT_FLOAT:
-			m_pDevice->SetPixelShaderConstantF(
-				nReg, (float*)pData, nNum);
-			break;
-		default: return ZFX_FAIL;
-		} // switch
-	}
-	return ZFX_OK;
-} // SetShaderConstant
-/*----------------------------------------------------------------*/
-
-
-HRESULT ZFXD3D::SetShaderConstant(ZFXSHADERTYPE shadertype, ZFXDATATYPE datatype, const char* name, const void* data)
-{
-	return ZFX_OK;
-}
+//HRESULT ZFXD3D::SetShaderConstant(ZFXSHADERTYPE sht,
+//	ZFXDATATYPE dat,
+//	UINT nReg, UINT nNum,
+//	const void *pData) {
+//	if (!m_bCanDoShaders) return ZFX_NOSHADERSUPPORT;
+//
+//	if (sht == SHT_VERTEX) {
+//		if (nReg < 20) return ZFX_INVALIDPARAM;
+//
+//		switch (dat) {
+//		case DAT_BOOL:
+//			m_pDevice->SetVertexShaderConstantB(
+//				nReg, (BOOL*)pData, nNum);
+//			break;
+//		case DAT_INT:
+//			m_pDevice->SetVertexShaderConstantI(
+//				nReg, (int*)pData, nNum);
+//			break;
+//		case DAT_FLOAT:
+//			m_pDevice->SetVertexShaderConstantF(
+//				nReg, (float*)pData, nNum);
+//			break;
+//		default: return ZFX_FAIL;
+//		} // switch
+//	}
+//	else {
+//		switch (dat) {
+//		case DAT_BOOL:
+//			m_pDevice->SetPixelShaderConstantB(
+//				nReg, (BOOL*)pData, nNum);
+//			break;
+//		case DAT_INT:
+//			m_pDevice->SetPixelShaderConstantI(
+//				nReg, (int*)pData, nNum);
+//			break;
+//		case DAT_FLOAT:
+//			m_pDevice->SetPixelShaderConstantF(
+//				nReg, (float*)pData, nNum);
+//			break;
+//		default: return ZFX_FAIL;
+//		} // switch
+//	}
+//	return ZFX_OK;
+//} // SetShaderConstant
+///*----------------------------------------------------------------*/
+//
+//
+//HRESULT ZFXD3D::SetShaderConstant(ZFXSHADERTYPE shadertype, ZFXDATATYPE datatype, const char* name, const void* data)
+//{
+//	return ZFX_OK;
+//}
 
 
 /**

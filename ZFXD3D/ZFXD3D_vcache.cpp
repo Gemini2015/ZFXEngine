@@ -279,7 +279,7 @@ HRESULT ZFXD3DVCManager::CreateStaticBuffer(ZFXVERTEXID VertexID,
 	}
 
 	// no need for FVF if shaders are used
-	if (m_pZFXD3D->IsUseShaders()) dwActualFVF = 0;
+	if (m_pZFXD3D->GetShaderManager()->IsUseShader()) dwActualFVF = 0;
 	else dwActualFVF = m_pSB[m_nNumSB].dwFVF;
 
 	// create vertex buffer
@@ -370,7 +370,7 @@ HRESULT ZFXD3DVCManager::CreateIndexBuffer(UINT nIndis,
 HRESULT ZFXD3DVCManager::ForcedFlushAll(void)
 {
 	HRESULT hr = ZFX_OK;
-	bool    bShaders = m_pZFXD3D->IsUseShaders();
+	bool    bShaders = m_pZFXD3D->GetShaderManager()->IsUseShader();
 	int     i;
 
 	for (i = 0; i < NUM_CACHES; i++)
@@ -433,7 +433,7 @@ HRESULT ZFXD3DVCManager::ForcedFlush(ZFXVERTEXID VertexID)
 	} // switch
 
 	for (i = 0; i < NUM_CACHES; i++)
-		if (FAILED(pCache[i]->Flush(m_pZFXD3D->IsUseShaders())))
+		if (FAILED(pCache[i]->Flush(m_pZFXD3D->GetShaderManager()->IsUseShader())))
 			hr = ZFX_FAIL;
 
 	return hr;
@@ -494,7 +494,7 @@ HRESULT ZFXD3DVCManager::Render(UINT nID)
 			// set material for device
 			ZFXMATERIAL *pMat = &m_pSkinMan->m_pMaterials[pSkin->nMaterial];
 
-			if (!m_pZFXD3D->IsUseShaders())
+			if (!m_pZFXD3D->GetShaderManager()->IsUseShader())
 			{
 				// 材质
 				D3DMATERIAL9 mat = {
@@ -508,10 +508,10 @@ HRESULT ZFXD3DVCManager::Render(UINT nID)
 			}
 			else
 			{
-				GetZFXD3D()->SetShaderConstant(SHT_PIXEL, DAT_FLOAT, 1, 1, &pMat->cAmbient);
+				/*GetZFXD3D()->SetShaderConstant(SHT_PIXEL, DAT_FLOAT, 1, 1, &pMat->cAmbient);
 				GetZFXD3D()->SetShaderConstant(SHT_PIXEL, DAT_FLOAT, 2, 1, &pMat->cDiffuse);
 				GetZFXD3D()->SetShaderConstant(SHT_PIXEL, DAT_FLOAT, 3, 1, &pMat->cEmissive);
-				GetZFXD3D()->SetShaderConstant(SHT_PIXEL, DAT_FLOAT, 4, 1, &pMat->cSpecular);
+				GetZFXD3D()->SetShaderConstant(SHT_PIXEL, DAT_FLOAT, 4, 1, &pMat->cSpecular);*/
 			}
 
 			// forced rendering without textures?
@@ -588,7 +588,7 @@ HRESULT ZFXD3DVCManager::Render(UINT nID)
 
 	// if using shaders they should be activated by the
 	// ActivateVShader methods. Else set FVF
-	if (!m_pZFXD3D->IsUseShaders())
+	if (!m_pZFXD3D->GetShaderManager()->IsUseShader())
 		m_pDevice->SetFVF(m_pSB[nID].dwFVF);
 
 	//  should we use additive rendering?
@@ -706,7 +706,7 @@ HRESULT ZFXD3DVCManager::Render(UINT nSBID, UINT nIBID, UINT nSkin) {
 			// set material for device
 			ZFXMATERIAL *pMat = &m_pSkinMan->m_pMaterials[pSkin->nMaterial];
 
-			if (!m_pZFXD3D->IsUseShaders()) {
+			if (!m_pZFXD3D->GetShaderManager()->IsUseShader()) {
 				D3DMATERIAL9 mat = {
 					pMat->cDiffuse.fR, pMat->cDiffuse.fG, pMat->cDiffuse.fB, pMat->cDiffuse.fA,
 					pMat->cAmbient.fR, pMat->cAmbient.fG, pMat->cAmbient.fB, pMat->cAmbient.fA,
@@ -717,10 +717,10 @@ HRESULT ZFXD3DVCManager::Render(UINT nSBID, UINT nIBID, UINT nSkin) {
 				m_pDevice->SetMaterial(&mat);
 			}
 			else {
-				GetZFXD3D()->SetShaderConstant(SHT_PIXEL, DAT_FLOAT, 1, 1, &pMat->cAmbient);
+				/*GetZFXD3D()->SetShaderConstant(SHT_PIXEL, DAT_FLOAT, 1, 1, &pMat->cAmbient);
 				GetZFXD3D()->SetShaderConstant(SHT_PIXEL, DAT_FLOAT, 2, 1, &pMat->cDiffuse);
 				GetZFXD3D()->SetShaderConstant(SHT_PIXEL, DAT_FLOAT, 3, 1, &pMat->cEmissive);
-				GetZFXD3D()->SetShaderConstant(SHT_PIXEL, DAT_FLOAT, 4, 1, &pMat->cSpecular);
+				GetZFXD3D()->SetShaderConstant(SHT_PIXEL, DAT_FLOAT, 4, 1, &pMat->cSpecular);*/
 			}
 
 			// forced rendering without textures?
@@ -782,7 +782,7 @@ HRESULT ZFXD3DVCManager::Render(UINT nSBID, UINT nIBID, UINT nSkin) {
 
 	// if using shaders they should be activated by the
 	// ActivateVShader methods. Else set FVF
-	if (!m_pZFXD3D->IsUseShaders())
+	if (!m_pZFXD3D->GetShaderManager()->IsUseShader())
 		m_pDevice->SetFVF(m_pSB[nSBID].dwFVF);
 
 	//  should we use additive rendering?
@@ -879,7 +879,7 @@ HRESULT ZFXD3DVCManager::Render(UINT nID, UINT SkinID, UINT StartIndex,
 			// set material for device
 			ZFXMATERIAL *pMat = &m_pSkinMan->m_pMaterials[pSkin->nMaterial];
 
-			if (!m_pZFXD3D->IsUseShaders()) {
+			if (!m_pZFXD3D->GetShaderManager()->IsUseShader()) {
 				D3DMATERIAL9 mat = {
 					pMat->cDiffuse.fR, pMat->cDiffuse.fG, pMat->cDiffuse.fB, pMat->cDiffuse.fA,
 					pMat->cAmbient.fR, pMat->cAmbient.fG, pMat->cAmbient.fB, pMat->cAmbient.fA,
@@ -890,10 +890,10 @@ HRESULT ZFXD3DVCManager::Render(UINT nID, UINT SkinID, UINT StartIndex,
 				m_pDevice->SetMaterial(&mat);
 			}
 			else {
-				GetZFXD3D()->SetShaderConstant(SHT_PIXEL, DAT_FLOAT, 1, 1, &pMat->cAmbient);
+				/*GetZFXD3D()->SetShaderConstant(SHT_PIXEL, DAT_FLOAT, 1, 1, &pMat->cAmbient);
 				GetZFXD3D()->SetShaderConstant(SHT_PIXEL, DAT_FLOAT, 2, 1, &pMat->cDiffuse);
 				GetZFXD3D()->SetShaderConstant(SHT_PIXEL, DAT_FLOAT, 3, 1, &pMat->cEmissive);
-				GetZFXD3D()->SetShaderConstant(SHT_PIXEL, DAT_FLOAT, 4, 1, &pMat->cSpecular);
+				GetZFXD3D()->SetShaderConstant(SHT_PIXEL, DAT_FLOAT, 4, 1, &pMat->cSpecular);*/
 			}
 
 			if (m_pZFXD3D->IsUseTextures()) {
@@ -954,7 +954,7 @@ HRESULT ZFXD3DVCManager::Render(UINT nID, UINT SkinID, UINT StartIndex,
 
 	// if using shaders they should be activated by the
 	// ActivateVShader methods. Else set FVF
-	if (!m_pZFXD3D->IsUseShaders())
+	if (!m_pZFXD3D->GetShaderManager()->IsUseShader())
 		m_pDevice->SetFVF(m_pSB[nID].dwFVF);
 
 	// this method is for indexed primitives only
@@ -1032,7 +1032,7 @@ HRESULT ZFXD3DVCManager::Render(ZFXVERTEXID VertexID,
 	int nEmptyVC = -1;
 	int nFullestVC = 0;
 
-	bool bShaders = m_pZFXD3D->IsUseShaders();
+	bool bShaders = m_pZFXD3D->GetShaderManager()->IsUseShader();
 
 	// which vertex type is to be processed?
 	switch (VertexID) {
@@ -1106,7 +1106,7 @@ HRESULT ZFXD3DVCManager::RenderNaked(UINT nNumV, const void *pVerts, bool b)
 {
 	HRESULT hr = ZFX_OK;
 	InvalidateStates();
-	m_pZFXD3D->UseShaders(false);
+	m_pZFXD3D->GetShaderManager()->EnableShader(false);
 	m_pDevice->SetTexture(0, NULL);
 
 	if (b)
@@ -1199,7 +1199,7 @@ HRESULT ZFXD3DVCManager::RenderPoints(ZFXVERTEXID VID,
 	} // switch
 
 	// shaders or FVF
-	if (m_pZFXD3D->IsUseShaders()) {
+	if (m_pZFXD3D->GetShaderManager()->IsUseShader()) {
 		/*m_pZFXD3D->ActivateVShader(0, VID);
 		m_pZFXD3D->ActivatePShader(0);*/
 	}
@@ -1286,7 +1286,7 @@ HRESULT ZFXD3DVCManager::RenderLines(ZFXVERTEXID VID,
 	} // switch
 
 	// shaders or FVF
-	if (m_pZFXD3D->IsUseShaders()) {
+	if (m_pZFXD3D->GetShaderManager()->IsUseShader()) {
 		/*m_pZFXD3D->ActivateVShader(0, VID);
 		m_pZFXD3D->ActivatePShader(0);*/
 	}
@@ -1331,7 +1331,7 @@ HRESULT ZFXD3DVCManager::RenderLine(const float *fStart,
 	InvalidateStates();
 
 	// make sure state is switched off
-	GetZFXD3D()->UseShaders(false);
+	GetZFXD3D()->GetShaderManager()->EnableShader(false);
 
 	// set coordinates
 	pVerts[0].x = fStart[0];
@@ -1523,7 +1523,7 @@ HRESULT ZFXD3DVCache::Flush(bool bUseShaders) {
 		// WIREFRAME MODE NEEDS A SPECIAL CASE
 		if (m_pDad->GetZFXD3D()->GetShadeMode() == RS_SHADE_SOLID) 
 		{
-			if (!m_pDad->GetZFXD3D()->IsUseShaders()) 
+			if (!m_pDad->GetZFXD3D()->GetShaderManager()->IsUseShader())
 			{
 				D3DMATERIAL9 mat = {
 					pMat->cDiffuse.fR, pMat->cDiffuse.fG, pMat->cDiffuse.fB, pMat->cDiffuse.fA,
@@ -1536,10 +1536,10 @@ HRESULT ZFXD3DVCache::Flush(bool bUseShaders) {
 			}
 			else 
 			{
-				m_pDad->GetZFXD3D()->SetShaderConstant(SHT_PIXEL, DAT_FLOAT, 1, 1, &pMat->cAmbient);
+				/*m_pDad->GetZFXD3D()->SetShaderConstant(SHT_PIXEL, DAT_FLOAT, 1, 1, &pMat->cAmbient);
 				m_pDad->GetZFXD3D()->SetShaderConstant(SHT_PIXEL, DAT_FLOAT, 2, 1, &pMat->cDiffuse);
 				m_pDad->GetZFXD3D()->SetShaderConstant(SHT_PIXEL, DAT_FLOAT, 3, 1, &pMat->cEmissive);
-				m_pDad->GetZFXD3D()->SetShaderConstant(SHT_PIXEL, DAT_FLOAT, 4, 1, &pMat->cSpecular);
+				m_pDad->GetZFXD3D()->SetShaderConstant(SHT_PIXEL, DAT_FLOAT, 4, 1, &pMat->cSpecular);*/
 			}
 
 			if (m_pDad->GetZFXD3D()->IsUseTextures()) 

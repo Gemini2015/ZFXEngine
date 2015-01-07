@@ -250,7 +250,7 @@ HRESULT ZFXOpenGLVCacheManager::Render(ZFXVERTEXID VertexID,
 	int nEmptyVCache = -1;
 	int nFullestVCache = 0;
 
-	bool bUseShader = m_pOpenGL->IsUseShaders();
+	bool bUseShader = m_pOpenGL->GetShaderManager()->IsUseShader();
 
 	switch (VertexID)
 	{
@@ -344,8 +344,8 @@ HRESULT ZFXOpenGLVCacheManager::Render(UINT nSBID)
 		glBlendFunc(GL_ZERO, GL_ONE);
 	}
 	CHECK_ERROR;
-
-	if (!m_pOpenGL->IsUseShaders())
+	bool bUseShader = m_pOpenGL->GetShaderManager()->IsUseShader();
+	if (!bUseShader)
 	{
 		hr = ZFXOpenGLVCache::SetClientStateEnable(m_pStaticBuffer[nSBID].nVertexType, true);
 	}
@@ -356,7 +356,7 @@ HRESULT ZFXOpenGLVCacheManager::Render(UINT nSBID)
 	
 	hr = DrawPrimitive(mode, nVertexNum, nIndisNum, m_pStaticBuffer[nSBID].bIndis);
 
-	if (!m_pOpenGL->IsUseShaders())
+	if (!bUseShader)
 	{
 		hr = ZFXOpenGLVCache::SetClientStateEnable(m_pStaticBuffer[nSBID].nVertexType, false);
 	}
@@ -393,7 +393,8 @@ HRESULT ZFXOpenGLVCacheManager::Render(UINT nSBID, UINT nIBID, UINT nSkin)
 		m_pOpenGL->ActiveSkin(nSkin);
 	}// set skin
 
-	if (!m_pOpenGL->IsUseShaders())
+	bool bUseShader = m_pOpenGL->GetShaderManager()->IsUseShader();
+	if (!bUseShader)
 	{
 		// Set FVF
 		ZFXOpenGLVCache::SetFVF(m_pStaticBuffer[nSBID].nVertexType);
@@ -479,7 +480,8 @@ HRESULT ZFXOpenGLVCacheManager::Render(UINT nSBID, UINT SkinID, UINT StartIndex,
 		m_pOpenGL->ActiveSkin(SkinID);
 	} // set device skin
 
-	if (!m_pOpenGL->IsUseShaders())
+	bool bUseShader = m_pOpenGL->GetShaderManager()->IsUseShader();
+	if (!bUseShader)
 	{
 		// Set FVF
 		ZFXOpenGLVCache::SetFVF(m_pStaticBuffer[nSBID].nVertexType);
@@ -532,7 +534,7 @@ HRESULT ZFXOpenGLVCacheManager::RenderNaked(UINT nVerts, const void *pVerts, boo
 {
 	HRESULT hr = ZFX_OK;
 	InvalidateStates();
-	m_pOpenGL->UseShaders(false);
+	m_pOpenGL->GetShaderManager()->EnableShader(false);
 	
 	glClientActiveTexture(GL_TEXTURE0);
 	glDisable(GL_TEXTURE_2D);
@@ -607,7 +609,8 @@ HRESULT ZFXOpenGLVCacheManager::RenderPoints(ZFXVERTEXID VertexID, UINT nVerts, 
 	glBufferData(GL_ARRAY_BUFFER, size, pVerts, GL_STATIC_DRAW);
 	
 	// shaders or FVF
-	if (m_pOpenGL->IsUseShaders())
+	bool bUseShader = m_pOpenGL->GetShaderManager()->IsUseShader();
+	if (bUseShader)
 	{
 		/*m_pOpenGL->ActivateVShader(0, VertexID);
 		m_pOpenGL->ActivatePShader(0);*/
@@ -685,7 +688,8 @@ HRESULT ZFXOpenGLVCacheManager::RenderLines(ZFXVERTEXID VertexID, UINT nVerts, c
 	glBufferData(GL_ARRAY_BUFFER, size, pVerts, GL_STATIC_DRAW);
 	
 	// shaders or FVF
-	if (m_pOpenGL->IsUseShaders())
+	bool bUseShader = m_pOpenGL->GetShaderManager()->IsUseShader();
+	if (bUseShader)
 	{
 		/*m_pOpenGL->ActivateVShader(0, VertexID);
 		m_pOpenGL->ActivatePShader(0);*/
@@ -721,7 +725,7 @@ HRESULT ZFXOpenGLVCacheManager::RenderLine(const float *fStart, const float *fEn
 
 	InvalidateStates();
 
-	m_pOpenGL->UseShaders(false);
+	m_pOpenGL->GetShaderManager()->EnableShader(false);
 
 	LVERTEX pVertex[2];
 	pVertex[0].x = fStart[0];
@@ -742,7 +746,6 @@ HRESULT ZFXOpenGLVCacheManager::RenderLine(const float *fStart, const float *fEn
 	glClientActiveTexture(GL_TEXTURE0);
 	glDisable(GL_TEXTURE_2D);
 
-	m_pOpenGL->UseShaders(false);
 	glEnable(GL_LIGHTING);
 
 	GLuint vertexbuffer;
@@ -770,7 +773,7 @@ HRESULT ZFXOpenGLVCacheManager::RenderLine(const float *fStart, const float *fEn
 
 HRESULT ZFXOpenGLVCacheManager::ForcedFlushAll(void)
 {
-	bool bUseShader = m_pOpenGL->IsUseShaders();
+	bool bUseShader = m_pOpenGL->GetShaderManager()->IsUseShader();
 	int i = 0;
 	HRESULT hr = ZFX_OK;
 	for (i = 0; i < ZFXOpenGLVCache_NUM; i++)
@@ -823,7 +826,7 @@ HRESULT ZFXOpenGLVCacheManager::ForcedFlush(ZFXVERTEXID vid)
 	{
 		if (!pCache[i]->IsEmpty())
 		{
-			if (FAILED(pCache[i]->Flush(m_pOpenGL->IsUseShaders())))
+			if (FAILED(pCache[i]->Flush(m_pOpenGL->GetShaderManager()->IsUseShader())))
 				hr = ZFX_FAIL;
 		}
 	}

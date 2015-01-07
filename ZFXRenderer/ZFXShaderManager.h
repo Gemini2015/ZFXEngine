@@ -3,7 +3,7 @@
 
 #include <windows.h>
 #include "ZFX.h"
-
+#include "ZFXRenderDevice.h"
 #include <string>
 
 
@@ -43,6 +43,7 @@ public:
 class IShaderManager
 {
 protected:
+	ZFXRenderDevice* m_pRenderDevice;
 	ShaderObject* m_ActiveVertexShader;
 	ShaderObject* m_ActiveFragmentShader;
 
@@ -50,8 +51,9 @@ protected:
 	bool m_bUseShader;
 	
 public:
-	IShaderManager()
+	IShaderManager(ZFXRenderDevice* pRenderDevice)
 	{
+		m_pRenderDevice = pRenderDevice;
 		m_ActiveVertexShader = NULL;
 		m_ActiveFragmentShader = NULL;
 	}
@@ -60,6 +62,10 @@ public:
 	virtual HRESULT BindShader(ShaderObject* obj) = 0;
 	virtual HRESULT UnBindShader(ZFXSHADERTYPE type) = 0;
 	virtual ShaderObject* GetActiveShader(ZFXSHADERTYPE type) = 0;
+	/*
+		Step.1 Bind Shader
+		Step.2 Enable Shader
+	*/
 	virtual HRESULT EnableShader(bool bEnable) = 0;
 	virtual bool IsCanUseShader() const { return m_bCanUseShader; };
 	virtual bool IsUseShader() const { return m_bUseShader; };

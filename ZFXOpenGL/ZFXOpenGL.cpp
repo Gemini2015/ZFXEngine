@@ -892,7 +892,7 @@ void ZFXOpenGL::FadeScreen(float fR, float fG, float fB, float fA)
 	SetView3D(ZFXVector(1, 0, 0), ZFXVector(0, 1, 0),
 		ZFXVector(0, 0, 1), ZFXVector(0, 0, 0));*/
 
-	UseShaders(false);
+	m_pShaderManager->EnableShader(false);
 	glActiveTexture(GL_TEXTURE0);
 	glDisable(GL_TEXTURE_2D);
 
@@ -987,15 +987,16 @@ HRESULT ZFXOpenGL::Init(HWND mainWnd, const HWND* childWnds, int nWndsNum, int n
 
 	g_bLF = bSaveLog;
 
-	/*if (m_pGLSLManager == NULL)
+	if (m_pShaderManager == NULL)
 	{
-		m_pGLSLManager = new GLSLManager();
-		if (m_pGLSLManager == NULL)
+		ZFXOpenGL* pRenderDevice = this;
+		m_pShaderManager = new GLSLShaderManager(pRenderDevice);
+		if (m_pShaderManager == NULL)
 		{
-			Log("create GLSLManager error");
+			Log("create GLSLShaderManager error");
 			return E_FAIL;
 		}
-	}*/
+	}
 
 	if (nWndsNum > 0)
 	{
@@ -1169,64 +1170,6 @@ void ZFXOpenGL::Release(void)
 	*/
 	CHECK_ERROR;
 	Log("OpenGL release");
-}
-
-void ZFXOpenGL::UseShaders(bool b)
-{
-	if (!m_bCanDoShaders) return;
-
-	if (m_bUseShaders == b) return;
-
-	if (m_pVertexMan)
-	{
-		m_pVertexMan->ForcedFlushAll();
-		m_pVertexMan->InvalidateStates();
-	}
-
-	m_bUseShaders = b;
-	if (!m_bUseShaders)
-	{
-		glUseProgram(0);
-	}
-
-	CHECK_ERROR;
-}
-
-HRESULT ZFXOpenGL::SetShaderConstant(ZFXSHADERTYPE sht,
-	ZFXDATATYPE dat,
-	UINT nReg, UINT nNum,
-	const void *pData)
-{
-	return ZFX_OK;
-}
-
-HRESULT ZFXOpenGL::SetShaderConstant(ZFXSHADERTYPE shadertype, ZFXDATATYPE datatype, const char* name, const void* data)
-{
-	/*if (m_bCanDoShaders && m_bUseShaders)
-	{
-		if (name == NULL || data == NULL || strlen(name) == 0)
-			return ZFX_INVALIDPARAM;
-
-		HRESULT hr = ZFX_OK;
-		switch (datatype)
-		{
-		DAT_BOOL:
-			m_pGLSLManager->SetNamedConstant(name, *(int*)data);
-			break;
-		DAT_INT:
-			m_pGLSLManager->SetNamedConstant(name, *(int*)data);
-			break;
-		DAT_FLOAT:
-			m_pGLSLManager->SetNamedConstant(name, *(float*)data);
-			break;
-		default:
-			hr = ZFX_INVALIDPARAM;
-			break;
-		}
-
-		return hr;
-	}*/
-	return ZFX_FAIL;
 }
 
 void ZFXOpenGL::UseAdditiveBlending(bool b)

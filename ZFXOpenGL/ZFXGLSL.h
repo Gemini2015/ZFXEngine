@@ -14,6 +14,8 @@
 
 #define MAX_SHADER_NUM (MAX_SHADER * 2)
 
+class ZFXOpenGL;
+
 class GLSLShaderObject : public ShaderObject
 {
 private:
@@ -68,7 +70,7 @@ class GLSLShaderManager : public IShaderManager
 	GLSLProgram* m_ActiveProgram;
 
 public:
-	GLSLShaderManager();
+	GLSLShaderManager(ZFXOpenGL* pOpenGL);
 
 	virtual ShaderObject* CreateShader(const void* pData, ZFXSHADERTYPE type, bool bLoadFromFile) override;
 

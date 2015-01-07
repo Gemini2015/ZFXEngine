@@ -9,7 +9,6 @@
 #include <stdio.h>            // file stuff
 #include "zfx3d.h"            // zfx 3d math library
 #include "zfx.h"       // MATERIAL structure
-#include "ZFXShaderManager.h"
 
 // D E F I N E S ///////////////////////////////////////////////////
 // 窗口数量
@@ -20,6 +19,7 @@
 
 typedef enum ZFXAXIS_TYPE { X_AXIS, Y_AXIS, Z_AXIS } ZFXAXIS;
 
+class IShaderManager;
 
 // S T R U C T S ///////////////////////////////////////////////////
 
@@ -236,18 +236,14 @@ public:
 	// MISC OPERATIONS:
 	// ================
 
-	// activate or deactivate shaders
-	virtual bool    IsUseShaders(void) = 0;
-	virtual void    UseShaders(bool) = 0;
-	virtual bool    CanDoShaders(void) = 0;
 	/*
 		统一使用高级着色语言， HLSL & GLSL。
 		使用 名称 来引用参数
 	*/
-	virtual HRESULT SetShaderConstant(ZFXSHADERTYPE shadertype,
+	/*virtual HRESULT SetShaderConstant(ZFXSHADERTYPE shadertype,
 		ZFXDATATYPE datatype, const char* name, const void* data) = 0;
 	virtual HRESULT SetShaderConstant(ZFXSHADERTYPE, ZFXDATATYPE,
-		UINT, UINT, const void*) = 0;
+		UINT, UINT, const void*) = 0;*/
 
 	// activate additive blending
 	virtual void    UseAdditiveBlending(bool) = 0;

@@ -862,7 +862,7 @@ HRESULT ZFXOpenGLSkinManager::ActiveSkin(UINT nSkinID)
 
 	if (m_pOpenGL->GetShadeMode() == RS_SHADE_SOLID)
 	{
-		if (!m_pOpenGL->IsUseShaders())
+		if (!m_pOpenGL->GetShaderManager()->IsUseShader())
 		{
 			glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, pMat->cDiffuse.c);
 			glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, pMat->cAmbient.c);
@@ -873,10 +873,10 @@ HRESULT ZFXOpenGLSkinManager::ActiveSkin(UINT nSkinID)
 		}
 		else
 		{
-			m_pOpenGL->SetShaderConstant(SHT_PIXEL, DAT_FLOAT, 1, 1, &pMat->cAmbient);
+			/*m_pOpenGL->SetShaderConstant(SHT_PIXEL, DAT_FLOAT, 1, 1, &pMat->cAmbient);
 			m_pOpenGL->SetShaderConstant(SHT_PIXEL, DAT_FLOAT, 2, 1, &pMat->cDiffuse);
 			m_pOpenGL->SetShaderConstant(SHT_PIXEL, DAT_FLOAT, 3, 1, &pMat->cEmissive);
-			m_pOpenGL->SetShaderConstant(SHT_PIXEL, DAT_FLOAT, 4, 1, &pMat->cSpecular);
+			m_pOpenGL->SetShaderConstant(SHT_PIXEL, DAT_FLOAT, 4, 1, &pMat->cSpecular);*/
 		}
 
 		if (m_pOpenGL->IsUseTextures())
@@ -894,7 +894,7 @@ HRESULT ZFXOpenGLSkinManager::ActiveSkin(UINT nSkinID)
 					glEnable(GL_TEXTURE_2D);
 					glBindTexture(GL_TEXTURE_2D, texture);
 
-					if (m_pOpenGL->IsUseShaders())
+					if (m_pOpenGL->GetShaderManager()->IsUseShader())
 					{
 						//gluniform1
 						if (m_pOpenGL->GetShaderManager())

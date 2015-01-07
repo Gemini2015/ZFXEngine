@@ -115,23 +115,6 @@ public:
 		pPt->y = m_dwHeight;
 	}
 
-	void UseShaders(bool);
-	bool IsUseShaders(void)
-	{
-		return m_bUseShaders;
-	}
-
-	bool CanDoShaders(void)
-	{
-		return m_bCanDoShaders;
-	}
-
-	HRESULT SetShaderConstant(ZFXSHADERTYPE, ZFXDATATYPE,
-		UINT, UINT, const void*);
-
-	HRESULT SetShaderConstant(ZFXSHADERTYPE shadertype,
-		ZFXDATATYPE datatype, const char* name, const void* data);
-
 	void UseAdditiveBlending(bool);
 	bool IsUseAdditiveBlending(void)
 	{

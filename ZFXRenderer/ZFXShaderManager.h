@@ -34,6 +34,7 @@ public:
 	bool IsLoadFromFile() const { return m_bLoadFromFile; }
 	bool IsCompiled() const { return m_bCompiled; }
 	UINT GetID() const { return m_uuid; }
+	std::string GetFileName() const { return m_file; }
 	virtual HRESULT LoadSource(std::string str, bool bLoadFromFile = true);
 	virtual HRESULT Compile(void) = 0;
 
@@ -44,6 +45,9 @@ class IShaderManager
 protected:
 	ShaderObject* m_ActiveVertexShader;
 	ShaderObject* m_ActiveFragmentShader;
+
+	bool m_bCanUseShader;
+	bool m_bUseShader;
 	
 public:
 	IShaderManager()
@@ -57,6 +61,8 @@ public:
 	virtual HRESULT UnBindShader(ZFXSHADERTYPE type) = 0;
 	virtual ShaderObject* GetActiveShader(ZFXSHADERTYPE type) = 0;
 	virtual HRESULT EnableShader(bool bEnable) = 0;
+	virtual bool IsCanUseShader() const { return m_bCanUseShader; };
+	virtual bool IsUseShader() const { return m_bUseShader; };
 
 	virtual HRESULT SetNamedConstant(std::string name, bool val) = 0;
 	virtual HRESULT SetNamedConstant(std::string name, int val) = 0;

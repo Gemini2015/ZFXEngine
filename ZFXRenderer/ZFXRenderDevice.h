@@ -236,15 +236,6 @@ public:
 	// MISC OPERATIONS:
 	// ================
 
-	/*
-		统一使用高级着色语言， HLSL & GLSL。
-		使用 名称 来引用参数
-	*/
-	/*virtual HRESULT SetShaderConstant(ZFXSHADERTYPE shadertype,
-		ZFXDATATYPE datatype, const char* name, const void* data) = 0;
-	virtual HRESULT SetShaderConstant(ZFXSHADERTYPE, ZFXDATATYPE,
-		UINT, UINT, const void*) = 0;*/
-
 	// activate additive blending
 	virtual void    UseAdditiveBlending(bool) = 0;
 	virtual bool    IsUseAdditiveBlending(void) = 0;

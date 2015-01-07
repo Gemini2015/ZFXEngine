@@ -95,6 +95,9 @@ public:
 	virtual HRESULT SetNamedConstant(std::string name, float val) override;
 
 	virtual HRESULT SetNamedConstant(std::string name, ZFXMatrix m) override;
+
+	virtual HRESULT SetNamedConstant(std::string name, ZFXDATATYPE type, int count, void* data) override;
+
 };
 
 

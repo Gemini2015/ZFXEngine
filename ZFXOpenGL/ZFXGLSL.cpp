@@ -420,6 +420,40 @@ HRESULT GLSLShaderManager::SetNamedConstant(std::string name, ZFXMatrix m)
 	return ZFX_OK;
 }
 
+HRESULT GLSLShaderManager::SetNamedConstant(std::string name, ZFXDATATYPE type, int count, void* data)
+{
+	if (!m_ActiveProgram)
+		return ZFX_FAIL;
+	if (!glIsProgram(m_ActiveProgram->m_program))
+		return ZFX_FAIL;
+	GLSLCONSTANT_MAP::iterator it = m_ConstantMap.find(name);
+	if (it == m_ConstantMap.end())
+	{
+		return ZFX_FAIL;
+	}
+	GLSLConstant constant = it->second;
+	if (constant.type != type)
+		return ZFX_INVALIDPARAM;
+
+	HRESULT hr = ZFX_OK;
+	switch (type)
+	{
+	case DAT_BOOL:
+		glUniform1iv(constant.location, 1, (GLint*)data);
+		break;
+	case DAT_INT:
+		glUniform1fv(constant.location, 1, (GLfloat*)data);
+		break;
+	case DAT_FLOAT:
+		glUniform1fv(constant.location, 1, (GLfloat*)data);
+		break;
+	default:
+		hr = ZFX_FAIL;
+		break;
+	}
+	return hr;
+}
+
 
 
 

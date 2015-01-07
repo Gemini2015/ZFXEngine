@@ -183,13 +183,13 @@ public:
 
 	HRESULT SetLight(const ZFXLIGHT*, UCHAR) override;
 
-	HRESULT CreateVShader(const void *pData, UINT nSize, bool bLoadFromFile, bool bIsCompiled, UINT *pID) override;
+	/*HRESULT CreateVShader(const void *pData, UINT nSize, bool bLoadFromFile, bool bIsCompiled, UINT *pID) override;
 
 	HRESULT CreatePShader(const void *pData, UINT nSize, bool bLoadFromFile, bool bIsCompiled, UINT *pID) override;
 
 	HRESULT ActivateVShader(UINT id, ZFXVERTEXID VertexID) override;
 
-	HRESULT ActivatePShader(UINT id) override;
+	HRESULT ActivatePShader(UINT id) override;*/
 
 	HRESULT UseWindow(UINT nHwnd) override;
 
@@ -230,11 +230,6 @@ public:
 	
 	HRESULT ActiveSkin(UINT nSkinID);
 
-	GLSLManager* GetGLSLManager()
-	{
-		return m_pGLSLManager;
-	}
-
 private:
 	HINSTANCE m_hDLL;
 	HDC m_hDC[MAX_3DHWND];
@@ -246,7 +241,6 @@ private:
 	bool m_bIsSceneRunning;
 	GLenum m_TextureOp[8];
 	UCHAR m_nActivateTextureUnit;
-	GLSLManager *m_pGLSLManager;
 	std::string m_name;
 	UINT m_nActiveSkin;
 	UINT m_nActiveVShader;

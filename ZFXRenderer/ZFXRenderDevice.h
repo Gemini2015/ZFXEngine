@@ -9,7 +9,7 @@
 #include <stdio.h>            // file stuff
 #include "zfx3d.h"            // zfx 3d math library
 #include "zfx.h"       // MATERIAL structure
-
+#include "ZFXShaderManager.h"
 
 // D E F I N E S ///////////////////////////////////////////////////
 // 窗口数量
@@ -204,7 +204,7 @@ protected:
 
 	ZFXSkinManager        *m_pSkinMan;   // material and textures
 	ZFXVertexCacheManager *m_pVertexMan; // manage vertices/indices
-
+	IShaderManager* m_pShaderManager;
 
 public:
 	ZFXRenderDevice(void) {};
@@ -323,19 +323,19 @@ public:
 	// =============
 
 	// create shaders
-	virtual HRESULT CreateVShader(const void *pData,
+	/*virtual HRESULT CreateVShader(const void *pData,
 		UINT nSize,
 		bool bLoadFromFile,
 		bool bIsCompiled,
 		UINT *pID) = 0;
-	virtual HRESULT CreatePShader(const void *pData,
+		virtual HRESULT CreatePShader(const void *pData,
 		UINT nSize,
 		bool bLoadFromFile,
 		bool bIsCompiled,
 		UINT *pID) = 0;
 
-	virtual HRESULT ActivateVShader(UINT id, ZFXVERTEXID VertexID) = 0;
-	virtual HRESULT ActivatePShader(UINT id) = 0;
+		virtual HRESULT ActivateVShader(UINT id, ZFXVERTEXID VertexID) = 0;
+		virtual HRESULT ActivatePShader(UINT id) = 0;*/
 
 
 	// RENDERING STUFF:
@@ -374,7 +374,7 @@ public:
 	// draw text: font id, x, y, color, string
 	virtual HRESULT DrawText(UINT, int, int, DWORD, char*) = 0;
 
-
+	IShaderManager* GetShaderManager() const { return m_pShaderManager; };
 	// LIGHT STUFF:
 	// ============
 

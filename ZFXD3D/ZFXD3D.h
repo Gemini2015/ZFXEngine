@@ -220,10 +220,10 @@ public:
 	HRESULT   SetLight(const ZFXLIGHT*, UCHAR);
 
 	// shader stuff
-	HRESULT   CreateVShader(const void*, UINT, bool, bool, UINT*);
+	/*HRESULT   CreateVShader(const void*, UINT, bool, bool, UINT*);
 	HRESULT   CreatePShader(const void*, UINT, bool, bool, UINT*);
 	HRESULT   ActivateVShader(UINT, ZFXVERTEXID);
-	HRESULT   ActivatePShader(UINT);
+	HRESULT   ActivatePShader(UINT);*/
 
 	// misc stuff
 	void      UseAdditiveBlending(bool);

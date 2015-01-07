@@ -758,71 +758,71 @@ void ZFXD3D::UseShaders(bool b) {
 /**
  * Activate a prior created vertex shader for the render device.
  */
-HRESULT ZFXD3D::ActivateVShader(UINT nID, ZFXVERTEXID VertexID) {
-	if (!m_bCanDoShaders) return ZFX_NOSHADERSUPPORT;
-	if (nID >= m_nNumVShaders) return ZFX_INVALIDID;
-
-	// clear all vertex caches
-	m_pVertexMan->ForcedFlushAll();
-	//   m_pVertexMan->InvalidateStates();
-
-	// get size and format of vertex
-	switch (VertexID) {
-	case VID_PS: {
-		if (FAILED(m_pDevice->SetVertexDeclaration(m_pDeclPVertex)))
-			return ZFX_FAIL;
-	} break;
-	case VID_UU: {
-		if (FAILED(m_pDevice->SetVertexDeclaration(m_pDeclVertex)))
-			return ZFX_FAIL;
-	} break;
-	case VID_UL: {
-		if (FAILED(m_pDevice->SetVertexDeclaration(m_pDeclLVertex)))
-			return ZFX_FAIL;
-	} break;
-	case VID_CA: {
-		if (FAILED(m_pDevice->SetVertexDeclaration(m_pDeclCVertex)))
-			return ZFX_FAIL;
-	} break;
-	case VID_3T: {
-		if (FAILED(m_pDevice->SetVertexDeclaration(m_pDecl3TVertex)))
-			return ZFX_FAIL;
-	} break;
-	case VID_TV: {
-		if (FAILED(m_pDevice->SetVertexDeclaration(m_pDeclTVertex)))
-			return ZFX_FAIL;
-	} break;
-	default: return ZFX_INVALIDID;
-	} // switch
-
-	if (FAILED(m_pDevice->SetVertexShader(m_pVShader[nID])))
-		return ZFX_FAIL;
-
-	m_nActiveVShader = nID;
-	m_bUseShaders = true;
-	return ZFX_OK;
-} // ActivateVShader
-/*----------------------------------------------------------------*/
-
-
-/**
- * Activate a prior created pixel shader for the render device.
- */
-HRESULT ZFXD3D::ActivatePShader(UINT nID) {
-	if (!m_bCanDoShaders) return ZFX_NOSHADERSUPPORT;
-	if (nID >= m_nNumPShaders) return ZFX_INVALIDID;
-
-	// clear out buffers prior to state changes
-	m_pVertexMan->ForcedFlushAll();
-	//   m_pVertexMan->InvalidateStates();
-
-	if (FAILED(m_pDevice->SetPixelShader(m_pPShader[nID])))
-		return ZFX_FAIL;
-
-	m_nActivePShader = nID;
-	m_bUseShaders = true;
-	return ZFX_OK;
-} // ActivatePShader
+//HRESULT ZFXD3D::ActivateVShader(UINT nID, ZFXVERTEXID VertexID) {
+//	if (!m_bCanDoShaders) return ZFX_NOSHADERSUPPORT;
+//	if (nID >= m_nNumVShaders) return ZFX_INVALIDID;
+//
+//	// clear all vertex caches
+//	m_pVertexMan->ForcedFlushAll();
+//	//   m_pVertexMan->InvalidateStates();
+//
+//	// get size and format of vertex
+//	switch (VertexID) {
+//	case VID_PS: {
+//		if (FAILED(m_pDevice->SetVertexDeclaration(m_pDeclPVertex)))
+//			return ZFX_FAIL;
+//	} break;
+//	case VID_UU: {
+//		if (FAILED(m_pDevice->SetVertexDeclaration(m_pDeclVertex)))
+//			return ZFX_FAIL;
+//	} break;
+//	case VID_UL: {
+//		if (FAILED(m_pDevice->SetVertexDeclaration(m_pDeclLVertex)))
+//			return ZFX_FAIL;
+//	} break;
+//	case VID_CA: {
+//		if (FAILED(m_pDevice->SetVertexDeclaration(m_pDeclCVertex)))
+//			return ZFX_FAIL;
+//	} break;
+//	case VID_3T: {
+//		if (FAILED(m_pDevice->SetVertexDeclaration(m_pDecl3TVertex)))
+//			return ZFX_FAIL;
+//	} break;
+//	case VID_TV: {
+//		if (FAILED(m_pDevice->SetVertexDeclaration(m_pDeclTVertex)))
+//			return ZFX_FAIL;
+//	} break;
+//	default: return ZFX_INVALIDID;
+//	} // switch
+//
+//	if (FAILED(m_pDevice->SetVertexShader(m_pVShader[nID])))
+//		return ZFX_FAIL;
+//
+//	m_nActiveVShader = nID;
+//	m_bUseShaders = true;
+//	return ZFX_OK;
+//} // ActivateVShader
+///*----------------------------------------------------------------*/
+//
+//
+///**
+// * Activate a prior created pixel shader for the render device.
+// */
+//HRESULT ZFXD3D::ActivatePShader(UINT nID) {
+//	if (!m_bCanDoShaders) return ZFX_NOSHADERSUPPORT;
+//	if (nID >= m_nNumPShaders) return ZFX_INVALIDID;
+//
+//	// clear out buffers prior to state changes
+//	m_pVertexMan->ForcedFlushAll();
+//	//   m_pVertexMan->InvalidateStates();
+//
+//	if (FAILED(m_pDevice->SetPixelShader(m_pPShader[nID])))
+//		return ZFX_FAIL;
+//
+//	m_nActivePShader = nID;
+//	m_bUseShaders = true;
+//	return ZFX_OK;
+//} // ActivatePShader
 /*----------------------------------------------------------------*/
 
 
@@ -891,106 +891,106 @@ HRESULT ZFXD3D::SetShaderConstant(ZFXSHADERTYPE shadertype, ZFXDATATYPE datatype
  *        bool  - is the shader already compiled
  *        UINT* - id to activate the shader later on
  */
-HRESULT ZFXD3D::CreateVShader(const void *pData, UINT nSize,
-	bool bLoadFromFile,
-	bool bIsCompiled, UINT *pID) {
-	LPD3DXBUFFER  pCode = NULL;
-	LPD3DXBUFFER  pDebug = NULL;
-	HRESULT       hrC = ZFX_OK, hrA = ZFX_OK;
-	DWORD        *pVS = NULL;
-	HANDLE        hFile = NULL, hMap = NULL;
-
-	// do we have space for one more?
-	if (m_nNumVShaders >= (MAX_SHADER - 1)) {
-		Log("error: max number of shaders reached in ZFXD3D::CreateVShader");
-		return ZFX_OUTOFMEMORY;
-	}
-
-	// (1): ALREADY ASSEMBLED
-	if (bIsCompiled) {
-
-		// already compiled (from file)
-		if (bLoadFromFile) {
-			hFile = CreateFile((LPCTSTR)pData, GENERIC_READ,
-				0, 0, OPEN_EXISTING,
-				FILE_ATTRIBUTE_NORMAL, 0);
-			if (hFile == INVALID_HANDLE_VALUE) {
-				Log("error: CreateFile() in ZFXD3D::CreateVShader failed");
-				return ZFX_FILENOTFOUND;
-			}
-
-			hMap = CreateFileMapping(hFile, 0, PAGE_READONLY, 0, 0, 0);
-			pVS = (DWORD*)MapViewOfFile(hMap, FILE_MAP_READ, 0, 0, 0);
-		}
-
-		// already compiled (from datapointer)
-		else { pVS = (DWORD*)pData; }
-	} // if
-
-	// (2): STILL NEEDS ASSEMBLING
-	else {
-		// not yet compiled (from file)
-		if (bLoadFromFile) {
-			hrA = D3DXAssembleShaderFromFile((char*)pData,
-				NULL, NULL, 0,
-				&pCode, &pDebug);
-		}
-		// not yet compiled (from datapointer)
-		else {
-			hrA = D3DXAssembleShader((char*)pData,
-				nSize - 1,
-				NULL, NULL, 0,
-				&pCode, &pDebug);
-		}
-
-		// track errors if any
-		if (SUCCEEDED(hrA)) {
-			pVS = (DWORD*)pCode->GetBufferPointer();
-		}
-		else {
-			Log("error: Assemble[Vertex]Shader[FromFile]() failed");
-			if (hrA == D3DERR_INVALIDCALL)
-				Log("INVALID_CALL");
-			else if (hrA == D3DXERR_INVALIDDATA)
-				Log("D3DXERR_INVALIDDATA");
-			else if (hrA == E_OUTOFMEMORY)
-				Log("E_OUTOFMEMORY");
-			if (pDebug->GetBufferPointer())
-				Log("Shader debugger says: %s", (char*)pDebug->GetBufferPointer());
-			else
-				Log("no debug infos stored");
-
-			return ZFX_FAIL;
-		}
-	} // else
-
-	// create the shader object
-	if (FAILED(hrC = m_pDevice->CreateVertexShader(pVS,
-		&m_pVShader[m_nNumVShaders]))) {
-		Log("error: CreateVertexShader() failed");
-		if (hrC == D3DERR_INVALIDCALL)
-			Log("INVALID_CALL");
-		else if (hrC == D3DERR_OUTOFVIDEOMEMORY)
-			Log("D3DERR_OUTOFVIDEOMEMORY");
-		else if (hrC == E_OUTOFMEMORY)
-			Log("E_OUTOFMEMORY");
-
-		return ZFX_FAIL;
-	}
-
-	// store index to this shader
-	if (pID) (*pID) = m_nNumVShaders;
-
-	// free resources
-	if (bIsCompiled && bLoadFromFile) {
-		UnmapViewOfFile(pVS);
-		CloseHandle(hMap);
-		CloseHandle(hFile);
-	}
-
-	m_nNumVShaders++;
-	return ZFX_OK;
-} // CreateVShader
+//HRESULT ZFXD3D::CreateVShader(const void *pData, UINT nSize,
+//	bool bLoadFromFile,
+//	bool bIsCompiled, UINT *pID) {
+//	LPD3DXBUFFER  pCode = NULL;
+//	LPD3DXBUFFER  pDebug = NULL;
+//	HRESULT       hrC = ZFX_OK, hrA = ZFX_OK;
+//	DWORD        *pVS = NULL;
+//	HANDLE        hFile = NULL, hMap = NULL;
+//
+//	// do we have space for one more?
+//	if (m_nNumVShaders >= (MAX_SHADER - 1)) {
+//		Log("error: max number of shaders reached in ZFXD3D::CreateVShader");
+//		return ZFX_OUTOFMEMORY;
+//	}
+//
+//	// (1): ALREADY ASSEMBLED
+//	if (bIsCompiled) {
+//
+//		// already compiled (from file)
+//		if (bLoadFromFile) {
+//			hFile = CreateFile((LPCTSTR)pData, GENERIC_READ,
+//				0, 0, OPEN_EXISTING,
+//				FILE_ATTRIBUTE_NORMAL, 0);
+//			if (hFile == INVALID_HANDLE_VALUE) {
+//				Log("error: CreateFile() in ZFXD3D::CreateVShader failed");
+//				return ZFX_FILENOTFOUND;
+//			}
+//
+//			hMap = CreateFileMapping(hFile, 0, PAGE_READONLY, 0, 0, 0);
+//			pVS = (DWORD*)MapViewOfFile(hMap, FILE_MAP_READ, 0, 0, 0);
+//		}
+//
+//		// already compiled (from datapointer)
+//		else { pVS = (DWORD*)pData; }
+//	} // if
+//
+//	// (2): STILL NEEDS ASSEMBLING
+//	else {
+//		// not yet compiled (from file)
+//		if (bLoadFromFile) {
+//			hrA = D3DXAssembleShaderFromFile((char*)pData,
+//				NULL, NULL, 0,
+//				&pCode, &pDebug);
+//		}
+//		// not yet compiled (from datapointer)
+//		else {
+//			hrA = D3DXAssembleShader((char*)pData,
+//				nSize - 1,
+//				NULL, NULL, 0,
+//				&pCode, &pDebug);
+//		}
+//
+//		// track errors if any
+//		if (SUCCEEDED(hrA)) {
+//			pVS = (DWORD*)pCode->GetBufferPointer();
+//		}
+//		else {
+//			Log("error: Assemble[Vertex]Shader[FromFile]() failed");
+//			if (hrA == D3DERR_INVALIDCALL)
+//				Log("INVALID_CALL");
+//			else if (hrA == D3DXERR_INVALIDDATA)
+//				Log("D3DXERR_INVALIDDATA");
+//			else if (hrA == E_OUTOFMEMORY)
+//				Log("E_OUTOFMEMORY");
+//			if (pDebug->GetBufferPointer())
+//				Log("Shader debugger says: %s", (char*)pDebug->GetBufferPointer());
+//			else
+//				Log("no debug infos stored");
+//
+//			return ZFX_FAIL;
+//		}
+//	} // else
+//
+//	// create the shader object
+//	if (FAILED(hrC = m_pDevice->CreateVertexShader(pVS,
+//		&m_pVShader[m_nNumVShaders]))) {
+//		Log("error: CreateVertexShader() failed");
+//		if (hrC == D3DERR_INVALIDCALL)
+//			Log("INVALID_CALL");
+//		else if (hrC == D3DERR_OUTOFVIDEOMEMORY)
+//			Log("D3DERR_OUTOFVIDEOMEMORY");
+//		else if (hrC == E_OUTOFMEMORY)
+//			Log("E_OUTOFMEMORY");
+//
+//		return ZFX_FAIL;
+//	}
+//
+//	// store index to this shader
+//	if (pID) (*pID) = m_nNumVShaders;
+//
+//	// free resources
+//	if (bIsCompiled && bLoadFromFile) {
+//		UnmapViewOfFile(pVS);
+//		CloseHandle(hMap);
+//		CloseHandle(hFile);
+//	}
+//
+//	m_nNumVShaders++;
+//	return ZFX_OK;
+//} // CreateVShader
 /*----------------------------------------------------------------*/
 
 
@@ -1001,105 +1001,105 @@ HRESULT ZFXD3D::CreateVShader(const void *pData, UINT nSize,
  *        bool  - is the shader already compiled
  *        UINT* - id to activate the shader later on
  */
-HRESULT ZFXD3D::CreatePShader(const void *pData, UINT nSize,
-	bool bLoadFromFile,
-	bool bIsCompiled, UINT *pID) 
-{
-	LPD3DXBUFFER  pCode = NULL;
-	LPD3DXBUFFER  pDebug = NULL;
-	HRESULT       hrC = ZFX_OK, hrA = ZFX_OK;
-	DWORD        *pPS = NULL;
-	HANDLE        hFile = NULL, hMap = NULL;
-
-	// do we have space for one more?
-	if (m_nNumPShaders >= (MAX_SHADER - 1))
-		return ZFX_OUTOFMEMORY;
-
-	// (1): ALREADY ASSEMBLED
-	if (bIsCompiled) {
-
-		// already compiled (from file)
-		if (bLoadFromFile) {
-			hFile = CreateFile((LPCTSTR)pData, GENERIC_READ,
-				0, 0, OPEN_EXISTING,
-				FILE_ATTRIBUTE_NORMAL, 0);
-			if (hFile == INVALID_HANDLE_VALUE) {
-				Log("error: CreateFile() in ZFXD3D::CreatePShader failed");
-				return ZFX_FILENOTFOUND;
-			}
-
-			hMap = CreateFileMapping(hFile, 0, PAGE_READONLY, 0, 0, 0);
-			pPS = (DWORD*)MapViewOfFile(hMap, FILE_MAP_READ, 0, 0, 0);
-		}
-
-		// already compiled (from datapointer)
-		else { pPS = (DWORD*)pData; }
-	} // if
-
-	// (2): STILL NEEDS ASSEMBLING
-	else {
-		// not yet compiled (from file)
-		if (bLoadFromFile) {
-			hrA = D3DXAssembleShaderFromFile((char*)pData,
-				NULL, NULL, 0,
-				&pCode, &pDebug);
-		}
-		// not yet compiled (from datapointer)
-		else {
-			hrA = D3DXAssembleShader((char*)pData,
-				nSize - 1,
-				NULL, NULL, 0,
-				&pCode, &pDebug);
-		}
-
-		// track errors if any
-		if (SUCCEEDED(hrA)) {
-			pPS = (DWORD*)pCode->GetBufferPointer();
-		}
-		else {
-			Log("error: Assemble[Pixel]Shader[FromFile]() failed");
-			if (hrA == D3DERR_INVALIDCALL)
-				Log("INVALID_CALL");
-			else if (hrA == D3DXERR_INVALIDDATA)
-				Log("D3DXERR_INVALIDDATA");
-			else if (hrA == E_OUTOFMEMORY)
-				Log("E_OUTOFMEMORY");
-			if (pDebug->GetBufferPointer())
-				Log("Shader debugger says: %s", (char*)pDebug->GetBufferPointer());
-			else
-				Log("no debug infos stored");
-
-			return ZFX_FAIL;
-		}
-	} // else
-
-	// create the shader object
-	if (FAILED(hrC = m_pDevice->CreatePixelShader(pPS,
-		&m_pPShader[m_nNumPShaders]))) {
-		Log("error: CreatePixelShader() failed");
-		if (hrC == D3DERR_INVALIDCALL)
-			Log("INVALID_CALL");
-		else if (hrC == D3DERR_OUTOFVIDEOMEMORY)
-			Log("D3DERR_OUTOFVIDEOMEMORY");
-		else if (hrC == E_OUTOFMEMORY)
-			Log("E_OUTOFMEMORY");
-
-		return ZFX_FAIL;
-	}
-
-	// store index to this shader
-	if (pID) (*pID) = m_nNumPShaders;
-
-	// free resources
-	if (bIsCompiled && bLoadFromFile) {
-		UnmapViewOfFile(pPS);
-		CloseHandle(hMap);
-		CloseHandle(hFile);
-	}
-
-	m_nNumPShaders++;
-	return ZFX_OK;
-} // CreatePShader
+//HRESULT ZFXD3D::CreatePShader(const void *pData, UINT nSize,
+//	bool bLoadFromFile,
+//	bool bIsCompiled, UINT *pID) 
+//{
+//	LPD3DXBUFFER  pCode = NULL;
+//	LPD3DXBUFFER  pDebug = NULL;
+//	HRESULT       hrC = ZFX_OK, hrA = ZFX_OK;
+//	DWORD        *pPS = NULL;
+//	HANDLE        hFile = NULL, hMap = NULL;
+//
+//	// do we have space for one more?
+//	if (m_nNumPShaders >= (MAX_SHADER - 1))
+//		return ZFX_OUTOFMEMORY;
+//
+//	// (1): ALREADY ASSEMBLED
+//	if (bIsCompiled) {
+//
+//		// already compiled (from file)
+//		if (bLoadFromFile) {
+//			hFile = CreateFile((LPCTSTR)pData, GENERIC_READ,
+//				0, 0, OPEN_EXISTING,
+//				FILE_ATTRIBUTE_NORMAL, 0);
+//			if (hFile == INVALID_HANDLE_VALUE) {
+//				Log("error: CreateFile() in ZFXD3D::CreatePShader failed");
+//				return ZFX_FILENOTFOUND;
+//			}
+//
+//			hMap = CreateFileMapping(hFile, 0, PAGE_READONLY, 0, 0, 0);
+//			pPS = (DWORD*)MapViewOfFile(hMap, FILE_MAP_READ, 0, 0, 0);
+//		}
+//
+//		// already compiled (from datapointer)
+//		else { pPS = (DWORD*)pData; }
+//	} // if
+//
+//	// (2): STILL NEEDS ASSEMBLING
+//	else {
+//		// not yet compiled (from file)
+//		if (bLoadFromFile) {
+//			hrA = D3DXAssembleShaderFromFile((char*)pData,
+//				NULL, NULL, 0,
+//				&pCode, &pDebug);
+//		}
+//		// not yet compiled (from datapointer)
+//		else {
+//			hrA = D3DXAssembleShader((char*)pData,
+//				nSize - 1,
+//				NULL, NULL, 0,
+//				&pCode, &pDebug);
+//		}
+//
+//		// track errors if any
+//		if (SUCCEEDED(hrA)) {
+//			pPS = (DWORD*)pCode->GetBufferPointer();
+//		}
+//		else {
+//			Log("error: Assemble[Pixel]Shader[FromFile]() failed");
+//			if (hrA == D3DERR_INVALIDCALL)
+//				Log("INVALID_CALL");
+//			else if (hrA == D3DXERR_INVALIDDATA)
+//				Log("D3DXERR_INVALIDDATA");
+//			else if (hrA == E_OUTOFMEMORY)
+//				Log("E_OUTOFMEMORY");
+//			if (pDebug->GetBufferPointer())
+//				Log("Shader debugger says: %s", (char*)pDebug->GetBufferPointer());
+//			else
+//				Log("no debug infos stored");
+//
+//			return ZFX_FAIL;
+//		}
+//	} // else
+//
+//	// create the shader object
+//	if (FAILED(hrC = m_pDevice->CreatePixelShader(pPS,
+//		&m_pPShader[m_nNumPShaders]))) {
+//		Log("error: CreatePixelShader() failed");
+//		if (hrC == D3DERR_INVALIDCALL)
+//			Log("INVALID_CALL");
+//		else if (hrC == D3DERR_OUTOFVIDEOMEMORY)
+//			Log("D3DERR_OUTOFVIDEOMEMORY");
+//		else if (hrC == E_OUTOFMEMORY)
+//			Log("E_OUTOFMEMORY");
+//
+//		return ZFX_FAIL;
+//	}
+//
+//	// store index to this shader
+//	if (pID) (*pID) = m_nNumPShaders;
+//
+//	// free resources
+//	if (bIsCompiled && bLoadFromFile) {
+//		UnmapViewOfFile(pPS);
+//		CloseHandle(hMap);
+//		CloseHandle(hFile);
+//	}
+//
+//	m_nNumPShaders++;
+//	return ZFX_OK;
+//} // CreatePShader
 /*----------------------------------------------------------------*/
 
 

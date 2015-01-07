@@ -26,6 +26,9 @@
     <ProjectReference Include="..\ZFX3D\ZFX3D.vcxproj">
       <Project>{33f48ca8-47cc-4e69-beee-9513e5b28aa3}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\ZFXRenderer\ZFXRenderer.vcxproj">
+      <Project>{031c4455-adb3-4eb7-a542-cfba8d100b66}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\ZFXUtil\ZFXUtil.vcxproj">
       <Project>{eaa626ce-f656-498a-8535-8b503da05dde}</Project>
     </ProjectReference>

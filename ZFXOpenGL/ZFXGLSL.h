@@ -6,6 +6,7 @@
 #include <gl\GL.h>
 #include <gl\GLU.h>
 #include "ZFXRenderDevice.h"
+#include "ZFXShaderManager.h"
 
 #include <string>
 #include <vector>
@@ -13,32 +14,36 @@
 
 #define MAX_SHADER_NUM (MAX_SHADER * 2)
 
-
-class GLSLShader
+class GLSLShaderObject : public ShaderObject
 {
-public:
-	GLuint m_shader;
-	GLenum m_type;
-	bool m_bCompiled;
-	std::string m_strSource;
+private:
 
-	GLSLShader();
-	~GLSLShader();
-	HRESULT CreateShader(GLenum type, std::string source);
-	HRESULT Compile();
+	static UINT sVertexShaderUUID;
+	static UINT sFragmentShaderUUID;
+
+	GLuint m_ShaderObject;
+	
+public:
+	GLSLShaderObject(ZFXSHADERTYPE type);
+	HRESULT Compile(void);
+
+	GLuint GetShaderObject() const { return m_ShaderObject; }
 };
 
 class GLSLProgram
 {
 public:
-	GLuint m_nVShader;
-	GLuint m_nFShader;
+	UINT64 m_uuid;
+	GLSLShaderObject* m_VShader;
+	GLSLShaderObject* m_FShader;
+
 	GLuint m_program;
 	bool m_bLinked;
 
 	GLSLProgram();
 	~GLSLProgram();
-	HRESULT CreateProgram(GLuint vshader = 0, GLuint fshader = 0);
+	HRESULT AttachShader(GLSLShaderObject *shader);
+	HRESULT Link();
 };
 
 typedef struct GLSLConstant_Type
@@ -49,39 +54,47 @@ typedef struct GLSLConstant_Type
 	GLuint location;
 } GLSLConstant;
 
-class GLSLManager
+class GLSLShaderManager : public IShaderManager
 {
+	typedef std::map<UINT, GLSLShaderObject> GLSLSHADER_MAP;
+	GLSLSHADER_MAP m_ShaderObjectMap;
+
+	typedef std::map<UINT64, GLSLProgram> GLSLPROGRAM_MAP;
+	GLSLPROGRAM_MAP m_ProgramMap;
+
+	typedef std::map<std::string, GLSLConstant> GLSLCONSTANT_MAP;
+	GLSLCONSTANT_MAP m_ConstantMap;
+
+	GLSLProgram* m_ActiveProgram;
+
 public:
-	GLSLShader* m_Shader[MAX_SHADER_NUM];
-	int m_nShaderNum;
-	std::vector<GLSLProgram*> m_vProgram;
+	GLSLShaderManager();
 
-	int m_nCurrentVShader;
-	int m_nCurrentFShader;
-	GLuint m_CurrentProgram;
-	bool m_bProgramCreated;
+	virtual ShaderObject* CreateShader(const void* pData, ZFXSHADERTYPE type, bool bLoadFromFile) override;
 
-	typedef std::map<std::string, GLSLConstant> ConstantList_Map;
-	ConstantList_Map m_ConstantList;
+	virtual HRESULT BindShader(ShaderObject* obj) override;
 
-	GLSLManager();
-	~GLSLManager();
+	virtual HRESULT UnBindShader(ZFXSHADERTYPE type) override;
 
-	HRESULT CreateShader(const void* pData, GLenum type, bool bLoadFromFile, UINT *pID);
-	HRESULT CreateProgram(int nVShader = -1, int nFShader = -1, GLuint *program = NULL);
-	HRESULT UseShader(int nVShader = -1, int nFShader = -1);
-	HRESULT ActivateShader(UINT id, GLenum type);
-	GLuint GetActiveProgram()
-	{
-		return m_CurrentProgram;
-	}
-	GLuint FindProgram(GLuint vshader = 0, GLuint fshader = 0);
+	virtual ShaderObject* GetActiveShader(ZFXSHADERTYPE type) override;
+
+	virtual HRESULT EnableShader(bool bEnable) override;
+
+	GLSLProgram* GetActiveProgram();
 	
+	GLSLProgram* LinkProgram();
 
 	HRESULT CollectConstant(GLuint program);
-	HRESULT SetNamedConstant(std::string name, int i);
-	HRESULT SetNamedConstant(std::string name, float v);
-	HRESULT SetNamedConstant(std::string name, ZFXMatrix m);
+
+	virtual HRESULT SetNamedConstant(std::string name, bool val) override;
+
+	virtual HRESULT SetNamedConstant(std::string name, int val) override;
+
+	virtual HRESULT SetNamedConstant(std::string name, float val) override;
+
+	virtual HRESULT SetNamedConstant(std::string name, ZFXMatrix m) override;
 };
+
+
 
 #endif

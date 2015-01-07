@@ -12,7 +12,7 @@ bool g_bLF = false;
 ZFXOpenGL::ZFXOpenGL(HINSTANCE hDLL)
 {
 	m_hDLL = hDLL;
-	m_pGLSLManager = NULL;
+	m_pShaderManager = NULL;
 	m_pSkinMan = NULL;
 	m_pVertexMan = NULL;
 	
@@ -712,46 +712,46 @@ HRESULT ZFXOpenGL::SetLight(const ZFXLIGHT* pLight, UCHAR nStage)
 	glEnable(GL_LIGHTING);
 	return ZFX_OK;
 }
-
-HRESULT ZFXOpenGL::CreateVShader(const void *pData, UINT nSize, bool bLoadFromFile, bool bIsCompiled, UINT *pID)
-{
-	if (pData == NULL)
-		return E_INVALIDARG;
-
-	if (m_pGLSLManager == NULL)
-		return E_FAIL;
-
-	return m_pGLSLManager->CreateShader(pData, GL_VERTEX_SHADER, bLoadFromFile, pID);
-}
-
-HRESULT ZFXOpenGL::CreatePShader(const void *pData, UINT nSize, bool bLoadFromFile, bool bIsCompiled, UINT *pID)
-{
-	if (pData == NULL)
-		return E_INVALIDARG;
-
-	if (m_pGLSLManager == NULL)
-		return E_FAIL;
-
-	return m_pGLSLManager->CreateShader(pData, GL_FRAGMENT_SHADER, bLoadFromFile, pID);
-}
-
-HRESULT ZFXOpenGL::ActivateVShader(UINT id, ZFXVERTEXID VertexID)
-{
-	if (m_pGLSLManager)
-	{
-		return m_pGLSLManager->ActivateShader(id, GL_VERTEX_SHADER);
-	}
-	return E_FAIL;
-}
-
-HRESULT ZFXOpenGL::ActivatePShader(UINT id)
-{
-	if (m_pGLSLManager)
-	{
-		return m_pGLSLManager->ActivateShader(id, GL_FRAGMENT_SHADER);
-	}
-	return E_FAIL;
-}
+//
+//HRESULT ZFXOpenGL::CreateVShader(const void *pData, UINT nSize, bool bLoadFromFile, bool bIsCompiled, UINT *pID)
+//{
+//	if (pData == NULL)
+//		return E_INVALIDARG;
+//
+//	if (m_pShaderManager == NULL)
+//		return E_FAIL;
+//
+//	return m_pShaderManager->CreateShader(pData, GL_VERTEX_SHADER, bLoadFromFile, pID);
+//}
+//
+//HRESULT ZFXOpenGL::CreatePShader(const void *pData, UINT nSize, bool bLoadFromFile, bool bIsCompiled, UINT *pID)
+//{
+//	if (pData == NULL)
+//		return E_INVALIDARG;
+//
+//	if (m_pGLSLManager == NULL)
+//		return E_FAIL;
+//
+//	return m_pGLSLManager->CreateShader(pData, GL_FRAGMENT_SHADER, bLoadFromFile, pID);
+//}
+//
+//HRESULT ZFXOpenGL::ActivateVShader(UINT id, ZFXVERTEXID VertexID)
+//{
+//	if (m_pGLSLManager)
+//	{
+//		return m_pGLSLManager->ActivateShader(id, GL_VERTEX_SHADER);
+//	}
+//	return E_FAIL;
+//}
+//
+//HRESULT ZFXOpenGL::ActivatePShader(UINT id)
+//{
+//	if (m_pGLSLManager)
+//	{
+//		return m_pGLSLManager->ActivateShader(id, GL_FRAGMENT_SHADER);
+//	}
+//	return E_FAIL;
+//}
 
 HRESULT ZFXOpenGL::UseWindow(UINT nHwnd)
 {
@@ -987,7 +987,7 @@ HRESULT ZFXOpenGL::Init(HWND mainWnd, const HWND* childWnds, int nWndsNum, int n
 
 	g_bLF = bSaveLog;
 
-	if (m_pGLSLManager == NULL)
+	/*if (m_pGLSLManager == NULL)
 	{
 		m_pGLSLManager = new GLSLManager();
 		if (m_pGLSLManager == NULL)
@@ -995,7 +995,7 @@ HRESULT ZFXOpenGL::Init(HWND mainWnd, const HWND* childWnds, int nWndsNum, int n
 			Log("create GLSLManager error");
 			return E_FAIL;
 		}
-	}
+	}*/
 
 	if (nWndsNum > 0)
 	{
@@ -1140,11 +1140,11 @@ HRESULT ZFXOpenGL::InitWindowed(HWND mainWnd, const HWND* childWnds, int nWndsNu
 
 void ZFXOpenGL::Release(void)
 {
-	if (m_pGLSLManager)
+	/*if (m_pGLSLManager)
 	{
 		delete m_pGLSLManager;
 		m_pGLSLManager = NULL;
-	}
+	}*/
 
 	if (m_bWindowed)
 	{
@@ -1202,7 +1202,7 @@ HRESULT ZFXOpenGL::SetShaderConstant(ZFXSHADERTYPE sht,
 
 HRESULT ZFXOpenGL::SetShaderConstant(ZFXSHADERTYPE shadertype, ZFXDATATYPE datatype, const char* name, const void* data)
 {
-	if (m_bCanDoShaders && m_bUseShaders)
+	/*if (m_bCanDoShaders && m_bUseShaders)
 	{
 		if (name == NULL || data == NULL || strlen(name) == 0)
 			return ZFX_INVALIDPARAM;
@@ -1225,7 +1225,7 @@ HRESULT ZFXOpenGL::SetShaderConstant(ZFXSHADERTYPE shadertype, ZFXDATATYPE datat
 		}
 
 		return hr;
-	}
+	}*/
 	return ZFX_FAIL;
 }
 
@@ -1639,10 +1639,10 @@ HRESULT ZFXOpenGL::ActiveSkin(UINT nSkinID)
 
 HRESULT ZFXOpenGL::SetMVPUniform()
 {
-	if (m_bCanDoShaders && m_bUseShaders)
+	/*if (m_bCanDoShaders && m_bUseShaders)
 	{
 		m_pGLSLManager->SetNamedConstant("mvp", m_mWorldViewProj);
-	}
+	}*/
 	return ZFX_OK;
 }
 

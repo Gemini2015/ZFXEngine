@@ -609,8 +609,8 @@ HRESULT ZFXOpenGLVCacheManager::RenderPoints(ZFXVERTEXID VertexID, UINT nVerts, 
 	// shaders or FVF
 	if (m_pOpenGL->IsUseShaders())
 	{
-		m_pOpenGL->ActivateVShader(0, VertexID);
-		m_pOpenGL->ActivatePShader(0);
+		/*m_pOpenGL->ActivateVShader(0, VertexID);
+		m_pOpenGL->ActivatePShader(0);*/
 	}
 	else
 	{
@@ -687,8 +687,8 @@ HRESULT ZFXOpenGLVCacheManager::RenderLines(ZFXVERTEXID VertexID, UINT nVerts, c
 	// shaders or FVF
 	if (m_pOpenGL->IsUseShaders())
 	{
-		m_pOpenGL->ActivateVShader(0, VertexID);
-		m_pOpenGL->ActivatePShader(0);
+		/*m_pOpenGL->ActivateVShader(0, VertexID);
+		m_pOpenGL->ActivatePShader(0);*/
 	}
 	else
 	{

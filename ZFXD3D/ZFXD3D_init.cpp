@@ -610,7 +610,7 @@ HRESULT ZFXD3D::OneTimeInit(void) {
 
 	// create a default shader. Note: its ID is 0
 	if (m_bCanDoShaders) {
-		const char BaseShader[] =
+		/*const char BaseShader[] =
 			"vs.1.1                 \n"\
 			"dcl_position0 v0       \n"\
 			"dcl_normal0   v3       \n"\
@@ -623,7 +623,7 @@ HRESULT ZFXD3D::OneTimeInit(void) {
 			false, false, NULL))) {
 			Log("CreateVShader() default failed");
 			return ZFX_FAIL;
-		}
+		}*/
 		/*
 		if (FAILED(ActivateVShader(0, VID_UU))) {
 		Log("ActivateVShader() default failed");

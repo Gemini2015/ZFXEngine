@@ -1200,8 +1200,8 @@ HRESULT ZFXD3DVCManager::RenderPoints(ZFXVERTEXID VID,
 
 	// shaders or FVF
 	if (m_pZFXD3D->IsUseShaders()) {
-		m_pZFXD3D->ActivateVShader(0, VID);
-		m_pZFXD3D->ActivatePShader(0);
+		/*m_pZFXD3D->ActivateVShader(0, VID);
+		m_pZFXD3D->ActivatePShader(0);*/
 	}
 	else m_pDevice->SetFVF(dwFVF);
 
@@ -1287,8 +1287,8 @@ HRESULT ZFXD3DVCManager::RenderLines(ZFXVERTEXID VID,
 
 	// shaders or FVF
 	if (m_pZFXD3D->IsUseShaders()) {
-		m_pZFXD3D->ActivateVShader(0, VID);
-		m_pZFXD3D->ActivatePShader(0);
+		/*m_pZFXD3D->ActivateVShader(0, VID);
+		m_pZFXD3D->ActivatePShader(0);*/
 	}
 	else m_pDevice->SetFVF(dwFVF);
 

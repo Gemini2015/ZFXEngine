@@ -897,11 +897,11 @@ HRESULT ZFXOpenGLSkinManager::ActiveSkin(UINT nSkinID)
 					if (m_pOpenGL->IsUseShaders())
 					{
 						//gluniform1
-						if (m_pOpenGL->GetGLSLManager())
+						if (m_pOpenGL->GetShaderManager())
 						{
 							char buf[MAX_PATH];
 							sprintf_s(buf, "tex_sample%d", i);
-							m_pOpenGL->GetGLSLManager()->SetNamedConstant(buf, i);
+							m_pOpenGL->GetShaderManager()->SetNamedConstant(buf, i);
 						}
 					}
 

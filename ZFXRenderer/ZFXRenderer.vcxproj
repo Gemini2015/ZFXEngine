@@ -13,9 +13,11 @@
   <ItemGroup>
     <ClInclude Include="ZFXRenderDevice.h" />
     <ClInclude Include="ZFXRenderer.h" />
+    <ClInclude Include="ZFXShaderManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ZFXRenderer.cpp" />
+    <ClCompile Include="ZFXShaderManager.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{031C4455-ADB3-4EB7-A542-CFBA8D100B66}</ProjectGuid>

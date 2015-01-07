@@ -530,31 +530,31 @@ HRESULT BuildAndSetShader(void)
 	if (!g_pDevice->CanDoShaders())
 		return S_OK;
 
-	if (FAILED(g_pDevice->CreateVShader("test.vsh", 0,
+	/*if (FAILED(g_pDevice->CreateVShader("test.vsh", 0,
 		true, false, &nID)))
-	{
+		{
 		GetLogger().Print(LOG_DEBUG,log_file,"CreateVShader failed\n");
 		return ZFX_FAIL;
-	}
+		}
 
-	if (FAILED(g_pDevice->ActivateVShader(nID, VID_UU))) 
-	{
+		if (FAILED(g_pDevice->ActivateVShader(nID, VID_UU)))
+		{
 		GetLogger().Print(LOG_DEBUG,log_file,"ActivateVShader failed\n");
 		return ZFX_FAIL;
-	}
+		}
 
-	if (FAILED(g_pDevice->CreatePShader("test.psh", 0,
-		true, false, &nID))) 
-	{
+		if (FAILED(g_pDevice->CreatePShader("test.psh", 0,
+		true, false, &nID)))
+		{
 		GetLogger().Print(LOG_DEBUG,log_file,"CreatePShader failed\n");
 		return ZFX_FAIL;
-	}
+		}
 
-	if (FAILED(g_pDevice->ActivatePShader(nID))) 
-	{
+		if (FAILED(g_pDevice->ActivatePShader(nID)))
+		{
 		GetLogger().Print(LOG_DEBUG,log_file,"ActivatePShader failed\n");
 		return ZFX_FAIL;
-	}
+		}*/
 
 	return ZFX_OK;
 } // BuildAndSetShader

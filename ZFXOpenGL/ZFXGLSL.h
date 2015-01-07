@@ -16,6 +16,13 @@
 
 class ZFXOpenGL;
 
+typedef struct GLTYPE_ZFXTYPE_TYPE
+{
+	ZFXDATATYPE zfx_type;
+	GLenum gl_type;
+}GLTYPE_ZFXTYPE;
+
+
 class GLSLShaderObject : public ShaderObject
 {
 private:
@@ -52,7 +59,7 @@ typedef struct GLSLConstant_Type
 {
 	std::string name;
 	GLsizei size;
-	GLenum type;
+	ZFXDATATYPE type;
 	GLuint location;
 } GLSLConstant;
 
@@ -66,6 +73,9 @@ class GLSLShaderManager : public IShaderManager
 
 	typedef std::map<std::string, GLSLConstant> GLSLCONSTANT_MAP;
 	GLSLCONSTANT_MAP m_ConstantMap;
+
+	typedef std::map<GLenum, ZFXDATATYPE> GLTYPE_ZFXTYPE_MAP;
+	GLTYPE_ZFXTYPE_MAP m_DataTypeMap;
 
 	GLSLProgram* m_ActiveProgram;
 

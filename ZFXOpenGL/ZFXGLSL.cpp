@@ -126,6 +126,17 @@ GLSLShaderManager::GLSLShaderManager(ZFXOpenGL *pOpenGL)
 	: IShaderManager((ZFXRenderDevice*)pOpenGL)
 {
 	m_ActiveProgram = NULL;
+
+	GLTYPE_ZFXTYPE TypeMapping[] = {
+			{ DAT_BOOL, GL_BOOL, },
+			{ DAT_INT, GL_INT, },
+			{ DAT_FLOAT, GL_FLOAT, },
+	};
+
+	for (int i = 0; i < sizeof(TypeMapping) / sizeof(GLTYPE_ZFXTYPE); i++)
+	{
+		m_DataTypeMap[TypeMapping[i].gl_type] = TypeMapping[i].zfx_type;
+	}
 }
 
 ShaderObject* GLSLShaderManager::CreateShader(const void* pData, ZFXSHADERTYPE type, bool bLoadFromFile)
@@ -325,7 +336,7 @@ HRESULT GLSLShaderManager::CollectConstant(GLuint program)
 				GLSLConstant constant;
 				constant.name.assign(buf);
 				constant.size = size;
-				constant.type = type;
+				constant.type = m_DataTypeMap[type];
 				constant.location = location;
 
 				m_ConstantMap[constant.name] = constant;

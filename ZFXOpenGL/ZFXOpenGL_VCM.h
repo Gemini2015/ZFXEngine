@@ -1,8 +1,10 @@
 #ifndef _ZFXOPENGL_VCM_H_
 #define _ZFXOPENGL_VCM_H_
 
+
+#include "ZFXGLPrerequisites.h"
+
 #include "ZFXRenderDevice.h"
-#include "ZFXOpenGL.h"
 #include "ZFXOpenGL_Skin.h"
 
 typedef struct ZFXSTATICBUFFER_TYPE

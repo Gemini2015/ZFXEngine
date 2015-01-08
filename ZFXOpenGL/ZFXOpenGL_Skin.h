@@ -1,16 +1,11 @@
 #ifndef _ZFXOPENGL_SKIN_H_
 #define _ZFXOPENGL_SKIN_H_
 
-
+#include "ZFXGLPrerequisites.h"
 #include "ZFXRenderDevice.h"
-#include "ZFX.h"
-#include "gl\GL.h"
 
-#define CHECK_ERROR {\
-	GLenum error = glGetError();\
-	if(error != GL_NO_ERROR)\
-		 Log("OpenGL Error > File:%s Line:%d Error:%d",__FILE__, __LINE__, error);\
-}
+
+
 
 class ZFXOpenGLSkinManager : public ZFXSkinManager
 {

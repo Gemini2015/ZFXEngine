@@ -1,5 +1,6 @@
 #include "ZFXOpenGL_VCM.h"
 #include "ZFXOpenGL.h"
+#include "ZFXGLSL.h"
 
 ZFXOpenGLVCacheManager::ZFXOpenGLVCacheManager(ZFXOpenGLSkinManager* pSkinMan,
 	ZFXOpenGL* pOpenGL, 

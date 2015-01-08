@@ -26,9 +26,6 @@
     <ClInclude Include="main.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="ZFX.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="s3d.h">
       <Filter>头文件</Filter>
     </ClInclude>

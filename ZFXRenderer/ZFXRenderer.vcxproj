@@ -11,6 +11,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\ZFXEngine\ZFX.h" />
+    <ClInclude Include="ZFXInclude.h" />
+    <ClInclude Include="ZFXPrerequisites.h" />
     <ClInclude Include="ZFXRenderDevice.h" />
     <ClInclude Include="ZFXRenderer.h" />
     <ClInclude Include="ZFXShaderManager.h" />

@@ -27,6 +27,9 @@
     <ClInclude Include="ZFXOpenGL_VCM.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="ZFXGLPrerequisites.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ZFXOpenGL.cpp">

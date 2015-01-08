@@ -1,8 +1,7 @@
 #ifndef _S3D_H_
 #define _S3D_H_
 
-#include "ZFX.h"
-#include "ZFXRenderDevice.h"
+#include "ZFXInclude.h"
 
 typedef struct TRI_TYPE
 {

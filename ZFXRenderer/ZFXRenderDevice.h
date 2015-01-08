@@ -6,9 +6,8 @@
 // I N C L U D E S /////////////////////////////////////////////////
 
 #include <windows.h>          // windows types and stuff
-#include <stdio.h>            // file stuff
-#include "zfx3d.h"            // zfx 3d math library
-#include "zfx.h"       // MATERIAL structure
+
+#include "ZFXPrerequisites.h"
 
 // D E F I N E S ///////////////////////////////////////////////////
 // 窗口数量

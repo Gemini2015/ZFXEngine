@@ -5,16 +5,14 @@
 #include <gl\glew.h>
 #include <gl\GL.h>
 #include <gl\GLU.h>
-#include "ZFXRenderDevice.h"
+
+#include "ZFXGLPrerequisites.h"
 #include "ZFXShaderManager.h"
 
 #include <string>
 #include <vector>
 #include <map>
 
-#define MAX_SHADER_NUM (MAX_SHADER * 2)
-
-class ZFXOpenGL;
 
 typedef struct GLTYPE_ZFXTYPE_TYPE
 {

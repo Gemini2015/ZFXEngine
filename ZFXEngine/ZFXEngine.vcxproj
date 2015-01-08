@@ -17,7 +17,6 @@
   <ItemGroup>
     <ClInclude Include="main.h" />
     <ClInclude Include="s3d.h" />
-    <ClInclude Include="ZFX.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ZFX3D\ZFX3D.vcxproj">

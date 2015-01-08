@@ -1,21 +1,9 @@
 #ifndef _ZFXOPENGL_H_
 #define _ZFXOPENGL_H_
 
-
-#include <windows.h>
-#include <gl\glew.h>
-#include <gl\GL.h>
-#include <gl\GLU.h>
-#include <gl\freeglut.h>
+#include "ZFXGLPrerequisites.h"
 #include "ZFXRenderDevice.h"
-#include "zfx3d.h"
-#include "ZFX.h"
-#include <string>
-#include <math.h>
-#include <map>
-#include <vector>
 
-#include "ZFXGLSL.h"
 
 BOOL WINAPI DllEntryPoint(HINSTANCE hDll,
 	DWORD fdwReason,
@@ -26,45 +14,7 @@ BOOL WINAPI DllEntryPoint(HINSTANCE hDll,
 #pragma comment(lib, "opengl32.lib")
 #pragma comment(lib, "zfx3d.lib")
 
-#define _USE_MATH_DEFINES
-#define RADIAN2DEGREE(radian) ((radian) * 180.0f / M_PI)
-#define DEGREE2RADIAN(degree) ((degree) * M_PI / 180.0f)
 
-#ifdef _DEBUG
-
-#define CHECK_ERROR {\
-	GLenum error = glGetError();\
-	if(error != GL_NO_ERROR)\
-		 Log("OpenGL Error > File:%s Line:%d Error:%d",__FILE__, __LINE__, error);\
-}
-
-#define CHECK_ERROR_RETURN(hr) {\
-	GLenum error = glGetError();\
-	if(error != GL_NO_ERROR)\
-			{\
-		Log("OpenGL Error > File:%s Line:%d Error:%d",__FILE__, __LINE__, error);\
-		hr = ZFX_FAIL;\
-			}\
-}
-
-#else
-
-#define CHECK_ERROR {}
-
-#define CHECK_ERROR_RETURN(hr) {\
-	GLenum error = glGetError();\
-	if(error != GL_NO_ERROR)\
-		hr = ZFX_FAIL;\
-}
-
-#endif
-
-#define COLORDWORD(r,g,b,a) \
-	 ((DWORD)((((a)&0xff)<<24)|(((b)&0xff)<<16)|(((g)&0xff)<<8)|((r)&0xff)))
-#define FCOLOR2DWORD(r,g,b,a) \
-	COLORDWORD((DWORD)((r)*255.f),(DWORD)((g)*255.f),(DWORD)((b)*255.f),(DWORD)((a)*255.f))
-
-#define BUFFER_OFFSET(offset) ((void*)(offset))
 
 
 class ZFXOpenGL :

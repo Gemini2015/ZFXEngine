@@ -2,11 +2,9 @@
 #define _ZFX_SHADER_MANAGER_H_
 
 #include <windows.h>
-#include "ZFX.h"
-#include "ZFXRenderDevice.h"
 #include <string>
 
-
+#include "ZFXPrerequisites.h"
 
 class ShaderObject
 {

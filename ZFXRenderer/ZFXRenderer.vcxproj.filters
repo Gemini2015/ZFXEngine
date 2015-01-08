@@ -24,6 +24,15 @@
     <ClInclude Include="ZFXShaderManager.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="..\ZFXEngine\ZFX.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ZFXInclude.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ZFXPrerequisites.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ZFXRenderer.cpp">

@@ -11,6 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ZFXGLPrerequisites.h" />
     <ClInclude Include="ZFXGLSL.h" />
     <ClInclude Include="ZFXOpenGL.h" />
     <ClInclude Include="ZFXOpenGL_Skin.h" />

@@ -101,7 +101,7 @@ HRESULT GLSLShaderObject::Compile(void)
 	// create shader
 	GLenum type = m_type == SHT_VERTEX ? GL_VERTEX_SHADER : GL_FRAGMENT_SHADER;
 	m_ShaderObject = glCreateShader(type);
-	if (m_ShaderObject)
+	if (m_ShaderObject == 0)
 		return E_FAIL;
 
 	const char* str = m_Source.c_str();
@@ -114,6 +114,15 @@ HRESULT GLSLShaderObject::Compile(void)
 	if (statue != GL_TRUE)
 	{
 		// get compile message
+		GLsizei len;
+		glGetShaderiv(m_ShaderObject, GL_INFO_LOG_LENGTH, &len);
+
+		GLchar* log = new GLchar[len + 1];
+		glGetShaderInfoLog(m_ShaderObject, len, &len, log);
+
+		std::cerr << "Shader compilation failed: " << log << std::endl;
+		delete [] log;
+
 		glDeleteShader(m_ShaderObject);
 		return E_FAIL;
 	}
@@ -135,6 +144,7 @@ GLSLShaderManager::GLSLShaderManager(ZFXOpenGL *pOpenGL)
 			{ DAT_BOOL, GL_BOOL, },
 			{ DAT_INT, GL_INT, },
 			{ DAT_FLOAT, GL_FLOAT, },
+			{ DAT_FMAT4, GL_FLOAT_MAT4, },
 	};
 
 	for (int i = 0; i < sizeof(TypeMapping) / sizeof(GLTYPE_ZFXTYPE); i++)
@@ -247,18 +257,24 @@ HRESULT GLSLShaderManager::EnableShader(bool bEnable)
 			glUseProgram(program->m_program);
 
 			CollectConstant(program->m_program);
+
+			m_bUseShader = true;
 		}
 		else
 		{
 			m_ActiveProgram = NULL;
 			glUseProgram(0);
 			hr = ZFX_FAIL;
+
+			m_bUseShader = false;
 		}
 	}
 	else
 	{
 		m_ActiveProgram = NULL;
 		glUseProgram(0);
+
+		m_bUseShader = false;
 	}
 	return hr;
 }
@@ -267,8 +283,6 @@ GLSLProgram* GLSLShaderManager::GetActiveProgram()
 {
 	if (m_ActiveProgram)
 		return m_ActiveProgram;
-
-	GLSLProgram* program = NULL;
 
 	UINT64 uuid = 0;
 	if (m_ActiveVertexShader)
@@ -283,19 +297,21 @@ GLSLProgram* GLSLShaderManager::GetActiveProgram()
 	GLSLPROGRAM_MAP::iterator it = m_ProgramMap.find(uuid);
 	if (it == m_ProgramMap.end())
 	{
-		program = LinkProgram();
+		m_ActiveProgram = LinkProgram();
 	}
 	else
 	{
-		program = it->second;
+		m_ActiveProgram = it->second;
 	}
 
-	return program;
+	return m_ActiveProgram;
 }
 
 GLSLProgram* GLSLShaderManager::LinkProgram()
 {
 	GLSLProgram *program = new GLSLProgram();
+	if (program == NULL)
+		return program;
 	if (m_ActiveVertexShader)
 		program->AttachShader((GLSLShaderObject*)m_ActiveVertexShader);
 	if (m_ActiveFragmentShader)
@@ -306,14 +322,13 @@ GLSLProgram* GLSLShaderManager::LinkProgram()
 	if (FAILED(hr))
 	{
 		delete program;
-		m_ActiveProgram = NULL;
+		program = NULL;
 	}
 	else
 	{
 		m_ProgramMap[program->m_uuid] = program;
-		m_ActiveProgram = program;
 	}
-	return m_ActiveProgram;
+	return program;
 }
 
 HRESULT GLSLShaderManager::CollectConstant(GLuint program)
@@ -462,10 +477,13 @@ HRESULT GLSLShaderManager::SetNamedConstant(std::string name, ZFXDATATYPE type, 
 		glUniform1iv(constant.location, 1, (GLint*)data);
 		break;
 	case DAT_INT:
-		glUniform1fv(constant.location, 1, (GLfloat*)data);
+		glUniform1iv(constant.location, 1, (GLint*)data);
 		break;
 	case DAT_FLOAT:
 		glUniform1fv(constant.location, 1, (GLfloat*)data);
+		break;
+	case DAT_FMAT4:
+		glUniformMatrix4fv(constant.location, 1, GL_FALSE, (GLfloat*)data);
 		break;
 	default:
 		hr = ZFX_FAIL;

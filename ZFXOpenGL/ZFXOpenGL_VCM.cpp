@@ -349,6 +349,11 @@ HRESULT ZFXOpenGLVCacheManager::Render(UINT nSBID)
 	{
 		hr = ZFXOpenGLVCache::SetClientStateEnable(m_pStaticBuffer[nSBID].nVertexType, true);
 	}
+	else 
+	{
+		//m_pOpenGL->GetShaderManager()->EnableShader(false);
+		m_pOpenGL->SetMVPUniform();
+	}
 
 	int nVertexNum = m_pStaticBuffer[nSBID].nVertexNum;
 	int nIndisNum = m_pStaticBuffer[nSBID].nIndisNum;

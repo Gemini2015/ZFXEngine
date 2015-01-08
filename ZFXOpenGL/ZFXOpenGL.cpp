@@ -985,17 +985,6 @@ HRESULT ZFXOpenGL::Init(HWND mainWnd, const HWND* childWnds, int nWndsNum, int n
 
 	g_bLF = bSaveLog;
 
-	if (m_pShaderManager == NULL)
-	{
-		ZFXOpenGL* pRenderDevice = this;
-		m_pShaderManager = new GLSLShaderManager(pRenderDevice);
-		if (m_pShaderManager == NULL)
-		{
-			Log("create GLSLShaderManager error");
-			return E_FAIL;
-		}
-	}
-
 	if (nWndsNum > 0)
 	{
 		if (nWndsNum > MAX_3DHWND) nWndsNum = MAX_3DHWND;
@@ -1092,6 +1081,17 @@ HRESULT ZFXOpenGL::Go(void)
 	m_pSkinMan = new ZFXOpenGLSkinManager(this);
 
 	m_pVertexMan = new ZFXOpenGLVCacheManager((ZFXOpenGLSkinManager*)m_pSkinMan, this, 8192, 8192);
+
+	if (m_pShaderManager == NULL)
+	{
+		ZFXOpenGL* pRenderDevice = this;
+		m_pShaderManager = new GLSLShaderManager(pRenderDevice);
+		if (m_pShaderManager == NULL)
+		{
+			Log("create GLSLShaderManager error");
+			return E_FAIL;
+		}
+	}
 
 	ZFXVIEWPORT vpView = { 0, 0, m_dwWidth, m_dwHeight };
 	m_Mode = EMD_PERSPECTIVE;
@@ -1461,6 +1461,12 @@ HRESULT ZFXOpenGL::CalcOrthoProjMatrix(int nStage)
 	bottom /= m_dwHeight;
 	top /= m_dwHeight;
 
+	left = 2 * left - 1;
+	right = 2 * right - 1;
+	bottom = 2 * bottom - 1;
+	top = 2 * top - 1;
+
+
 	float x = 2.0f / (right - left);
 	float y = 2.0f / (top - bottom);
 	float z = 1.0f / (m_fFar - m_fNear);
@@ -1580,10 +1586,14 @@ HRESULT ZFXOpenGL::ActiveSkin(UINT nSkinID)
 
 HRESULT ZFXOpenGL::SetMVPUniform()
 {
-	/*if (m_bCanDoShaders && m_bUseShaders)
+	if (m_pShaderManager->IsUseShader())
 	{
-		m_pGLSLManager->SetNamedConstant("mvp", m_mWorldViewProj);
-	}*/
+		GLfloat mat[16];
+		glGetFloatv(GL_MODELVIEW_MATRIX, mat);
+		m_pShaderManager->SetNamedConstant("modelview", DAT_FMAT4, 1, mat);
+		glGetFloatv(GL_PROJECTION_MATRIX, mat);
+		m_pShaderManager->SetNamedConstant("projection", DAT_FMAT4, 1, mat);
+	}
 	return ZFX_OK;
 }
 

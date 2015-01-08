@@ -136,7 +136,8 @@ typedef enum ZFXLIGHTID_TYPE {
 typedef enum ZFXDATATYPE_TYPE {
 	DAT_BOOL,          // boolean
 	DAT_INT,           // integer
-	DAT_FLOAT          // floating point
+	DAT_FLOAT,         // floating point
+	DAT_FMAT4,
 } ZFXDATATYPE;
 
 typedef enum ZFXSHADER_TYPE {

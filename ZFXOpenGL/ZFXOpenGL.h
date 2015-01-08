@@ -212,6 +212,7 @@ public:
 	GLenum GetTextureOp(int n);
 	
 	HRESULT ActiveSkin(UINT nSkinID);
+	HRESULT SetMVPUniform();
 
 private:
 	HINSTANCE m_hDLL;
@@ -252,7 +253,7 @@ private:
 	HRESULT CalcPerspProjMatrix(int nStage);
 	HRESULT CalcPerspProjMatrix(float fFov, float fAspect, int nStage);
 	HRESULT CalcOrthoProjMatrix(int nStage);
-	HRESULT SetMVPUniform();
+	
 
 	bool InitPixelFormat(int nHWnd);
 

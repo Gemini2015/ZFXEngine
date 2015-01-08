@@ -21,6 +21,8 @@
 #pragma comment(lib, "glu32.lib")
 #pragma comment(lib, "opengl32.lib")
 
+#define BUFFER_OFFSET(offset) ((void*)(offset))
+
 // windows stuff
 HWND      g_hWnd = NULL;
 HINSTANCE g_hInst = NULL;
@@ -52,6 +54,63 @@ float yAngle = 0.0f;
 float xAngleStep = 0.05f;
 float yAngleStep = 0.05f;
 float distanceStep = 0.1f;
+
+
+ShaderObject *g_vshader = NULL;
+ShaderObject *g_fshader = NULL;
+
+void DrawTriangle(IShaderManager* sm)
+{
+	g_pDevice->BeginRendering(true, true, true);
+
+	ZFXMatrix mWorld;
+	mWorld.Identity();
+	g_pDevice->SetWorldTransform(&mWorld);
+
+	GLuint vao;
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
+
+	GLfloat vertexs[6][5] = {
+			{ -0.9, -0.9, 0.0, 0.0f, 0.5f },
+			{ 0.85, -0.9, 0.0, 0.5f, 0.0f },
+			{ -0.9, 0.85, 0.5, 0.0f, 0.0f },
+			{ 0.9, -0.85, 0.0, 0.0f, 0.5f },
+			{ 0.9, 0.9, 0.0, 0.0f, 0.5f },
+			{ -0.85, 0.9, 0.0, 0.0f, 0.5f },
+	};
+
+	GLuint vbo;
+	glGenBuffers(1, &vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertexs), vertexs, GL_STATIC_DRAW);
+	glVertexPointer(2, GL_FLOAT, sizeof(float) * 5, 0);
+	glColorPointer(3, GL_FLOAT, 5 * sizeof(float), (void*)(2 * sizeof(float)));
+
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), BUFFER_OFFSET(0));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), BUFFER_OFFSET(2 * sizeof(float)));
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
+
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_COLOR_ARRAY);
+
+	sm->EnableShader(true);
+
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+
+	glDisableClientState(GL_VERTEX_ARRAY);
+	glDisableClientState(GL_COLOR_ARRAY);
+
+	GLenum error = glGetError();
+	if (error != GL_NO_ERROR)
+	{
+		int i = 0;
+	}
+
+	g_pDevice->EndRendering();
+}
 
 /**
  * WinMain function to get the thing started.
@@ -178,7 +237,8 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance,
 	ZFXVIEWPORT vp = { 0, 0, 800, 600 };
 	g_pDevice->InitStage(60, &vp, 0);
 	g_pDevice->SetClippingPlanes(0.1f, 1000.0f);
-	g_pDevice->SetMode(EMD_PERSPECTIVE, 0);
+	g_pDevice->SetMode(EMD_ORTHOGONAL, 0);
+	//g_pDevice->SetMode(EMD_PERSPECTIVE, 0);
 	g_pDevice->GetVertexManager()->CreateStaticBuffer(VID_PS, 0, 8, 36, vertexs, first, &nID);
 
 	
@@ -193,6 +253,17 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance,
 	color.fR = 1.0f;
 	color.fA = 1.0f;
 	g_pDevice->SetShadeMode(RS_SHADE_SOLID, 1.0f, &color);
+
+	IShaderManager* sm = g_pDevice->GetShaderManager();
+	if (g_vshader)
+		sm->BindShader(g_vshader);
+	if (g_fshader)
+		sm->BindShader(g_fshader);
+	if (g_vshader || g_fshader)
+		sm->EnableShader(true);
+
+	ZFXVertexCacheManager* vcm = g_pDevice->GetVertexManager();
+
 	while (!g_bDone)
 	{
 		while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
@@ -210,10 +281,13 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance,
 
 			g_pDevice->UseWindow(0);
 			
-			ProgramTick();
+			
 			g_dir = -g_pos;
 			g_dir.Normalize();
 			g_pDevice->SetViewLookAt(g_pos, ZFXVector(0, 0, 0), vU);
+			ProgramTick();
+
+			//DrawTriangle(sm);
 
 
 			//g_pDevice->BeginRendering(true, true, true);
@@ -399,6 +473,14 @@ HRESULT ProgramStartup(const char *chAPI)
 			return ZFX_FAIL;
 		}
 	}
+
+	IShaderManager* sm = g_pDevice->GetShaderManager();
+	std::string str("shader//shader.vert");
+	g_vshader = sm->CreateShader((void*)str.c_str(), SHT_VERTEX, true);
+	str.assign("shader//shader.frag");
+	g_fshader = sm->CreateShader((void*)str.c_str(), SHT_PIXEL, true);
+
+
 	return ZFX_OK;
 } // ProgramStartup
 /*----------------------------------------------------------------*/
@@ -462,6 +544,13 @@ HRESULT ProgramTick(void)
 
 	// set first viewport (whole window)
 	g_pDevice->SetMode(EMD_PERSPECTIVE, 0);
+	IShaderManager* sm = g_pDevice->GetShaderManager();
+	if (g_vshader)
+		sm->BindShader(g_vshader);
+	if (g_fshader)
+		sm->BindShader(g_fshader);
+	if(g_vshader || g_fshader)
+		sm->EnableShader(true);
 	GLfloat f[16] = { 0.0 };
 	glGetFloatv(GL_MODELVIEW_MATRIX, f);
 	glGetFloatv(GL_PROJECTION_MATRIX, f);
@@ -487,6 +576,8 @@ HRESULT ProgramTick(void)
 
 	// render into second viewport
 	g_pDevice->SetMode(EMD_PERSPECTIVE, 1);
+	if (g_vshader || g_fshader)
+		sm->EnableShader(true);
 	glGetFloatv(GL_MODELVIEW_MATRIX, f);
 	glGetFloatv(GL_PROJECTION_MATRIX, f);
 	g_pDevice->SetClearColor(1.0f, 0.2f, 0.2f);

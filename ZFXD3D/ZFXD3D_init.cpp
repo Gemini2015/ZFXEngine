@@ -104,8 +104,6 @@ ZFXD3D::ZFXD3D(HINSTANCE hDLL)
 	m_ClearColor = D3DCOLOR_COLORVALUE(0.0f, 0.0f, 0.0f, 1.0f);
 	m_bRunning = false;
 	m_bIsSceneRunning = false;
-	m_bUseShaders = false;
-	m_bCanDoShaders = false;
 	m_bAdditive = false;
 	m_bColorBuffer = true;
 	m_bTextures = true;
@@ -609,7 +607,7 @@ HRESULT ZFXD3D::OneTimeInit(void) {
 	PrepareShaderStuff();
 
 	// create a default shader. Note: its ID is 0
-	if (m_bCanDoShaders) {
+	if (m_pShaderManager->IsCanUseShader()) {
 		/*const char BaseShader[] =
 			"vs.1.1                 \n"\
 			"dcl_position0 v0       \n"\

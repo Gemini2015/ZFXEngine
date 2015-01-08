@@ -188,8 +188,6 @@ protected:
 	bool            m_bWindowed;         // windowed mode?
 	char            m_chAdapter[256];    // graphics adapter name
 	bool            m_bRunning;          // after succesful initialization
-	bool            m_bUseShaders;       // shaders or fixed function pipeline
-	bool            m_bCanDoShaders;     // hw can do shaders version 1.1
 	bool            m_bAdditive;         // use additive rendering
 	bool            m_bColorBuffer;      // use color buffer
 	ZFXRENDERSTATE  m_ShadeMode;         // wireframe rendering?

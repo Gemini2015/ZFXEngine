@@ -141,6 +141,11 @@ GLSLShaderManager::GLSLShaderManager(ZFXOpenGL *pOpenGL)
 	{
 		m_DataTypeMap[TypeMapping[i].gl_type] = TypeMapping[i].zfx_type;
 	}
+
+	if (GLEW_ARB_vertex_program || GLEW_ARB_fragment_program)
+	{
+		m_bCanUseShader = true;
+	}
 }
 
 ShaderObject* GLSLShaderManager::CreateShader(const void* pData, ZFXSHADERTYPE type, bool bLoadFromFile)
@@ -151,21 +156,21 @@ ShaderObject* GLSLShaderManager::CreateShader(const void* pData, ZFXSHADERTYPE t
 	if (type != SHT_VERTEX && type != SHT_PIXEL)
 		return NULL;
 
-	GLSLShaderObject shaderobject(type);
+	GLSLShaderObject *shaderobject = new GLSLShaderObject(type);
 
-	HRESULT hr = shaderobject.LoadSource(std::string((char*)pData), bLoadFromFile);
-
-	if (FAILED(hr))
-		return NULL;
-
-	hr = shaderobject.Compile();
+	HRESULT hr = shaderobject->LoadSource(std::string((char*)pData), bLoadFromFile);
 
 	if (FAILED(hr))
 		return NULL;
 
-	m_ShaderObjectMap[shaderobject.GetID()] = shaderobject;
+	hr = shaderobject->Compile();
 
-	return &shaderobject;
+	if (FAILED(hr))
+		return NULL;
+
+	m_ShaderObjectMap[shaderobject->GetID()] = shaderobject;
+
+	return shaderobject;
 }
 
 HRESULT GLSLShaderManager::BindShader(ShaderObject* obj)
@@ -282,7 +287,7 @@ GLSLProgram* GLSLShaderManager::GetActiveProgram()
 	}
 	else
 	{
-		program = &(it->second);
+		program = it->second;
 	}
 
 	return program;
@@ -290,22 +295,23 @@ GLSLProgram* GLSLShaderManager::GetActiveProgram()
 
 GLSLProgram* GLSLShaderManager::LinkProgram()
 {
-	GLSLProgram program;
+	GLSLProgram *program = new GLSLProgram();
 	if (m_ActiveVertexShader)
-		program.AttachShader((GLSLShaderObject*)m_ActiveVertexShader);
+		program->AttachShader((GLSLShaderObject*)m_ActiveVertexShader);
 	if (m_ActiveFragmentShader)
-		program.AttachShader((GLSLShaderObject*)m_ActiveFragmentShader);
+		program->AttachShader((GLSLShaderObject*)m_ActiveFragmentShader);
 	
-	HRESULT hr = program.Link();
+	HRESULT hr = program->Link();
 
 	if (FAILED(hr))
 	{
+		delete program;
 		m_ActiveProgram = NULL;
 	}
 	else
 	{
-		m_ProgramMap[program.m_uuid] = program;
-		m_ActiveProgram = &program;
+		m_ProgramMap[program->m_uuid] = program;
+		m_ActiveProgram = program;
 	}
 	return m_ActiveProgram;
 }
@@ -466,6 +472,41 @@ HRESULT GLSLShaderManager::SetNamedConstant(std::string name, ZFXDATATYPE type, 
 		break;
 	}
 	return hr;
+}
+
+ShaderObject* GLSLShaderManager::GetShaderByName(std::string file)
+{
+	GLSLSHADER_MAP::iterator it = m_ShaderObjectMap.begin();
+	bool found = false;
+	GLSLShaderObject* shaderobject = NULL;
+	while (it != m_ShaderObjectMap.end())
+	{
+		shaderobject = it->second;
+		if (shaderobject && shaderobject->GetFileName().compare(file) == 0)
+		{
+			found = true;
+			break;
+		}
+		it++;
+	}
+	if (found)
+	{
+		return shaderobject;
+	}
+	else
+	{
+		return NULL;
+	}
+}
+
+ShaderObject* GLSLShaderManager::GetShaderByID(UINT id)
+{
+	GLSLSHADER_MAP::iterator it = m_ShaderObjectMap.find(id);
+	if (it == m_ShaderObjectMap.end())
+	{
+		return NULL;
+	}
+	return it->second;
 }
 
 

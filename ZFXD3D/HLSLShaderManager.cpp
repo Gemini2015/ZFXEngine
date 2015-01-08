@@ -60,3 +60,13 @@ HRESULT HLSLShaderManager::SetNamedConstant(std::string name, ZFXDATATYPE type, 
 {
 	throw std::logic_error("The method or operation is not implemented.");
 }
+
+ShaderObject* HLSLShaderManager::GetShaderByName(std::string file)
+{
+	throw std::logic_error("The method or operation is not implemented.");
+}
+
+ShaderObject* HLSLShaderManager::GetShaderByID(UINT id)
+{
+	throw std::logic_error("The method or operation is not implemented.");
+}

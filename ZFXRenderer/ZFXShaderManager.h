@@ -70,6 +70,9 @@ public:
 	virtual bool IsCanUseShader() const { return m_bCanUseShader; };
 	virtual bool IsUseShader() const { return m_bUseShader; };
 
+	virtual ShaderObject* GetShaderByName(std::string file) = 0;
+	virtual ShaderObject* GetShaderByID(UINT id) = 0;
+
 	virtual HRESULT SetNamedConstant(std::string name, ZFXDATATYPE type, int count, void* data) = 0;
 	virtual HRESULT SetNamedConstant(std::string name, bool val) = 0;
 	virtual HRESULT SetNamedConstant(std::string name, int val) = 0;

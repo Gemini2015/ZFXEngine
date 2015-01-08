@@ -64,10 +64,10 @@ typedef struct GLSLConstant_Type
 
 class GLSLShaderManager : public IShaderManager
 {
-	typedef std::map<UINT, GLSLShaderObject> GLSLSHADER_MAP;
+	typedef std::map<UINT, GLSLShaderObject*> GLSLSHADER_MAP;
 	GLSLSHADER_MAP m_ShaderObjectMap;
 
-	typedef std::map<UINT64, GLSLProgram> GLSLPROGRAM_MAP;
+	typedef std::map<UINT64, GLSLProgram*> GLSLPROGRAM_MAP;
 	GLSLPROGRAM_MAP m_ProgramMap;
 
 	typedef std::map<std::string, GLSLConstant> GLSLCONSTANT_MAP;
@@ -106,6 +106,10 @@ public:
 	virtual HRESULT SetNamedConstant(std::string name, ZFXMatrix m) override;
 
 	virtual HRESULT SetNamedConstant(std::string name, ZFXDATATYPE type, int count, void* data) override;
+
+	virtual ShaderObject* GetShaderByName(std::string file) override;
+
+	virtual ShaderObject* GetShaderByID(UINT id) override;
 
 };
 

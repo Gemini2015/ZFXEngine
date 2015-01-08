@@ -18,8 +18,6 @@ ZFXOpenGL::ZFXOpenGL(HINSTANCE hDLL)
 	
 	m_bRunning = false;
 	m_bIsSceneRunning = false;
-	m_bUseShaders = false;
-	m_bCanDoShaders = false;
 	m_bAdditive = false;
 	m_bColorBuffer = true;
 	m_bTextures = true;
@@ -99,7 +97,7 @@ HRESULT ZFXOpenGL::SetMode(ZFXENGINEMODE mode, int nStage)
 
 	if (mode == EMD_TWOD)
 	{
-		if (!m_bUseShaders)
+		if (!m_pShaderManager->IsUseShader())
 		{
 			float *mat = NULL;
 			glMatrixMode(GL_PROJECTION);
@@ -112,7 +110,7 @@ HRESULT ZFXOpenGL::SetMode(ZFXENGINEMODE mode, int nStage)
 	}
 	else
 	{
-		if (!m_bUseShaders)
+		if (!m_pShaderManager->IsUseShader())
 		{
 			glMatrixMode(GL_MODELVIEW);
 			float* mat = (float*)&(m_mView3D * m_mWorld3D);
@@ -973,7 +971,7 @@ void ZFXOpenGL::SetAmbientLight(float fRed, float fGreen, float fBlue)
 	GLfloat lmodel_ambient[] = { fRed, fGreen, fBlue, 1.0f };
 	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lmodel_ambient);
 
-	if (m_bCanDoShaders)
+	if (m_pShaderManager->IsCanUseShader())
 	{
 		//
 	}
@@ -1141,11 +1139,11 @@ HRESULT ZFXOpenGL::InitWindowed(HWND mainWnd, const HWND* childWnds, int nWndsNu
 
 void ZFXOpenGL::Release(void)
 {
-	/*if (m_pGLSLManager)
+	if (m_pShaderManager)
 	{
-		delete m_pGLSLManager;
-		m_pGLSLManager = NULL;
-	}*/
+		delete m_pShaderManager;
+		m_pShaderManager = NULL;
+	}
 
 	if (m_bWindowed)
 	{
@@ -1226,7 +1224,7 @@ HRESULT ZFXOpenGL::SetView3D(const ZFXVector &vcRight,
 	m_mView3D._33 = vcDir.z;
 	m_mView3D._43 = -(vcDir*vcPos);
 
-	if (!m_bUseShaders)
+	if (!m_pShaderManager->IsUseShader())
 	{
 		float *mat = (float*)&(m_mView3D * m_mWorld3D);
 		glMatrixMode(GL_MODELVIEW);

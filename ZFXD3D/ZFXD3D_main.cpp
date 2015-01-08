@@ -175,7 +175,7 @@ void ZFXD3D::SetWorldTransform(const ZFXMatrix *mWorld) {
 	CalcWorldViewProjMatrix();
 
 	// if shaders set transform as constant to device
-	if (m_bCanDoShaders) {
+	if (m_pShaderManager->IsCanUseShader()) {
 		ZFXMatrix mTranspose;
 		mTranspose.TransposeOf(*(ZFXMatrix*)&m_mWorldViewProj);
 		m_pDevice->SetVertexShaderConstantF(0, (float*)&mTranspose, 4);
@@ -198,7 +198,7 @@ void ZFXD3D::SetAmbientLight(float fRed, float fGreen, float fBlue) {
 	int nGreen = (int)(fGreen * 255.0f);
 	int nBlue = (int)(fBlue * 255.0f);
 
-	if (m_bCanDoShaders) {
+	if (m_pShaderManager->IsCanUseShader()) {
 		// default setting to use as diffuse vertex color
 		float fCol[4] = { fRed, fGreen, fBlue, 1.0f };
 		m_pDevice->SetVertexShaderConstantF(4, fCol, 1);

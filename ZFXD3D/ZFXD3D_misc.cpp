@@ -48,7 +48,7 @@ HRESULT ZFXD3D::SetMode(ZFXENGINEMODE Mode, int nStage)
 		if (FAILED(m_pDevice->SetViewport(&d3dVP)))
 			return ZFX_FAIL;
 
-		if (!m_bUseShaders)
+		if (!m_pShaderManager->IsUseShader())
 		{
 			if (FAILED(m_pDevice->SetTransform(D3DTS_PROJECTION, &m_mProj2D)))
 				return ZFX_FAIL;
@@ -64,7 +64,7 @@ HRESULT ZFXD3D::SetMode(ZFXENGINEMODE Mode, int nStage)
 		if (FAILED(m_pDevice->SetViewport(&d3dVP)))
 			return ZFX_FAIL;
 
-		if (!m_bUseShaders)
+		if (!m_pShaderManager->IsUseShader())
 		{
 			if (FAILED(m_pDevice->SetTransform(D3DTS_VIEW, &m_mView3D)))
 				return ZFX_FAIL;
@@ -273,7 +273,7 @@ HRESULT ZFXD3D::SetView3D(const ZFXVector &vcRight,
 	m_mView3D._33 = vcDir.z;
 	m_mView3D._43 = -(vcDir*vcPos);
 
-	if (!m_bUseShaders) {
+	if (!m_pShaderManager->IsUseShader()) {
 		// activate viewmatrix for D3D
 		if (FAILED(m_pDevice->SetTransform(D3DTS_VIEW, &m_mView3D)))
 			return ZFX_FAIL;
@@ -646,19 +646,19 @@ void ZFXD3D::PrepareShaderStuff(void) {
 
 	if (FAILED(m_pDevice->GetDeviceCaps(&d3dCaps))) {
 		Log("error: GetDeviceCaps() in PrepareShaderStuff failed");
-		m_bCanDoShaders = false;
+		//m_bCanDoShaders = false;
 		return;
 	}
 
 	if (d3dCaps.VertexShaderVersion < D3DVS_VERSION(1, 1)) {
 		Log("warning: Vertex Shader Version < 1.1 => no support");
-		m_bCanDoShaders = false;
+		//m_bCanDoShaders = false;
 		return;
 	}
 
 	if (d3dCaps.PixelShaderVersion < D3DPS_VERSION(1, 1)) {
 		Log("warning: Pixel Shader Version < 1.1 => no support");
-		m_bCanDoShaders = false;
+		//m_bCanDoShaders = false;
 		return;
 	}
 
@@ -722,7 +722,7 @@ void ZFXD3D::PrepareShaderStuff(void) {
 	m_pDevice->CreateVertexDeclaration(declTVertex, &m_pDeclTVertex);
 	m_pDevice->SetFVF(NULL);
 
-	m_bCanDoShaders = true;
+	//m_bCanDoShaders = true;
 	Log("use of shaders activated (VS 1.1, PS 1.1)");
 } // PrepareShaderStuff
 /*----------------------------------------------------------------*/

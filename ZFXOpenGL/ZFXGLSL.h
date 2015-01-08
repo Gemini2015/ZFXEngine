@@ -27,8 +27,7 @@ class GLSLShaderObject : public ShaderObject
 {
 private:
 
-	static UINT sVertexShaderUUID;
-	static UINT sFragmentShaderUUID;
+	static UINT sShaderUUID;
 
 	GLuint m_ShaderObject;
 	

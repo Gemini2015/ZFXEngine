@@ -79,13 +79,13 @@ HRESULT GLSLProgram::AttachShader(GLSLShaderObject *shader)
 	return hr;
 }
 
-UINT GLSLShaderObject::sVertexShaderUUID = 0;
-UINT GLSLShaderObject::sFragmentShaderUUID = 0;
+UINT GLSLShaderObject::sShaderUUID = 0;
 
 GLSLShaderObject::GLSLShaderObject(ZFXSHADERTYPE type)
 	:ShaderObject(type)
 {
 	m_ShaderObject = 0;
+	m_uuid = sShaderUUID++;
 }
 
 HRESULT GLSLShaderObject::Compile(void)
@@ -125,6 +125,10 @@ HRESULT GLSLShaderObject::Compile(void)
 GLSLShaderManager::GLSLShaderManager(ZFXOpenGL *pOpenGL)
 	: IShaderManager((ZFXRenderDevice*)pOpenGL)
 {
+	m_ShaderObjectMap.clear();
+	m_ProgramMap.clear();
+	m_ConstantMap.clear();
+	m_DataTypeMap.clear();
 	m_ActiveProgram = NULL;
 
 	GLTYPE_ZFXTYPE TypeMapping[] = {
@@ -147,19 +151,21 @@ ShaderObject* GLSLShaderManager::CreateShader(const void* pData, ZFXSHADERTYPE t
 	if (type != SHT_VERTEX && type != SHT_PIXEL)
 		return NULL;
 
-	GLSLShaderObject* shaderobject = new GLSLShaderObject(type);
+	GLSLShaderObject shaderobject(type);
 
-	HRESULT hr = shaderobject->LoadSource(std::string((char*)pData), bLoadFromFile);
-
-	if (FAILED(hr))
-		return NULL;
-
-	hr = shaderobject->Compile();
+	HRESULT hr = shaderobject.LoadSource(std::string((char*)pData), bLoadFromFile);
 
 	if (FAILED(hr))
 		return NULL;
 
-	return shaderobject;
+	hr = shaderobject.Compile();
+
+	if (FAILED(hr))
+		return NULL;
+
+	m_ShaderObjectMap[shaderobject.GetID()] = shaderobject;
+
+	return &shaderobject;
 }
 
 HRESULT GLSLShaderManager::BindShader(ShaderObject* obj)
@@ -284,26 +290,23 @@ GLSLProgram* GLSLShaderManager::GetActiveProgram()
 
 GLSLProgram* GLSLShaderManager::LinkProgram()
 {
-	GLSLProgram* program = new GLSLProgram();
-	
+	GLSLProgram program;
 	if (m_ActiveVertexShader)
-		program->AttachShader((GLSLShaderObject*)m_ActiveVertexShader);
+		program.AttachShader((GLSLShaderObject*)m_ActiveVertexShader);
 	if (m_ActiveFragmentShader)
-		program->AttachShader((GLSLShaderObject*)m_ActiveFragmentShader);
+		program.AttachShader((GLSLShaderObject*)m_ActiveFragmentShader);
 	
-	HRESULT hr = program->Link();
+	HRESULT hr = program.Link();
 
 	if (FAILED(hr))
 	{
-		delete program;
-		program = NULL;
+		m_ActiveProgram = NULL;
 	}
 	else
 	{
-		m_ProgramMap[program->m_uuid] = *program;
+		m_ProgramMap[program.m_uuid] = program;
+		m_ActiveProgram = &program;
 	}
-
-	m_ActiveProgram = program;
 	return m_ActiveProgram;
 }
 

@@ -2,16 +2,17 @@
 
 #define WIN32_MEAN_AND_LEAN
 
-#include "ZFXRenderer.h"  // our render interface
-#include "ZFX.h"          // return values and stuff
 #include "main.h"         // prototypes and stuff
 #include "s3d.h"
+#include "ModelObject.h"
 
 #include <windows.h>
 #include <gl\glew.h>
 #include <gl\GL.h>
 #include <gl\GLU.h>
 #include <gl\freeglut.h>
+
+#include "ZFXInclude.h"
 
 //include our library
 #pragma comment(lib, "ZFXRenderer.lib")
@@ -45,6 +46,8 @@ UINT g_nFontID = 0;
 ZFXModel *g_pG3 = NULL,
 *g_pLeopard2 = NULL,
 *g_pMarder = NULL;
+
+CModelObject* g_pCube = NULL;
 
 ZFXVector g_dir(0, 0, 1), g_pos(0, 0, 3);
 float eye[3] = { 0.0f, 0.0f, 1.0f };
@@ -192,6 +195,9 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance,
 		g_pLeopard2 = new ZFXModel("model\\leo2.s3d", g_pDevice);
 		g_pG3 = new ZFXModel("model\\G3.s3d", g_pDevice);
 		g_pMarder = new ZFXModel("model\\ma3.s3d", g_pDevice);
+		g_pCube = new CModelObject(g_pDevice);
+		g_pCube->LoadFromFile("model/uvcube2.obj");
+		
 
 		/*if (FAILED(BuildAndSetShader()))
 		{
@@ -285,7 +291,17 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance,
 			g_dir = -g_pos;
 			g_dir.Normalize();
 			g_pDevice->SetViewLookAt(g_pos, ZFXVector(0, 0, 0), vU);
-			ProgramTick();
+			//ProgramTick();
+
+			ZFXMatrix mWorld;
+			mWorld.Identity();
+			g_pDevice->SetWorldTransform(&mWorld);
+
+			g_pDevice->BeginRendering(true, true, true);
+			
+			g_pCube->Render();
+
+			g_pDevice->EndRendering();
 
 			//DrawTriangle(sm);
 

@@ -12,10 +12,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="ModelObject.cpp" />
     <ClCompile Include="s3d.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h" />
+    <ClInclude Include="ModelObject.h" />
     <ClInclude Include="s3d.h" />
   </ItemGroup>
   <ItemGroup>

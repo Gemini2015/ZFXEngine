@@ -4,6 +4,7 @@
 #ifndef _MAIN_H_
 #define _MAIN_H_
 
+#include <windows.h>
 // P R O T O T Y P E S /////////////////////////////////////////////
 
 LRESULT WINAPI MsgProc(HWND, UINT, WPARAM, LPARAM);

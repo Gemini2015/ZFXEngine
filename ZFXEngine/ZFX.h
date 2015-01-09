@@ -211,7 +211,8 @@ struct _ZFXCOLOR
 	};
 	_ZFXCOLOR()
 	{
-		memset(c, 0, sizeof(c));
+		c[0] = c[1] = c[2] = 0;
+		c[3] = 1.0f;
 	}
 	bool operator==(const _ZFXCOLOR& clr1) const
 	{
@@ -229,7 +230,7 @@ typedef struct _ZFXMaterial
 	float fPower;
 	_ZFXMaterial()
 	{
-		fPower = 0;
+		fPower = 1;
 	}
 	bool operator==(const _ZFXMaterial& m) const
 	{

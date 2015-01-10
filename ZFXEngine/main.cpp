@@ -243,7 +243,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance,
 	ZFXVIEWPORT vp = { 0, 0, 800, 600 };
 	g_pDevice->InitStage(60, &vp, 0);
 	g_pDevice->SetClippingPlanes(0.1f, 1000.0f);
-	g_pDevice->SetMode(EMD_ORTHOGONAL, 0);
+	g_pDevice->SetMode(EMD_PERSPECTIVE, 0);
 	//g_pDevice->SetMode(EMD_PERSPECTIVE, 0);
 	g_pDevice->GetVertexManager()->CreateStaticBuffer(VID_PS, 0, 8, 36, vertexs, first, &nID);
 
@@ -296,6 +296,8 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance,
 			ZFXMatrix mWorld;
 			mWorld.Identity();
 			g_pDevice->SetWorldTransform(&mWorld);
+
+			//sm->EnableShader(false);
 
 			g_pDevice->BeginRendering(true, true, true);
 			

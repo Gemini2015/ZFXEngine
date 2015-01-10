@@ -247,7 +247,7 @@ HRESULT CModelObject::VertexProcess(std::vector<tagRawSubModel> &rawsubmodellist
 	std::vector<tagVN> vnlist)
 {
 	std::vector<tagRawSubModel>::iterator it = rawsubmodellist.begin();
-	WORD index = 0;
+	WORD index = -1;
 	while (it != rawsubmodellist.end())
 	{
 		// 遍历每一个原始子模型
@@ -287,6 +287,7 @@ HRESULT CModelObject::VertexProcess(std::vector<tagRawSubModel> &rawsubmodellist
 			}
 
 			// v2
+			uuid = 0;
 			uuid |= (faceit->v2 & 0xffff);
 			uuid |= (faceit->vt2 & 0xffff) << 16;
 			// 查询是否存在该顶点
@@ -314,6 +315,7 @@ HRESULT CModelObject::VertexProcess(std::vector<tagRawSubModel> &rawsubmodellist
 			}
 				
 			// v3
+			uuid = 0;
 			uuid |= (faceit->v3 & 0xffff);
 			uuid |= (faceit->vt3 & 0xffff) << 16;
 			// 查询是否存在该顶点

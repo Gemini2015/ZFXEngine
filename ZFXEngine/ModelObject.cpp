@@ -51,7 +51,8 @@ HRESULT CModelObject::LoadFromFile(std::string file)
 		content++;
 		if (strcmp(token, "mtllib") == 0)
 		{
-			content[strlen(content) - 1] = 0;
+			if (content[strlen(content) - 1] == '\n')
+				content[strlen(content) - 1] = 0;
 			LoadMaterial(std::string(content));
 		}
 		else if (strcmp(token, "v") == 0)
@@ -177,7 +178,8 @@ HRESULT CModelObject::LoadMaterial(std::string file)
 			}
 			else if (strcmp(token, "map_Kd") == 0)
 			{
-				content[strlen(content) - 1] = 0;
+				if(content[strlen(content) - 1] == '\n')
+					content[strlen(content) - 1] = 0;
 				rawMatList[current].texfile.push_back(std::string(content));
 			}
 			
@@ -225,7 +227,7 @@ HRESULT CModelObject::LoadRawFace(std::vector<tagRawF> &rawface, FILE *fp)
 			int v2, vt2, vn2;
 			int v3, vt3, vn3;
 
-			sscanf(content, "%d/%d %d/%d %d/%d", &v1, &vt1, &v2, &vt2, &v3, &vt3);
+			sscanf(content, "%d/%d/%d %d/%d/%d %d/%d/%d", &v1, &vt1, &vn1, &v2, &vt2, &vn2, &v3, &vt3, &vn3);
 
 			tagRawF face;
 			face.v1 = v1;
@@ -234,7 +236,9 @@ HRESULT CModelObject::LoadRawFace(std::vector<tagRawF> &rawface, FILE *fp)
 			face.vt1 = vt1;
 			face.vt2 = vt2;
 			face.vt3 = vt3;
-
+			face.vn1 = vn1;
+			face.vn2 = vn2;
+			face.vn3 = vn3;
 			rawface.push_back(face);
 		}
 	}
@@ -258,8 +262,9 @@ HRESULT CModelObject::VertexProcess(std::vector<tagRawSubModel> &rawsubmodellist
 		{
 			// 遍历每个子模型的面
 			UINT64 uuid = 0;
-			uuid |= (faceit->v1 & 0xffff);
-			uuid |= (faceit->vt1 & 0xffff) << 16;
+			uuid |= (faceit->v1 & 0xfffff);
+			uuid |= (faceit->vt1 & 0xfffff) << 20;
+			uuid |= (faceit->vn1 & 0xfffff) << 40;
 			// 查询是否存在该顶点
 			INDEX_MAP::iterator indexit = m_IndexMap.find(uuid);
 			if (indexit == m_IndexMap.end())
@@ -272,6 +277,9 @@ HRESULT CModelObject::VertexProcess(std::vector<tagRawSubModel> &rawsubmodellist
 				v.z = vlist[faceit->v1 - 1].z;
 
 				v.vcN[0] = v.vcN[1] = v.vcN[2] = 0;
+				/*v.vcN[0] = vnlist[faceit->vn1 - 1].x;
+				v.vcN[1] = vnlist[faceit->vn1 - 1].y; 
+				v.vcN[2] = vnlist[faceit->vn1 - 1].z;*/
 
 				v.tu = vtlist[faceit->vt1 - 1].u;
 				v.tv = vtlist[faceit->vt1 - 1].v;
@@ -288,8 +296,9 @@ HRESULT CModelObject::VertexProcess(std::vector<tagRawSubModel> &rawsubmodellist
 
 			// v2
 			uuid = 0;
-			uuid |= (faceit->v2 & 0xffff);
-			uuid |= (faceit->vt2 & 0xffff) << 16;
+			uuid |= (faceit->v2 & 0xfffff);
+			uuid |= (faceit->vt2 & 0xfffff) << 20;
+			uuid |= (faceit->vn2 & 0xffffff) << 40;
 			// 查询是否存在该顶点
 			indexit = m_IndexMap.find(uuid);
 			if (indexit == m_IndexMap.end())
@@ -300,6 +309,9 @@ HRESULT CModelObject::VertexProcess(std::vector<tagRawSubModel> &rawsubmodellist
 				v.z = vlist[faceit->v2 - 1].z;
 
 				v.vcN[0] = v.vcN[1] = v.vcN[2] = 0;
+				/*v.vcN[0] = vnlist[faceit->vn2 - 1].x; 
+				v.vcN[1] = vnlist[faceit->vn2 - 1].y; 
+				v.vcN[2] = vnlist[faceit->vn2 - 1].z;*/
 
 				v.tu = vtlist[faceit->vt2 - 1].u;
 				v.tv = vtlist[faceit->vt2 - 1].v;
@@ -316,8 +328,9 @@ HRESULT CModelObject::VertexProcess(std::vector<tagRawSubModel> &rawsubmodellist
 				
 			// v3
 			uuid = 0;
-			uuid |= (faceit->v3 & 0xffff);
-			uuid |= (faceit->vt3 & 0xffff) << 16;
+			uuid |= (faceit->v3 & 0xfffff);
+			uuid |= (faceit->vt3 & 0xfffff) << 20;
+			uuid |= (faceit->vn3 & 0xfffff) << 40;
 			// 查询是否存在该顶点
 			indexit = m_IndexMap.find(uuid);
 			if (indexit == m_IndexMap.end())
@@ -328,6 +341,9 @@ HRESULT CModelObject::VertexProcess(std::vector<tagRawSubModel> &rawsubmodellist
 				v.z = vlist[faceit->v3 - 1].z;
 
 				v.vcN[0] = v.vcN[1] = v.vcN[2] = 0;
+				/*v.vcN[0] = vnlist[faceit->vn3 - 1].x; 
+				v.vcN[1] = vnlist[faceit->vn3 - 1].y; 
+				v.vcN[2] = vnlist[faceit->vn3 - 1].z;*/
 
 				v.tu = vtlist[faceit->vt3 - 1].u;
 				v.tv = vtlist[faceit->vt3 - 1].v;

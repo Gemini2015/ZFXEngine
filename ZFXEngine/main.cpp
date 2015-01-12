@@ -48,6 +48,7 @@ ZFXModel *g_pG3 = NULL,
 *g_pMarder = NULL;
 
 CModelObject* g_pCube = NULL;
+CModelObject* g_pMonkey = NULL;
 
 ZFXVector g_dir(0, 0, 1), g_pos(0, 0, 3);
 float eye[3] = { 0.0f, 0.0f, 1.0f };
@@ -197,7 +198,8 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance,
 		g_pMarder = new ZFXModel("model\\ma3.s3d", g_pDevice);
 		g_pCube = new CModelObject(g_pDevice);
 		g_pCube->LoadFromFile("model/uvcube2.obj");
-		
+		g_pMonkey = new CModelObject(g_pDevice);
+		g_pMonkey->LoadFromFile("model/monkey.obj");
 
 		/*if (FAILED(BuildAndSetShader()))
 		{
@@ -270,6 +272,8 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance,
 
 	ZFXVertexCacheManager* vcm = g_pDevice->GetVertexManager();
 
+	
+
 	while (!g_bDone)
 	{
 		while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
@@ -297,11 +301,12 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance,
 			mWorld.Identity();
 			g_pDevice->SetWorldTransform(&mWorld);
 
-			//sm->EnableShader(false);
+			sm->EnableShader(false);
 
 			g_pDevice->BeginRendering(true, true, true);
 			
 			g_pCube->Render();
+			//g_pMonkey->Render();
 
 			g_pDevice->EndRendering();
 

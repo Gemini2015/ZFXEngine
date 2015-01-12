@@ -704,7 +704,7 @@ HRESULT ZFXOpenGL::SetLight(const ZFXLIGHT* pLight, UCHAR nStage)
 
 	glLightf(gl_index, GL_CONSTANT_ATTENUATION, (GLfloat)pLight->fAttenuation0);
 	glLightf(gl_index, GL_LINEAR_ATTENUATION, (GLfloat)pLight->fAttenuation1);
-	glLightf(gl_index, GL_QUADRATIC_ATTENUATION, 1.0f);
+	glLightf(gl_index, GL_QUADRATIC_ATTENUATION, 0.0f);
 
 	glEnable(gl_index);
 	glEnable(GL_LIGHTING);

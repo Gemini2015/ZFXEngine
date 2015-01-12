@@ -218,6 +218,22 @@ struct _ZFXCOLOR
 	{
 		return memcmp(&this->c[0], &clr1.c[0], sizeof(_ZFXCOLOR)) == 0 ? true : false;
 	}
+	void rgba(float r, float g, float b, float a)
+	{
+		fR = r;
+		fG = g;
+		fB = b;
+		fA = a;
+	}
+	void rgbafv(float* v)
+	{
+		if (v == NULL)
+			return;
+		c[0] = v[0];
+		c[1] = v[1];
+		c[2] = v[2];
+		c[3] = v[3];
+	}
 };
 typedef _ZFXCOLOR ZFXCOLOR;
 

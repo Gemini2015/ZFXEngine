@@ -272,7 +272,14 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance,
 
 	ZFXVertexCacheManager* vcm = g_pDevice->GetVertexManager();
 
-	
+	ZFXLIGHT light;
+	light.Type = LGT_DIRECTIONAL;
+	light.cAmbient.rgba(1, 1, 1, 1);
+	light.cDiffuse.rgba(1, 1, 1, 1);
+	light.cSpecular.rgba(1, 1, 1, 1);
+	light.fAttenuation0 = 1.0f;
+	light.fAttenuation1 = 0.0f;
+	light.fTheta = 30;
 
 	while (!g_bDone)
 	{

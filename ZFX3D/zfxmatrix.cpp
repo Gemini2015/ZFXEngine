@@ -412,6 +412,19 @@ inline void ZFXMatrix::TransposeOf(const ZFXMatrix &m) {
 	_34 = m._43;
 	_44 = m._44;
 }
+
+inline void ZFXMatrix::Transpose()
+{
+	float t[4][4] = { 0 };
+	memcpy(t, m, 16 * sizeof(float));
+	for (int i = 0; i < 4; i++)
+	{
+		for (int j = 0; j < 4; j++)
+		{
+			m[i][j] = t[j][i];
+		}
+	}
+}
 /*----------------------------------------------------------------*/
 
 // invert the matrix, use of intel's SSE code is incredibly slow here.
@@ -609,3 +622,104 @@ inline void ZFXMatrix::InverseOf(const ZFXMatrix &m) {
 	   */
 } // func
 /*----------------------------------------------------------------*/
+
+void ZFXMatrix::Inverse()
+{
+	float m00 = m[0][0], m01 = m[0][1], m02 = m[0][2], m03 = m[0][3];
+	float m10 = m[1][0], m11 = m[1][1], m12 = m[1][2], m13 = m[1][3];
+	float m20 = m[2][0], m21 = m[2][1], m22 = m[2][2], m23 = m[2][3];
+	float m30 = m[3][0], m31 = m[3][1], m32 = m[3][2], m33 = m[3][3];
+
+	float v0 = m20 * m31 - m21 * m30;
+	float v1 = m20 * m32 - m22 * m30;
+	float v2 = m20 * m33 - m23 * m30;
+	float v3 = m21 * m32 - m22 * m31;
+	float v4 = m21 * m33 - m23 * m31;
+	float v5 = m22 * m33 - m23 * m32;
+
+	float t00 = +(v5 * m11 - v4 * m12 + v3 * m13);
+	float t10 = -(v5 * m10 - v2 * m12 + v1 * m13);
+	float t20 = +(v4 * m10 - v2 * m11 + v0 * m13);
+	float t30 = -(v3 * m10 - v1 * m11 + v0 * m12);
+
+	float invDet = 1 / (t00 * m00 + t10 * m01 + t20 * m02 + t30 * m03);
+
+	_11 = t00 * invDet;
+	_21 = t10 * invDet;
+	_31 = t20 * invDet;
+	_41 = t30 * invDet;
+
+	_12 = -(v5 * m01 - v4 * m02 + v3 * m03) * invDet;
+	_22 = +(v5 * m00 - v2 * m02 + v1 * m03) * invDet;
+	_32 = -(v4 * m00 - v2 * m01 + v0 * m03) * invDet;
+	_42 = +(v3 * m00 - v1 * m01 + v0 * m02) * invDet;
+
+	v0 = m10 * m31 - m11 * m30;
+	v1 = m10 * m32 - m12 * m30;
+	v2 = m10 * m33 - m13 * m30;
+	v3 = m11 * m32 - m12 * m31;
+	v4 = m11 * m33 - m13 * m31;
+	v5 = m12 * m33 - m13 * m32;
+
+	_13 = +(v5 * m01 - v4 * m02 + v3 * m03) * invDet;
+	_23 = -(v5 * m00 - v2 * m02 + v1 * m03) * invDet;
+	_33 = +(v4 * m00 - v2 * m01 + v0 * m03) * invDet;
+	_43 = -(v3 * m00 - v1 * m01 + v0 * m02) * invDet;
+
+	v0 = m21 * m10 - m20 * m11;
+	v1 = m22 * m10 - m20 * m12;
+	v2 = m23 * m10 - m20 * m13;
+	v3 = m22 * m11 - m21 * m12;
+	v4 = m23 * m11 - m21 * m13;
+	v5 = m23 * m12 - m22 * m13;
+
+	_14 = -(v5 * m01 - v4 * m02 + v3 * m03) * invDet;
+	_24 = +(v5 * m00 - v2 * m02 + v1 * m03) * invDet;
+	_34 = -(v4 * m00 - v2 * m01 + v0 * m03) * invDet;
+	_44 = +(v3 * m00 - v1 * m01 + v0 * m02) * invDet;
+
+}
+
+bool ZFXMatrix::isAffine()
+{
+	return _41 == 0 && _42 == 0 && _43 == 0 && _44 == 1;
+}
+
+void ZFXMatrix::InverseAffine()
+{
+	float m10 = m[1][0], m11 = m[1][1], m12 = m[1][2];
+	float m20 = m[2][0], m21 = m[2][1], m22 = m[2][2];
+
+	float t00 = m22 * m11 - m21 * m12;
+	float t10 = m20 * m12 - m22 * m10;
+	float t20 = m21 * m10 - m20 * m11;
+
+	float m00 = m[0][0], m01 = m[0][1], m02 = m[0][2];
+
+	float invDet = 1 / (m00 * t00 + m01 * t10 + m02 * t20);
+
+	t00 *= invDet; t10 *= invDet; t20 *= invDet;
+
+	m00 *= invDet; m01 *= invDet; m02 *= invDet;
+
+	_11 = t00;
+	_12 = m02 * m21 - m01 * m22;
+	_13 = m01 * m12 - m02 * m11;
+
+	_21 = t10;
+	_22 = m00 * m22 - m02 * m20;
+	_23 = m02 * m10 - m00 * m12;
+
+	_31 = t20;
+	_32 = m01 * m20 - m00 * m21;
+	_33 = m00 * m11 - m01 * m10;
+
+	float m03 = m[0][3], m13 = m[1][3], m23 = m[2][3];
+
+	_14 = -(_11 * m03 + _12 * m13 + _13 * m23);
+	_24 = -(_21 * m03 + _22 * m13 + _23 * m23);
+	_34 = -(_31 * m03 + _32 * m13 + _33 * m23);
+
+	_41 = _42 = _43 = 0;
+	_44 = 1;
+}

@@ -124,14 +124,49 @@ public:
 // Our basic matrix class
 class __declspec(dllexport) ZFXMatrix {
 public:
-	float _11, _12, _13, _14;
-	float _21, _22, _23, _24;
-	float _31, _32, _33, _34;
-	float _41, _42, _43, _44;
+	union
+	{
+		struct  
+		{
+			float _11, _12, _13, _14;
+			float _21, _22, _23, _24;
+			float _31, _32, _33, _34;
+			float _41, _42, _43, _44;
+		};
+		float val[16];
+		float m[4][4];
+	};
 
 	//---------------------------------------
 
 	ZFXMatrix(void) { /* nothing to do */; }
+	inline ZFXMatrix(
+		float f11, float f12, float f13, float f14,
+		float f21, float f22, float f23, float f24,
+		float f31, float f32, float f33, float f34,
+		float f41, float f42, float f43, float f44
+		)
+	{
+		_11 = f11;
+		_12 = f12;
+		_13 = f13;
+		_14 = f14;
+		
+		_21 = f21;
+		_22 = f22;
+		_23 = f23;
+		_24 = f24;
+
+		_31 = f31;
+		_32 = f32;
+		_33 = f33;
+		_34 = f34;
+
+		_41 = f41;
+		_42 = f42;
+		_43 = f43;
+		_44 = f44;
+	}
 
 	inline void Identity(void);                       // identity matrix
 	inline void RotaX(float a);                       // x axis
@@ -153,7 +188,11 @@ public:
 		ZFXVector vcWorldUp = ZFXVector(0, 1, 0));
 
 	inline void TransposeOf(const ZFXMatrix &m);       // transpose m, save result in this
+	inline void Transpose();
 	inline void InverseOf(const ZFXMatrix &m);         // invert m, save result in this
+	inline void Inverse();
+	inline bool isAffine();
+	inline void InverseAffine();
 
 	ZFXMatrix operator * (const ZFXMatrix &m)const;    // matrix multiplication
 	ZFXVector operator * (const ZFXVector &vc)const;   // matrix vector multiplication

@@ -60,6 +60,29 @@ typedef struct GLSLConstant_Type
 	GLuint location;
 } GLSLConstant;
 
+enum AUTOCONSTANT_ID
+{
+	ACT_WORLDVIEWPROJ_MATRIX = 0,
+	ACT_NORMAL_MATRIX,
+	MAX_AUTOCONSTANT_ID,
+};
+
+typedef struct GLSLAutoConstant_Type
+{
+	AUTOCONSTANT_ID id;
+	std::string name;
+	ZFXDATATYPE type;
+	GLSLAutoConstant_Type()
+	{
+	}
+	GLSLAutoConstant_Type(AUTOCONSTANT_ID id, std::string name, ZFXDATATYPE type)
+	{
+		this->id = id;
+		this->name.assign(name);
+		this->type = type;
+	}
+}GLSLAutoConstant;
+
 class GLSLShaderManager : public IShaderManager
 {
 	typedef std::map<UINT, GLSLShaderObject*> GLSLSHADER_MAP;
@@ -77,6 +100,10 @@ class GLSLShaderManager : public IShaderManager
 	GLSLProgram* m_ActiveProgram;
 
 public:
+	
+
+	static GLSLAutoConstant sGLSLAutoConstantDict[MAX_AUTOCONSTANT_ID];
+
 	GLSLShaderManager(ZFXOpenGL* pOpenGL);
 
 	virtual ShaderObject* CreateShader(const void* pData, ZFXSHADERTYPE type, bool bLoadFromFile) override;
@@ -94,6 +121,8 @@ public:
 	GLSLProgram* LinkProgram();
 
 	HRESULT CollectConstant(GLuint program);
+
+	HRESULT UpdateAutoConstant();
 
 	virtual HRESULT SetNamedConstant(std::string name, bool val) override;
 

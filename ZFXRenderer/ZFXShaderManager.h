@@ -76,6 +76,7 @@ public:
 	virtual HRESULT SetNamedConstant(std::string name, int val) = 0;
 	virtual HRESULT SetNamedConstant(std::string name, float val) = 0;
 	virtual HRESULT SetNamedConstant(std::string name, ZFXMatrix m) = 0;
+
 };
 
 

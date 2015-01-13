@@ -527,6 +527,53 @@ ShaderObject* GLSLShaderManager::GetShaderByID(UINT id)
 	return it->second;
 }
 
+GLSLAutoConstant GLSLShaderManager::sGLSLAutoConstantDict[] = {
+	GLSLAutoConstant(ACT_WORLDVIEWPROJ_MATRIX, "modelviewproj_matrix", DAT_FMAT4),
+	GLSLAutoConstant(ACT_NORMAL_MATRIX, "normal_matrix", DAT_FMAT4),
+};
+
+HRESULT GLSLShaderManager::UpdateAutoConstant()
+{
+	if (m_ConstantMap.empty())
+		return ZFX_OK;
+
+	for (int i = 0; i < MAX_AUTOCONSTANT_ID; i++)
+	{
+		GLSLCONSTANT_MAP::iterator it = m_ConstantMap.find(sGLSLAutoConstantDict[i].name);
+		if (it != m_ConstantMap.end())
+		{
+			switch (sGLSLAutoConstantDict[i].id)
+			{
+			case ACT_WORLDVIEWPROJ_MATRIX:
+			{
+				float val[16];
+				ZFXMatrix modelview;
+				ZFXMatrix project;
+				glGetFloatv(GL_MODELVIEW_MATRIX, val);
+				modelview.SetColumnMajorMat(val);
+				glGetFloatv(GL_PROJECTION_MATRIX, val);
+				project.SetColumnMajorMat(val);
+				ZFXMatrix mvp = (project * modelview).GetColumnMajorMat();
+				glUniformMatrix4fv(it->second.location, 1, GL_FALSE, mvp.val);
+			}
+				break;
+			case ACT_NORMAL_MATRIX:
+			{
+				ZFXMatrix modelview;
+				glGetFloatv(GL_MODELVIEW_MATRIX, modelview.val);
+				modelview.InverseAffine();
+				modelview.Transpose();
+				glUniformMatrix4fv(it->second.location, 1, GL_FALSE, modelview.val);
+			}
+				break;
+			default:
+				break;
+			}
+		}
+	}
+	return ZFX_OK;
+}
+
 
 
 

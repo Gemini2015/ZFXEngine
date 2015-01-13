@@ -293,8 +293,8 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance,
 		{
 			// compute camera 
 			g_pos.y = distance * sin(yAngle);
-			g_pos.x = distance * cos(yAngle) * sin(xAngle);
-			g_pos.z = distance * cos(yAngle) * cos(xAngle);
+			g_pos.x = distance * cos(yAngle) * sin(-xAngle);
+			g_pos.z = distance * cos(yAngle) * cos(-xAngle);
 
 			g_pDevice->UseWindow(0);
 			
@@ -308,7 +308,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance,
 			mWorld.Identity();
 			g_pDevice->SetWorldTransform(&mWorld);
 
-			sm->EnableShader(false);
+			//sm->EnableShader(false);
 
 			g_pDevice->BeginRendering(true, true, true);
 			

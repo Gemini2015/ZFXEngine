@@ -65,15 +65,15 @@ void ZFXOpenGL::SetClippingPlanes(float fNear, float fFar)
 	float X = m_fNear / (m_fNear - m_fFar);
 	m_mProjO[0]._33 = m_mProjO[1]._33 = Q;
 	m_mProjO[2]._33 = m_mProjO[3]._33 = Q;
-	m_mProjO[0]._43 = m_mProjO[1]._43 = X;
-	m_mProjO[2]._43 = m_mProjO[3]._43 = X;
+	m_mProjO[0]._34 = m_mProjO[1]._34 = X;
+	m_mProjO[2]._34 = m_mProjO[3]._34 = X;
 
 	Q = -(m_fFar + m_fNear) / (m_fFar - m_fNear);
 	X = -2 * m_fFar * m_fNear / (m_fFar - m_fNear);
 	m_mProjP[0]._33 = m_mProjP[1]._33 = Q;
 	m_mProjP[2]._33 = m_mProjP[3]._33 = Q;
-	m_mProjP[0]._43 = m_mProjP[1]._43 = X;
-	m_mProjP[2]._43 = m_mProjP[3]._43 = X;
+	m_mProjP[0]._34 = m_mProjP[1]._34 = X;
+	m_mProjP[2]._34 = m_mProjP[3]._34 = X;
 }
 
 HRESULT ZFXOpenGL::SetMode(ZFXENGINEMODE mode, int nStage)
@@ -99,13 +99,13 @@ HRESULT ZFXOpenGL::SetMode(ZFXENGINEMODE mode, int nStage)
 	{
 		if (!m_pShaderManager->IsUseShader())
 		{
-			float *mat = NULL;
+			//float *mat = NULL;
 			glMatrixMode(GL_PROJECTION);
-			mat = (float*)&m_mProj2D;
-			glLoadMatrixf(mat);
-			mat = (float*)&(m_mView2D * m_mWorld2D);
+			ZFXMatrix mat = m_mProj2D.GetColumnMajorMat();
+			glLoadMatrixf(mat.val);
+			mat = (m_mView2D * m_mWorld2D).GetColumnMajorMat();
 			glMatrixMode(GL_MODELVIEW);
-			glLoadMatrixf(mat);
+			glLoadMatrixf(mat.val);
 		}
 	}
 	else
@@ -113,20 +113,20 @@ HRESULT ZFXOpenGL::SetMode(ZFXENGINEMODE mode, int nStage)
 		if (!m_pShaderManager->IsUseShader())
 		{
 			glMatrixMode(GL_MODELVIEW);
-			float* mat = (float*)&(m_mView3D * m_mWorld3D);
-			glLoadMatrixf(mat);
+			ZFXMatrix mat = (m_mView3D * m_mWorld3D).GetColumnMajorMat();
+			glLoadMatrixf(mat.val);
 
 			if (m_Mode == EMD_PERSPECTIVE)
 			{
 				glMatrixMode(GL_PROJECTION);
-				mat = (float*)&m_mProjP[nStage];
-				glLoadMatrixf(mat);
+				mat = m_mProjP[nStage].GetColumnMajorMat();
+				glLoadMatrixf(mat.val);
 			}
 			else
 			{
 				glMatrixMode(GL_PROJECTION);
-				mat = (float*)&m_mProjO[nStage];
-				glLoadMatrixf(mat);
+				mat = m_mProjO[nStage].GetColumnMajorMat();
+				glLoadMatrixf(mat.val);
 			}
 		}
 		CalcViewProjMatrix();
@@ -379,13 +379,13 @@ void ZFXOpenGL::SetWorldTransform(const ZFXMatrix* m)
 	{
 		m_mWorld3D = *m;
 	}
-	float *mat = (float*)&(m_mView3D * m_mWorld3D);
+	ZFXMatrix mat = (m_mView3D * m_mWorld3D).GetColumnMajorMat();
 	glMatrixMode(GL_MODELVIEW);
-	glLoadMatrixf(mat);
+	glLoadMatrixf(mat.val);
 
 	CalcWorldViewProjMatrix();
 
-	SetMVPUniform();
+	//SetMVPUniform();
 }
 
 void ZFXOpenGL::SetBackfaceCulling(ZFXRENDERSTATE rs)
@@ -662,8 +662,8 @@ HRESULT ZFXOpenGL::SetLight(const ZFXLIGHT* pLight, UCHAR nStage)
 {
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
-	float *mat = (float*)&(m_mView3D * m_mWorld3D);
-	glLoadMatrixf(mat);
+	ZFXMatrix mat = (m_mView3D * m_mWorld3D).GetColumnMajorMat();
+	glLoadMatrixf(mat.val);
 
 	GLenum gl_index = GL_LIGHT0 + nStage;
 
@@ -1206,7 +1206,7 @@ HRESULT ZFXOpenGL::SetView3D(const ZFXVector &vcRight,
 {
 	if (!m_bRunning) return E_FAIL;
 
-	m_mView3D._14 = m_mView3D._24 = m_mView3D._34 = 0.0f;
+	m_mView3D._41 = m_mView3D._42 = m_mView3D._43 = 0.0f;
 	m_mView3D._44 = 1.0f;
 
 	m_mView3D._11 = vcRight.x;
@@ -1217,24 +1217,24 @@ HRESULT ZFXOpenGL::SetView3D(const ZFXVector &vcRight,
 	m_mView3D._12 = vcUp.x;
 	m_mView3D._22 = vcUp.y;
 	m_mView3D._32 = vcUp.z;
-	m_mView3D._42 = -(vcUp * vcPos);
+	m_mView3D._24 = -(vcUp * vcPos);
 
 	m_mView3D._13 = vcDir.x;
 	m_mView3D._23 = vcDir.y;
 	m_mView3D._33 = vcDir.z;
-	m_mView3D._43 = -(vcDir*vcPos);
+	m_mView3D._34 = -(vcDir*vcPos);
 
 	if (!m_pShaderManager->IsUseShader())
 	{
-		float *mat = (float*)&(m_mView3D * m_mWorld3D);
+		ZFXMatrix mat = (m_mView3D * m_mWorld3D).GetColumnMajorMat();
 		glMatrixMode(GL_MODELVIEW);
-		glLoadMatrixf(mat);
+		glLoadMatrixf(mat.val);
 	}
 	// view changed so recalculate combomatrix
 	CalcViewProjMatrix();
 	CalcWorldViewProjMatrix();
 
-	SetMVPUniform();
+	//SetMVPUniform();
 	return ZFX_OK;
 }
 
@@ -1386,9 +1386,14 @@ void ZFXOpenGL::CalcWorldViewProjMatrix(void)
 
 HRESULT ZFXOpenGL::CalcPerspProjMatrix(int nStage)
 {
-	float left = (float)m_VP[nStage].X;
+	/*float left = (float)(m_VP[nStage].X - m_VP[nStage].Width / 2);
 	float right = left + m_VP[nStage].Width;
-	float bottom = (float)m_VP[nStage].Y;
+	float bottom = (float)(m_VP[nStage].Y - m_VP[nStage].Height / 2);
+	float top = bottom + m_VP[nStage].Height;*/
+
+	float left = (float)(m_VP[nStage].X);
+	float right = left + m_VP[nStage].Width;
+	float bottom = (float)(m_VP[nStage].Y );
 	float top = bottom + m_VP[nStage].Height;
 
 	if (nStage < 0 || nStage >= 4)
@@ -1402,12 +1407,12 @@ HRESULT ZFXOpenGL::CalcPerspProjMatrix(int nStage)
 	memset(&m_mProjP[nStage], 0, sizeof(ZFXMatrix));
 
 	m_mProjP[nStage]._11 = 2 * m_fNear / hori;
-	m_mProjP[nStage]._21 = 2 * m_fNear / veri;
-	m_mProjP[nStage]._31 = (right + left) / (right - left);
-	m_mProjP[nStage]._32 = (top + bottom) / (top - bottom);
+	m_mProjP[nStage]._22 = 2 * m_fNear / veri;
+	m_mProjP[nStage]._13 = (right + left) / (right - left);
+	m_mProjP[nStage]._23 = (top + bottom) / (top - bottom);
 	m_mProjP[nStage]._33 = -(m_fFar + m_fNear) / (m_fFar - m_fNear);
-	m_mProjP[nStage]._34 = -1.0f;
-	m_mProjP[nStage]._43 = -2 * m_fNear * m_fFar / (m_fFar - m_fNear);
+	m_mProjP[nStage]._43 = -1.0f;
+	m_mProjP[nStage]._34 = -2 * m_fNear * m_fFar / (m_fFar - m_fNear);
 
 	return ZFX_OK;
 }
@@ -1440,8 +1445,8 @@ HRESULT ZFXOpenGL::CalcPerspProjMatrix(float fFov, float fAspect, int nStage)
 	m_mProjP[nStage]._11 = w;
 	m_mProjP[nStage]._22 = h;
 	m_mProjP[nStage]._33 = Q;
-	m_mProjP[nStage]._43 = -2 * m_fFar * m_fNear / (m_fFar - m_fNear);
-	m_mProjP[nStage]._34 = -1.0f; 
+	m_mProjP[nStage]._34 = -2 * m_fFar * m_fNear / (m_fFar - m_fNear);
+	m_mProjP[nStage]._43 = -1.0f; 
 
 	return ZFX_OK;
 }
@@ -1469,7 +1474,7 @@ HRESULT ZFXOpenGL::CalcOrthoProjMatrix(int nStage)
 
 	float x = 2.0f / (right - left);
 	float y = 2.0f / (top - bottom);
-	float z = 1.0f / (m_fFar - m_fNear);
+	float z = -2.0f / (m_fFar - m_fNear);
 	float tx = -(right + left) / (right - left);
 	float ty = -(top + bottom) / (top - bottom);
 	float tz = -(m_fNear) / (m_fFar - m_fNear);
@@ -1479,9 +1484,9 @@ HRESULT ZFXOpenGL::CalcOrthoProjMatrix(int nStage)
 	m_mProjO[nStage]._22 = y;
 	m_mProjO[nStage]._33 = z;
 	m_mProjO[nStage]._44 = 1.0f;
-	m_mProjO[nStage]._41 = tx;
-	m_mProjO[nStage]._42 = ty;
-	m_mProjO[nStage]._43 = tz;
+	m_mProjO[nStage]._14 = tx;
+	m_mProjO[nStage]._24 = ty;
+	m_mProjO[nStage]._34 = tz;
 	return ZFX_OK;
 }
 

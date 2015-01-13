@@ -122,7 +122,33 @@ public:
 
 
 // Our basic matrix class
-class __declspec(dllexport) ZFXMatrix {
+class __declspec(dllexport) ZFXMatrix 
+{
+	/************************************************************************/
+	/*
+		列主序，按行存储
+		val[16] = 
+		{
+			_11, _12, _13, _14,
+			_21, _22, _23, _24,
+			_31, _32, _33, _34,
+			_41, _42, _43, _44,
+		}
+		m[row][col]
+
+		所有 ZFXMatrix 的计算都采用上面的规则
+
+		对于OpenGL(采用列主序，按列存储)，在将矩阵传给OpenGL时，须进行转换(getColumnMajorMat)
+		val[16] = 
+		{
+			_11, _21, _31, _41,
+			_12, _22, _32, _42,
+			_31, _23, _33, _43,
+			_14, _24, _34, _44,
+		}
+
+	*/
+	/************************************************************************/
 public:
 	union
 	{
@@ -193,6 +219,17 @@ public:
 	inline void Inverse();
 	inline bool isAffine();
 	inline void InverseAffine();
+
+	// to Column Major 
+	// eg. OpenGL
+	inline ZFXMatrix GetColumnMajorMat();
+	// from Column Major
+	// eg. OpenGL
+	inline ZFXMatrix SetColumnMajorMat(float *val);
+	inline ZFXMatrix SetColumnMajorMat(const ZFXMatrix &m);
+
+	// to Row Major
+	// from Row Major
 
 	ZFXMatrix operator * (const ZFXMatrix &m)const;    // matrix multiplication
 	ZFXVector operator * (const ZFXVector &vc)const;   // matrix vector multiplication

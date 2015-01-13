@@ -352,8 +352,9 @@ HRESULT ZFXOpenGLVCacheManager::Render(UINT nSBID)
 	}
 	else 
 	{
-		//m_pOpenGL->GetShaderManager()->EnableShader(false);
-		m_pOpenGL->SetMVPUniform();
+		GLSLShaderManager* sm = (GLSLShaderManager*)m_pOpenGL->GetShaderManager();
+		if(sm)
+			sm->UpdateAutoConstant();
 	}
 
 	int nVertexNum = m_pStaticBuffer[nSBID].nVertexNum;

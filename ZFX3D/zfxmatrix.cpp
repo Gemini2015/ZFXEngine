@@ -112,16 +112,16 @@ inline void ZFXMatrix::Rota(const ZFXVector &vc) {
 
 inline void ZFXMatrix::SetTranslation(ZFXVector vc, bool b) {
 	if (b) Identity();
-	_41 = vc.x;
-	_42 = vc.y;
-	_43 = vc.z;
+	_14 = vc.x;
+	_24 = vc.y;
+	_34 = vc.z;
 } // SetTranslation
 /*----------------------------------------------------------------*/
 
 
 inline ZFXVector ZFXMatrix::GetTranslation(void)
 {
-	return ZFXVector(_41, _42, _43);
+	return ZFXVector(_14, _24, _34);
 }
 /*----------------------------------------------------------------*/
 
@@ -168,9 +168,9 @@ inline void ZFXMatrix::RotaArbi(const ZFXVector &_vcAxis, float a) {
 
 // add translation to matrix
 inline void ZFXMatrix::Translate(float dx, float dy, float dz) {
-	_41 = dx;
-	_42 = dy;
-	_43 = dz;
+	_14 = dx;
+	_24 = dy;
+	_34 = dz;
 }
 /*----------------------------------------------------------------*/
 
@@ -313,28 +313,29 @@ __declspec(naked) void MatrixMult(float *src1, float *src2, float *dst) {
 /*----------------------------------------------------------------*/
 
 // multiply two matrices
-ZFXMatrix ZFXMatrix::operator * (const ZFXMatrix &m) const {
-	ZFXMatrix mResult;
+ZFXMatrix ZFXMatrix::operator * (const ZFXMatrix &m2) const {
+	ZFXMatrix r;
+	r.m[0][0] = m[0][0] * m2.m[0][0] + m[0][1] * m2.m[1][0] + m[0][2] * m2.m[2][0] + m[0][3] * m2.m[3][0];
+	r.m[0][1] = m[0][0] * m2.m[0][1] + m[0][1] * m2.m[1][1] + m[0][2] * m2.m[2][1] + m[0][3] * m2.m[3][1];
+	r.m[0][2] = m[0][0] * m2.m[0][2] + m[0][1] * m2.m[1][2] + m[0][2] * m2.m[2][2] + m[0][3] * m2.m[3][2];
+	r.m[0][3] = m[0][0] * m2.m[0][3] + m[0][1] * m2.m[1][3] + m[0][2] * m2.m[2][3] + m[0][3] * m2.m[3][3];
 
-	if (!g_bSSE) {
-		float *pA = (float*)this;
-		float *pB = (float*)&m;
-		float *pM = (float*)&mResult;
+	r.m[1][0] = m[1][0] * m2.m[0][0] + m[1][1] * m2.m[1][0] + m[1][2] * m2.m[2][0] + m[1][3] * m2.m[3][0];
+	r.m[1][1] = m[1][0] * m2.m[0][1] + m[1][1] * m2.m[1][1] + m[1][2] * m2.m[2][1] + m[1][3] * m2.m[3][1];
+	r.m[1][2] = m[1][0] * m2.m[0][2] + m[1][1] * m2.m[1][2] + m[1][2] * m2.m[2][2] + m[1][3] * m2.m[3][2];
+	r.m[1][3] = m[1][0] * m2.m[0][3] + m[1][1] * m2.m[1][3] + m[1][2] * m2.m[2][3] + m[1][3] * m2.m[3][3];
 
-		memset(pM, 0, sizeof(ZFXMatrix));
+	r.m[2][0] = m[2][0] * m2.m[0][0] + m[2][1] * m2.m[1][0] + m[2][2] * m2.m[2][0] + m[2][3] * m2.m[3][0];
+	r.m[2][1] = m[2][0] * m2.m[0][1] + m[2][1] * m2.m[1][1] + m[2][2] * m2.m[2][1] + m[2][3] * m2.m[3][1];
+	r.m[2][2] = m[2][0] * m2.m[0][2] + m[2][1] * m2.m[1][2] + m[2][2] * m2.m[2][2] + m[2][3] * m2.m[3][2];
+	r.m[2][3] = m[2][0] * m2.m[0][3] + m[2][1] * m2.m[1][3] + m[2][2] * m2.m[2][3] + m[2][3] * m2.m[3][3];
 
-		for (unsigned char i = 0; i < 4; i++)
-			for (unsigned char j = 0; j < 4; j++) {
-			pM[4 * i + j] += pA[4 * i] * pB[j];
-			pM[4 * i + j] += pA[4 * i + 1] * pB[4 + j];
-			pM[4 * i + j] += pA[4 * i + 2] * pB[8 + j];
-			pM[4 * i + j] += pA[4 * i + 3] * pB[12 + j];
-			}
-	}
-	else {
-		MatrixMult((float*)this, (float*)&m, (float*)&mResult);
-	}
-	return mResult;
+	r.m[3][0] = m[3][0] * m2.m[0][0] + m[3][1] * m2.m[1][0] + m[3][2] * m2.m[2][0] + m[3][3] * m2.m[3][0];
+	r.m[3][1] = m[3][0] * m2.m[0][1] + m[3][1] * m2.m[1][1] + m[3][2] * m2.m[2][1] + m[3][3] * m2.m[3][1];
+	r.m[3][2] = m[3][0] * m2.m[0][2] + m[3][1] * m2.m[1][2] + m[3][2] * m2.m[2][2] + m[3][3] * m2.m[3][2];
+	r.m[3][3] = m[3][0] * m2.m[0][3] + m[3][1] * m2.m[1][3] + m[3][2] * m2.m[2][3] + m[3][3] * m2.m[3][3];
+
+	return r;
 }
 /*----------------------------------------------------------------*/
 
@@ -722,4 +723,28 @@ void ZFXMatrix::InverseAffine()
 
 	_41 = _42 = _43 = 0;
 	_44 = 1;
+}
+
+ZFXMatrix ZFXMatrix::GetColumnMajorMat()
+{
+	ZFXMatrix m = *this;
+	m.Transpose();
+	return m;
+}
+
+ZFXMatrix ZFXMatrix::SetColumnMajorMat(float *val)
+{
+	if (val)
+	{
+		memcpy(this->val, val, sizeof(float) * 16);
+		Transpose();
+	}
+	return *this;
+}
+
+ZFXMatrix ZFXMatrix::SetColumnMajorMat(const ZFXMatrix &m)
+{
+	memcpy(val, m.val, 16 * sizeof(float));
+	Transpose();
+	return *this;
 }

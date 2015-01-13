@@ -137,6 +137,9 @@ class __declspec(dllexport) ZFXMatrix
 		m[row][col]
 
 		所有 ZFXMatrix 的计算都采用上面的规则
+		矩阵与向量相乘，矩阵在左，向量在右。
+		矩阵累乘，从右向左乘
+
 
 		对于OpenGL(采用列主序，按列存储)，在将矩阵传给OpenGL时，须进行转换(getColumnMajorMat)
 		val[16] = 

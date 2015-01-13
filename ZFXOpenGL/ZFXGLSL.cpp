@@ -537,6 +537,9 @@ HRESULT GLSLShaderManager::UpdateAutoConstant()
 	if (m_ConstantMap.empty())
 		return ZFX_OK;
 
+	if (!IsUseShader())
+		return ZFX_OK;
+
 	for (int i = 0; i < MAX_AUTOCONSTANT_ID; i++)
 	{
 		GLSLCONSTANT_MAP::iterator it = m_ConstantMap.find(sGLSLAutoConstantDict[i].name);

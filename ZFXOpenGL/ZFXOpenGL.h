@@ -162,7 +162,7 @@ public:
 	GLenum GetTextureOp(int n);
 	
 	HRESULT ActiveSkin(UINT nSkinID);
-	HRESULT SetMVPUniform();
+	
 
 private:
 	HINSTANCE m_hDLL;

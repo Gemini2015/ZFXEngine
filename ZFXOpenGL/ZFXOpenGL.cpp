@@ -1589,20 +1589,6 @@ HRESULT ZFXOpenGL::ActiveSkin(UINT nSkinID)
 	return hr;
 }
 
-HRESULT ZFXOpenGL::SetMVPUniform()
-{
-	if (m_pShaderManager->IsUseShader())
-	{
-		GLfloat mat[16];
-		glGetFloatv(GL_MODELVIEW_MATRIX, mat);
-		m_pShaderManager->SetNamedConstant("modelview", DAT_FMAT4, 1, mat);
-		glGetFloatv(GL_PROJECTION_MATRIX, mat);
-		m_pShaderManager->SetNamedConstant("projection", DAT_FMAT4, 1, mat);
-	}
-	return ZFX_OK;
-}
-
-
 /*-----------------------------------------------------------*/
 /* DLL stuff implementation                                  *
 /*-----------------------------------------------------------*/

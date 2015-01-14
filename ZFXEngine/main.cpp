@@ -59,6 +59,14 @@ float xAngleStep = 0.05f;
 float yAngleStep = 0.05f;
 float distanceStep = 0.1f;
 
+ZFXVector g_lightPos(10, 0, 0);
+float xLightAngle = 0.0f;
+float yLightAngle = 0.0f;
+float LightDistantce = 10.0f;
+float g_cutoff = 45.0f;
+float cutoffStep = 1;
+float g_exponent = 1;
+float exponentStep = 1;
 
 ShaderObject *g_vshader = NULL;
 ShaderObject *g_fshader = NULL;
@@ -273,13 +281,17 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance,
 	ZFXVertexCacheManager* vcm = g_pDevice->GetVertexManager();
 
 	ZFXLIGHT light;
-	light.Type = LGT_DIRECTIONAL;
-	light.cAmbient.rgba(1, 1, 1, 1);
-	light.cDiffuse.rgba(1, 1, 1, 1);
+	light.Type = LGT_SPOT;
+	light.cAmbient.rgba(0.2, 0.2, 0.2, 1);
+	light.cDiffuse.rgba(1, 0, 0, 1);
 	light.cSpecular.rgba(1, 1, 1, 1);
 	light.fAttenuation0 = 1.0f;
 	light.fAttenuation1 = 0.0f;
 	light.fTheta = 30;
+	light.fPhi = 60;
+	light.fRange = 50;
+	light.vcDirection = ZFXVector(0, 0, 0);
+
 
 	while (!g_bDone)
 	{
@@ -296,6 +308,18 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance,
 			g_pos.x = distance * cos(yAngle) * sin(-xAngle);
 			g_pos.z = distance * cos(yAngle) * cos(-xAngle);
 
+			g_lightPos.y = LightDistantce * sin(yLightAngle);
+			g_lightPos.x = LightDistantce * cos(yLightAngle) * sin(-xLightAngle);
+			g_lightPos.z = LightDistantce * cos(yLightAngle) * cos(-xLightAngle);
+
+
+			
+			light.vcPosition = g_lightPos;
+			light.vcDirection = -g_lightPos;
+			light.vcDirection.w = 0;
+			light.fPhi = g_cutoff;
+			light.fExponent = g_exponent;
+
 			g_pDevice->UseWindow(0);
 			
 			
@@ -308,7 +332,10 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance,
 			mWorld.Identity();
 			g_pDevice->SetWorldTransform(&mWorld);
 
-			//sm->EnableShader(false);
+			sm->EnableShader(false);
+
+			g_pDevice->SetAmbientLight(0.1, 0.1, 0.1);
+			g_pDevice->SetLight(&light, 0);
 
 			g_pDevice->BeginRendering(true, true, true);
 			
@@ -753,48 +780,48 @@ HRESULT KeyProc(UCHAR key)
 		break;
 	}*/
 
-	switch (key)
-	{
-		/*case 'W':
-		g_pos.z += 0.1;
-		break;
-		case 'S':
-		g_pos.z -= 0.1;
-		break;
-		case 'A':
-		g_pos.x -= 0.1;
-		break;
-		case 'D':
-		g_pos.x += 0.1;
-		break;
-		case 'Q':
-		g_pos.y += 0.1;
-		break;
-		case 'E':
-		g_pos.y -= 0.1;
-		break;*/
-	case 'U':
-		g_dir.y += 0.1;
-		break;
-	case 'J':
-		g_dir.y -= 0.1;
-		break;
-	case 'H':
-		g_dir.x -= 0.1;
-		break;
-	case 'K':
-		g_dir.x += 0.1;
-		break;
-	case 'Y':
-		g_dir.z += 0.1;
-		break;
-	case 'I':
-		g_dir.z -= 0.1;
-		break;
-	default:
-		hr = ZFX_FAIL;
-		break;
-	}
+	//switch (key)
+	//{
+	//	/*case 'W':
+	//	g_pos.z += 0.1;
+	//	break;
+	//	case 'S':
+	//	g_pos.z -= 0.1;
+	//	break;
+	//	case 'A':
+	//	g_pos.x -= 0.1;
+	//	break;
+	//	case 'D':
+	//	g_pos.x += 0.1;
+	//	break;
+	//	case 'Q':
+	//	g_pos.y += 0.1;
+	//	break;
+	//	case 'E':
+	//	g_pos.y -= 0.1;
+	//	break;*/
+	//case 'U':
+	//	g_dir.y += 0.1;
+	//	break;
+	//case 'J':
+	//	g_dir.y -= 0.1;
+	//	break;
+	//case 'H':
+	//	g_dir.x -= 0.1;
+	//	break;
+	//case 'K':
+	//	g_dir.x += 0.1;
+	//	break;
+	//case 'Y':
+	//	g_dir.z += 0.1;
+	//	break;
+	//case 'I':
+	//	g_dir.z -= 0.1;
+	//	break;
+	//default:
+	//	hr = ZFX_FAIL;
+	//	break;
+	//}
 
 	switch (key)
 	{
@@ -817,6 +844,47 @@ HRESULT KeyProc(UCHAR key)
 	case 'E':
 		distance -= distanceStep;
 		break;
+
+	case 'H':
+		xLightAngle += xAngleStep;
+		break;
+	case 'K':
+		xLightAngle -= xAngleStep;
+		break;
+	case 'U':
+		yLightAngle += yAngleStep;
+		break;
+	case 'J':
+		yLightAngle -= yAngleStep;
+		break;
+	case 'Y':
+		LightDistantce += distanceStep;
+		break;
+	case 'I':
+		LightDistantce -= distanceStep;
+		break;
+	case 'P':
+		xLightAngle = yLightAngle = 0.0f;
+		LightDistantce = 5.0;
+		break;
+
+	case 'Z':
+		g_cutoff += cutoffStep;
+		if (g_cutoff >= 90) g_cutoff = 89;
+		break;
+	case 'X':
+		g_cutoff -= cutoffStep;
+		if (g_cutoff <= 0) g_cutoff = 1;
+		break;
+	case 'C':
+		g_exponent += exponentStep;
+		if (g_exponent >= 90) g_exponent = 89;
+		break;
+	case 'V':
+		g_exponent -= exponentStep;
+		if (g_exponent <= 0) g_exponent = 1;
+		break;
+
 	case 'R':
 		xAngle = yAngle = 0.0f;
 		distance = 5.0f;
@@ -824,5 +892,10 @@ HRESULT KeyProc(UCHAR key)
 	default:
 		break;
 	}
+
+	char buf[256] = { 0 };
+	sprintf_s(buf, "cutoff %f exponent %f ", g_cutoff, g_exponent);
+	SetWindowText(g_hWnd, buf);
 	return hr;
+	
 }

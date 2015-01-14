@@ -865,11 +865,12 @@ HRESULT ZFXOpenGLSkinManager::ActiveSkin(UINT nSkinID)
 	{
 		if (!m_pOpenGL->GetShaderManager()->IsUseShader())
 		{
-			glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, pMat->cDiffuse.c);
-			glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, pMat->cAmbient.c);
-			glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, pMat->cSpecular.c);
-			glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, pMat->cEmissive.c);
-			glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, pMat->fPower);
+			CHECK_ERROR;
+			glMaterialfv(GL_FRONT, GL_DIFFUSE, pMat->cDiffuse.c);
+			glMaterialfv(GL_FRONT, GL_AMBIENT, pMat->cAmbient.c);
+			glMaterialfv(GL_FRONT, GL_SPECULAR, pMat->cSpecular.c);
+			glMaterialfv(GL_FRONT, GL_EMISSION, pMat->cEmissive.c);
+			glMaterialf(GL_FRONT, GL_SHININESS, 50);
 			CHECK_ERROR;
 		}
 		else

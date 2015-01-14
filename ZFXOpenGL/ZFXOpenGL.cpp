@@ -660,8 +660,9 @@ HRESULT ZFXOpenGL::SetTextureStage(UCHAR n, ZFXRENDERSTATE rs)
 
 HRESULT ZFXOpenGL::SetLight(const ZFXLIGHT* pLight, UCHAR nStage)
 {
+	CHECK_ERROR;
 	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
+	//glPushMatrix();
 	ZFXMatrix mat = (m_mView3D * m_mWorld3D).GetColumnMajorMat();
 	glLoadMatrixf(mat.val);
 
@@ -673,17 +674,6 @@ HRESULT ZFXOpenGL::SetLight(const ZFXLIGHT* pLight, UCHAR nStage)
 		return ZFX_OK;
 	}
 
-	switch (pLight->Type)
-	{
-	case LGT_SPOT:
-		glLightf(gl_index, GL_SPOT_CUTOFF, (float)RADIAN2DEGREE(pLight->fPhi));
-		glLightf(gl_index, GL_SPOT_EXPONENT, 1.0f);
-		break;
-	default:
-		glLightf(gl_index, GL_SPOT_CUTOFF, 180.0f);
-		break;
-	}
-
 	// 漫反射
 	glLightfv(gl_index, GL_DIFFUSE, (GLfloat*)pLight->cDiffuse.c);
 
@@ -692,15 +682,37 @@ HRESULT ZFXOpenGL::SetLight(const ZFXLIGHT* pLight, UCHAR nStage)
 
 	// 环境光
 	glLightfv(gl_index, GL_AMBIENT, (GLfloat*)pLight->cAmbient.c);
-
-	// 位置
-	glLightfv(gl_index, GL_POSITION, (GLfloat*)(&(pLight->vcPosition)));
-
-	// 方向
-	if (pLight->Type == LGT_SPOT || pLight->Type == LGT_DIRECTIONAL)
+	CHECK_ERROR;
+	switch (pLight->Type)
+	{
+	case LGT_SPOT:
+	{
+		glLightf(gl_index, GL_SPOT_CUTOFF, pLight->fPhi);
+		glLightf(gl_index, GL_SPOT_EXPONENT, pLight->fExponent);
+		// 位置
+		glLightfv(gl_index, GL_POSITION, (GLfloat*)(&(pLight->vcPosition)));
+		glLightfv(gl_index, GL_SPOT_DIRECTION, (GLfloat*)(&(pLight->vcDirection)));
+		CHECK_ERROR;
+	}
+		break;
+	case LGT_POINT:
+	{
+		glLightfv(gl_index, GL_POSITION, (GLfloat*)(&(pLight->vcPosition)));
+		glLightf(gl_index, GL_SPOT_CUTOFF, 180.0f);
+		CHECK_ERROR;
+	}
+		break;
+	case LGT_DIRECTIONAL:
 	{
 		glLightfv(gl_index, GL_SPOT_DIRECTION, (GLfloat*)(&(pLight->vcDirection)));
+		glLightf(gl_index, GL_SPOT_CUTOFF, 180.0f);
+		CHECK_ERROR;
 	}
+		break;
+	default:
+		break;
+	}
+	CHECK_ERROR;
 
 	glLightf(gl_index, GL_CONSTANT_ATTENUATION, (GLfloat)pLight->fAttenuation0);
 	glLightf(gl_index, GL_LINEAR_ATTENUATION, (GLfloat)pLight->fAttenuation1);
@@ -708,6 +720,7 @@ HRESULT ZFXOpenGL::SetLight(const ZFXLIGHT* pLight, UCHAR nStage)
 
 	glEnable(gl_index);
 	glEnable(GL_LIGHTING);
+	CHECK_ERROR;
 	return ZFX_OK;
 }
 //
@@ -969,6 +982,7 @@ HRESULT ZFXOpenGL::DrawText(UINT, int, int, DWORD, char*)
 void ZFXOpenGL::SetAmbientLight(float fRed, float fGreen, float fBlue)
 {
 	GLfloat lmodel_ambient[] = { fRed, fGreen, fBlue, 1.0f };
+	// 整个场景的全局环境光
 	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lmodel_ambient);
 
 	if (m_pShaderManager->IsCanUseShader())
@@ -1104,7 +1118,7 @@ HRESULT ZFXOpenGL::Go(void)
 
 	// prepare Shader stuff
 
-	SetAmbientLight(1.0f, 1.0f, 1.0f);
+	SetAmbientLight(0.5f, 0.5f, 0.5f);
 	SetTextureStage(0, RS_TEX_MODULATE);
 	SetTextureStage(1, RS_NONE);
 	SetTextureStage(2, RS_NONE);

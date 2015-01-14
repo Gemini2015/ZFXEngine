@@ -299,10 +299,11 @@ typedef struct ZFXLIGHT_TYPE {
 	ZFXVector  vcPosition;     // light position
 	ZFXVector  vcDirection;    // light direction
 	float      fRange;         // range of light
-	float      fTheta;         // angle of spot light inner cone
-	float      fPhi;           // angle of spot light outer cone
+	float      fTheta;         // angle of spot light inner cone(degree)
+	float      fPhi;           // angle of spot light outer cone(degree)
 	float      fAttenuation0;  // change of intensity over distance
 	float      fAttenuation1;  // change of intensity over distance
+	float	   fExponent;
 } ZFXLIGHT;
 /*----------------------------------------------------------------*/
 

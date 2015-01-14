@@ -194,7 +194,7 @@ HRESULT CModelObject::LoadMaterial(std::string file)
 	{
 		tagRawMaterial raw = rawMatList[i];
 		UINT id;
-		sm->AddSkin(&raw.mat.cAmbient, &raw.mat.cDiffuse, &raw.mat.cEmissive, &raw.mat.cSpecular, raw.mat.fPower, &id);
+		sm->AddSkin(&raw.mat.cAmbient, &raw.mat.cDiffuse, &raw.mat.cEmissive, &raw.mat.cSpecular, 50, &id);
 		for (int tex = 0; tex < raw.texfile.size(); tex++)
 		{
 			sm->AddTexture(id, raw.texfile[tex].c_str(), false, 1.0f, NULL, 0);

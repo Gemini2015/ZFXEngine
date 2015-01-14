@@ -49,6 +49,7 @@ ZFXModel *g_pG3 = NULL,
 
 CModelObject* g_pCube = NULL;
 CModelObject* g_pMonkey = NULL;
+CModelObject* g_pSphere = NULL;
 
 ZFXVector g_dir(0, 0, 1), g_pos(0, 0, 3);
 float eye[3] = { 0.0f, 0.0f, 1.0f };
@@ -59,10 +60,10 @@ float xAngleStep = 0.05f;
 float yAngleStep = 0.05f;
 float distanceStep = 0.1f;
 
-ZFXVector g_lightPos(10, 0, 0);
+ZFXVector g_lightPos(5, 0, 0);
 float xLightAngle = 0.0f;
 float yLightAngle = 0.0f;
-float LightDistantce = 10.0f;
+float LightDistantce = 5.0f;
 float g_cutoff = 45.0f;
 float cutoffStep = 1;
 float g_exponent = 1;
@@ -122,6 +123,85 @@ void DrawTriangle(IShaderManager* sm)
 	}
 
 	g_pDevice->EndRendering();
+}
+
+void LoadModel()
+{
+	g_pLeopard2 = new ZFXModel("model\\leo2.s3d", g_pDevice);
+	g_pG3 = new ZFXModel("model\\G3.s3d", g_pDevice);
+	g_pMarder = new ZFXModel("model\\ma3.s3d", g_pDevice);
+	g_pCube = new CModelObject(g_pDevice);
+	g_pCube->LoadFromFile("model/uvcube2.obj");
+	g_pMonkey = new CModelObject(g_pDevice);
+	g_pMonkey->LoadFromFile("model/monkey.obj");
+	g_pSphere = new CModelObject(g_pDevice);
+	g_pSphere->LoadFromFile("model/sphere.obj");
+}
+
+void DrawS3DModel()
+{
+	g_pDevice->BeginRendering(true, true, true);
+
+	ZFXMatrix mWorld;
+	mWorld.Identity();
+	/*mWorld.Identity();
+	mWorld.Translate(-2.0f, 1.0f, 13.0f);
+	g_pDevice->SetWorldTransform(&mWorld);
+	hr = g_pMarder->Render(true, false);
+
+	mWorld.Translate(-1.0f, -5.0f, 15.0f);
+	g_pDevice->SetWorldTransform(&mWorld);
+	hr = g_pLeopard2->Render(true, false);
+	*/
+	mWorld.Translate(0.5, 0.5, 0);
+	g_pDevice->SetWorldTransform(&mWorld);
+	g_pG3->Render(true, false);
+	g_pLeopard2->Render(true, false);
+	g_pMarder->Render(true, false);
+
+	g_pDevice->EndRendering();
+}
+
+void DrawOBJModel()
+{
+	g_pDevice->BeginRendering(true, true, true);
+
+	g_pSphere->Render();
+	//g_pCube->Render();
+	//g_pMonkey->Render();
+
+	g_pDevice->EndRendering();
+}
+
+void DrawVertex()
+{
+	UINT nID = 0;
+	static GLfloat vertexs[] = {
+		-0.25f, -0.25f, -0.25f,
+		0.25f, -0.25f, -0.25f,
+		0.25f, 0.25f, -0.25f,
+		-0.25f, 0.25f, -0.25f,
+		-0.25f, -0.25f, 0.25f,
+		0.25f, -0.25f, 0.25f,
+		0.25f, 0.25f, 0.25f,
+		-0.25f, 0.25f, 0.25f,
+	};
+	static GLushort first[] = {
+		0, 2, 1,
+		0, 3, 2,
+		1, 2, 5,
+		2, 6, 5,
+		2, 3, 6,
+		3, 7, 6,
+		4, 5, 6,
+		4, 6, 7,
+		0, 4, 3,
+		3, 4, 7,
+		0, 1, 5,
+		0, 5, 4,
+	};
+
+	g_pDevice->GetVertexManager()->CreateStaticBuffer(VID_PS, 0, 8, 36, vertexs, first, &nID);
 }
 
 /**
@@ -201,74 +281,20 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance,
 
 		ShowWindow(hWnd, SW_SHOW);
 
-		g_pLeopard2 = new ZFXModel("model\\leo2.s3d", g_pDevice);
-		g_pG3 = new ZFXModel("model\\G3.s3d", g_pDevice);
-		g_pMarder = new ZFXModel("model\\ma3.s3d", g_pDevice);
-		g_pCube = new CModelObject(g_pDevice);
-		g_pCube->LoadFromFile("model/uvcube2.obj");
-		g_pMonkey = new CModelObject(g_pDevice);
-		g_pMonkey->LoadFromFile("model/monkey.obj");
+		LoadModel();
 
-		/*if (FAILED(BuildAndSetShader()))
-		{
-			GetLogger().Print(LOG_DEBUG,log_file,"Error Build and Set Shader ");
-			g_bDone = true;
-		}*/
 	}
-	//g_pDevice->UseWindow(0);
 
-	
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	//DrawVertex();
 
-	UINT nID = 0;
-	static GLfloat vertexs[] = {
-		-0.25f, -0.25f, -0.25f,
-		0.25f, -0.25f, -0.25f,
-		0.25f, 0.25f, -0.25f,
-		-0.25f, 0.25f, -0.25f,
-		-0.25f, -0.25f, 0.25f,
-		0.25f, -0.25f, 0.25f,
-		0.25f, 0.25f, 0.25f,
-		-0.25f, 0.25f, 0.25f,
-	};
-	static GLushort first[] = { 
-		0,2,1,
-		0,3,2,
-		1,2,5,
-		2,6,5,
-		2,3,6,
-		3,7,6,
-		4,5,6,
-		4,6,7,
-		0,4,3,
-		3,4,7,
-		0,1,5,
-		0,5,4,
-	};
 
-	ZFXCOLOR color;
-	color.fB = 1.0f;
+	ZFXCOLOR color(0, 0, 1, 1);
 	g_pDevice->SetShadeMode(RS_SHADE_SOLID, 1.0f, &color);
-	ZFXVector vR(1, 0, 0), vU(0, 1, 0);
+	ZFXVector vU(0, 1, 0);
 	ZFXVIEWPORT vp = { 0, 0, 800, 600 };
 	g_pDevice->InitStage(60, &vp, 0);
 	g_pDevice->SetClippingPlanes(0.1f, 1000.0f);
 	g_pDevice->SetMode(EMD_PERSPECTIVE, 0);
-	//g_pDevice->SetMode(EMD_PERSPECTIVE, 0);
-	g_pDevice->GetVertexManager()->CreateStaticBuffer(VID_PS, 0, 8, 36, vertexs, first, &nID);
-
-	
-	g_dir.Normalize();
-	//g_pDevice->SetView3D(vR, vU, g_dir, g_pos);
-	g_pDevice->SetViewLookAt(g_pos, ZFXVector(0, 0, 1), vU);
-	GLfloat f[16] = { 0.0 };
-	glGetFloatv(GL_MODELVIEW_MATRIX, f);
-	glGetFloatv(GL_PROJECTION_MATRIX, f);
-	
-	//ZFXCOLOR color;
-	color.fR = 1.0f;
-	color.fA = 1.0f;
-	g_pDevice->SetShadeMode(RS_SHADE_SOLID, 1.0f, &color);
 
 	IShaderManager* sm = g_pDevice->GetShaderManager();
 	if (g_vshader)
@@ -278,13 +304,11 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance,
 	if (g_vshader || g_fshader)
 		sm->EnableShader(true);
 
-	ZFXVertexCacheManager* vcm = g_pDevice->GetVertexManager();
-
 	ZFXLIGHT light;
 	light.Type = LGT_SPOT;
 	light.cAmbient.rgba(0.2, 0.2, 0.2, 1);
-	light.cDiffuse.rgba(1, 0, 0, 1);
-	light.cSpecular.rgba(1, 1, 1, 1);
+	light.cDiffuse.rgba(1, 1, 1, 1);
+	light.cSpecular.rgba(1, 0, 0, 1);
 	light.fAttenuation0 = 1.0f;
 	light.fAttenuation1 = 0.0f;
 	light.fTheta = 30;
@@ -322,52 +346,53 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance,
 
 			g_pDevice->UseWindow(0);
 			
-			
-			g_dir = -g_pos;
-			g_dir.Normalize();
 			g_pDevice->SetViewLookAt(g_pos, ZFXVector(0, 0, 0), vU);
-			//ProgramTick();
+			GLfloat f[16] = { 0.0 };
+			glGetFloatv(GL_MODELVIEW_MATRIX, f);
+			glGetFloatv(GL_PROJECTION_MATRIX, f);
 
 			ZFXMatrix mWorld;
 			mWorld.Identity();
 			g_pDevice->SetWorldTransform(&mWorld);
 
-			sm->EnableShader(false);
+			//sm->EnableShader(false);
 
 			g_pDevice->SetAmbientLight(0.1, 0.1, 0.1);
 			g_pDevice->SetLight(&light, 0);
 
-			g_pDevice->BeginRendering(true, true, true);
+			float v[4];
+			glGetMaterialfv(GL_FRONT, GL_AMBIENT, v);
+			glGetMaterialfv(GL_FRONT, GL_DIFFUSE, v);
+			glGetMaterialfv(GL_FRONT, GL_SPECULAR, v);
+			glGetMaterialfv(GL_FRONT, GL_EMISSION, v);
+
+			DrawOBJModel();
+			GLenum error = glGetError();
+			if (error != GL_NO_ERROR)
+			{
+				int i = 0;
+			}
 			
-			g_pCube->Render();
-			//g_pMonkey->Render();
+			glGetMaterialfv(GL_FRONT, GL_AMBIENT, v);
+			glGetMaterialfv(GL_FRONT, GL_DIFFUSE, v);
+			glGetMaterialfv(GL_FRONT, GL_SPECULAR, v);
+			glGetMaterialfv(GL_FRONT, GL_EMISSION, v);
 
-			g_pDevice->EndRendering();
+			glGetLightfv(GL_LIGHT0, GL_AMBIENT, v);
+			glGetLightfv(GL_LIGHT0, GL_DIFFUSE, v);
+			glGetLightfv(GL_LIGHT0, GL_SPECULAR, v);
+		
 
+			error = glGetError();
+			if (error != GL_NO_ERROR)
+			{
+				int i = 0;
+			}
+
+			//ProgramTick();
 			//DrawTriangle(sm);
+			//DrawS3DModel();
 
-
-			//g_pDevice->BeginRendering(true, true, true);
-			//
-			//ZFXMatrix mWorld;
-			//mWorld.Identity();
-			///*mWorld.Identity();
-			//mWorld.Translate(-2.0f, 1.0f, 13.0f);
-			//g_pDevice->SetWorldTransform(&mWorld);
-			//hr = g_pMarder->Render(true, false);
-
-			//mWorld.Translate(-1.0f, -5.0f, 15.0f);
-			//g_pDevice->SetWorldTransform(&mWorld);
-			//hr = g_pLeopard2->Render(true, false);
-			//*/
-			//mWorld.Translate(0.5, 0.5, 0);
-			//g_pDevice->SetWorldTransform(&mWorld);
-			//hr = g_pG3->Render(true, false);
-			//g_pG3->Render(true, false);
-			//g_pLeopard2->Render(true, false);
-			//g_pMarder->Render(true, false);
-
-			//g_pDevice->EndRendering();
 
 			/*if (g_pDevice->IsWindowed())
 			{
@@ -878,7 +903,7 @@ HRESULT KeyProc(UCHAR key)
 		break;
 	case 'C':
 		g_exponent += exponentStep;
-		if (g_exponent >= 90) g_exponent = 89;
+		if (g_exponent >= 128) g_exponent = 127;
 		break;
 	case 'V':
 		g_exponent -= exponentStep;
@@ -894,7 +919,7 @@ HRESULT KeyProc(UCHAR key)
 	}
 
 	char buf[256] = { 0 };
-	sprintf_s(buf, "cutoff %f exponent %f ", g_cutoff, g_exponent);
+	sprintf_s(buf, "cutoff %f exponent %f LightDistance %f ", g_cutoff, g_exponent, LightDistantce);
 	SetWindowText(g_hWnd, buf);
 	return hr;
 	

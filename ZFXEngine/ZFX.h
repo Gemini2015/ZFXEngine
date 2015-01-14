@@ -214,6 +214,13 @@ struct _ZFXCOLOR
 		c[0] = c[1] = c[2] = 0;
 		c[3] = 1.0f;
 	}
+	_ZFXCOLOR(float r, float g, float b, float a)
+	{
+		fR = r;
+		fG = g;
+		fB = b;
+		fA = a;
+	}
 	bool operator==(const _ZFXCOLOR& clr1) const
 	{
 		return memcmp(&this->c[0], &clr1.c[0], sizeof(_ZFXCOLOR)) == 0 ? true : false;

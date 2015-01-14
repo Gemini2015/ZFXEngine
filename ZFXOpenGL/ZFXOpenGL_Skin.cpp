@@ -870,7 +870,7 @@ HRESULT ZFXOpenGLSkinManager::ActiveSkin(UINT nSkinID)
 			glMaterialfv(GL_FRONT, GL_AMBIENT, pMat->cAmbient.c);
 			glMaterialfv(GL_FRONT, GL_SPECULAR, pMat->cSpecular.c);
 			glMaterialfv(GL_FRONT, GL_EMISSION, pMat->cEmissive.c);
-			glMaterialf(GL_FRONT, GL_SHININESS, 50);
+			glMaterialf(GL_FRONT, GL_SHININESS, pMat->fPower);
 			CHECK_ERROR;
 		}
 		else

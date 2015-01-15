@@ -74,6 +74,12 @@ public:
 
 	virtual ZFXTEXTURE GetTexture(UINT nTexID) override;
 
+	virtual HRESULT ActiveSkin(UINT nSkinID) override;
+
+	virtual ZFXSKIN GetActiveSkin() override;
+
+	virtual ZFXMATERIAL GetActiveMaterial() override;
+
 protected:
 	ZFXOpenGL* m_pOpenGL;
 
@@ -83,8 +89,6 @@ protected:
 	HRESULT ConvertToNormalmap(ZFXTEXTURE *pTexture);
 	HRESULT SetAlphaKey(GLuint texture, UCHAR R, UCHAR G, UCHAR B, UCHAR A);
 	HRESULT SetTransparency(GLuint texture, UCHAR alpha);
-
-	HRESULT ActiveSkin(UINT nSkinID);
 
 };
 

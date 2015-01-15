@@ -12,6 +12,7 @@ CModelObject::CModelObject(ZFXRenderDevice *pDevice)
 	m_pDevice = pDevice;
 	m_file = "";
 	m_bReady = false;
+	m_VertexAttribFlag = 0;
 }
 
 
@@ -76,6 +77,13 @@ HRESULT CModelObject::LoadFromFile(std::string file)
 		}
 		else if (strcmp(token, "usemtl") == 0)
 		{
+			if (!vlist.empty())
+				m_VertexAttribFlag |= VA_VERTEX;
+			if (!vnlist.empty())
+				m_VertexAttribFlag |= VA_NORMAL;
+			if (!vtlist.empty())
+				m_VertexAttribFlag |= VA_TEX_COORD0;
+
 			tagRawSubModel rawsubmodel;
 			rawsubmodel.materialID = m_SkinIDs[std::string(content)];
 			LoadRawFace(rawsubmodel.flist, fp);
@@ -227,7 +235,30 @@ HRESULT CModelObject::LoadRawFace(std::vector<tagRawF> &rawface, FILE *fp)
 			int v2, vt2, vn2;
 			int v3, vt3, vn3;
 
-			sscanf(content, "%d/%d/%d %d/%d/%d %d/%d/%d", &v1, &vt1, &vn1, &v2, &vt2, &vn2, &v3, &vt3, &vn3);
+			// f v/vt/vn
+			switch (m_VertexAttribFlag)
+			{
+			case 0x1:
+				// vertex only
+				sscanf(content, "%d %d %d", &v1, &v2, &v3);
+				break;
+			case 0x3:
+				// vertex, normal
+				sscanf(content, "%d//%d %d//%d %d//%d", &v1, &vn1, &v2, &vn2, &v3, &vn3);
+				break;
+			case 0x5:
+				// vertex, texture
+				sscanf(content, "%d/%d %d/%d %d/%d", &v1, &vt1, &v2, &vt2, &v3, &vt3);
+				break;
+			case 0x7:
+				// vertex, texture, normal
+				sscanf(content, "%d/%d/%d %d/%d/%d %d/%d/%d", &v1, &vt1, &vn1, &v2, &vt2, &vn2, &v3, &vt3, &vn3);
+				break;
+			
+			default:
+				break;
+			}
+			
 
 			tagRawF face;
 			face.v1 = v1;
@@ -276,10 +307,10 @@ HRESULT CModelObject::VertexProcess(std::vector<tagRawSubModel> &rawsubmodellist
 				v.y = vlist[faceit->v1 - 1].y;
 				v.z = vlist[faceit->v1 - 1].z;
 
-				v.vcN[0] = v.vcN[1] = v.vcN[2] = 0;
-				/*v.vcN[0] = vnlist[faceit->vn1 - 1].x;
+				//v.vcN[0] = v.vcN[1] = v.vcN[2] = 0;
+				v.vcN[0] = vnlist[faceit->vn1 - 1].x;
 				v.vcN[1] = vnlist[faceit->vn1 - 1].y; 
-				v.vcN[2] = vnlist[faceit->vn1 - 1].z;*/
+				v.vcN[2] = vnlist[faceit->vn1 - 1].z;
 
 				v.tu = vtlist[faceit->vt1 - 1].u;
 				v.tv = vtlist[faceit->vt1 - 1].v;
@@ -308,10 +339,10 @@ HRESULT CModelObject::VertexProcess(std::vector<tagRawSubModel> &rawsubmodellist
 				v.y = vlist[faceit->v2 - 1].y;
 				v.z = vlist[faceit->v2 - 1].z;
 
-				v.vcN[0] = v.vcN[1] = v.vcN[2] = 0;
-				/*v.vcN[0] = vnlist[faceit->vn2 - 1].x; 
+				//v.vcN[0] = v.vcN[1] = v.vcN[2] = 0;
+				v.vcN[0] = vnlist[faceit->vn2 - 1].x; 
 				v.vcN[1] = vnlist[faceit->vn2 - 1].y; 
-				v.vcN[2] = vnlist[faceit->vn2 - 1].z;*/
+				v.vcN[2] = vnlist[faceit->vn2 - 1].z;
 
 				v.tu = vtlist[faceit->vt2 - 1].u;
 				v.tv = vtlist[faceit->vt2 - 1].v;
@@ -340,10 +371,10 @@ HRESULT CModelObject::VertexProcess(std::vector<tagRawSubModel> &rawsubmodellist
 				v.y = vlist[faceit->v3 - 1].y;
 				v.z = vlist[faceit->v3 - 1].z;
 
-				v.vcN[0] = v.vcN[1] = v.vcN[2] = 0;
-				/*v.vcN[0] = vnlist[faceit->vn3 - 1].x; 
+				//v.vcN[0] = v.vcN[1] = v.vcN[2] = 0;
+				v.vcN[0] = vnlist[faceit->vn3 - 1].x; 
 				v.vcN[1] = vnlist[faceit->vn3 - 1].y; 
-				v.vcN[2] = vnlist[faceit->vn3 - 1].z;*/
+				v.vcN[2] = vnlist[faceit->vn3 - 1].z;
 
 				v.tu = vtlist[faceit->vt3 - 1].u;
 				v.tv = vtlist[faceit->vt3 - 1].v;
@@ -392,4 +423,9 @@ HRESULT CModelObject::CreateStaticBuffer()
 		it++;
 	}
 	return ZFX_OK;
+}
+
+DWORD CModelObject::GetVertexAttribFlag()
+{
+	return m_VertexAttribFlag;
 }

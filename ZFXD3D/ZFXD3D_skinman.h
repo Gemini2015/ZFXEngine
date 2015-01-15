@@ -88,6 +88,10 @@ protected:
 	DWORD   MakeD3DColor(UCHAR R, UCHAR G, UCHAR B, UCHAR A);
 	void    Log(char *, ...);
 
+	virtual ZFXSKIN GetActiveSkin() override;
+
+	virtual ZFXMATERIAL GetActiveMaterial() override;
+
 	
 
 };

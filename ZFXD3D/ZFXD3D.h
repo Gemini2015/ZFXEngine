@@ -312,6 +312,12 @@ private:
 	// write to log file
 	void Log(char *, ...);
 	void LogDeviceCaps(D3DCAPS9 *pCaps);
+
+	virtual ZFXLIGHT GetLight() override
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
 }; // class
 
 

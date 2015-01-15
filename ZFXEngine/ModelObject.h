@@ -71,6 +71,15 @@ class CModelObject
 	std::map<UINT64, WORD> m_IndexMap;
 
 public:
+	enum VERTEX_ATTRIB
+	{
+		VA_VERTEX = 1,
+		VA_NORMAL = 2,
+		VA_TEX_COORD0 = 4,
+	};
+
+	DWORD m_VertexAttribFlag;
+
 	CModelObject(ZFXRenderDevice *pDevice);
 	~CModelObject();
 
@@ -79,6 +88,8 @@ public:
 	
 
 	HRESULT Render();
+
+	DWORD GetVertexAttribFlag();
 
 private:
 	HRESULT LoadMaterial(std::string file);

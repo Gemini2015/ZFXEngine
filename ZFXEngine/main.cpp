@@ -305,9 +305,9 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance,
 		sm->EnableShader(true);
 
 	ZFXLIGHT light;
-	light.Type = LGT_SPOT;
+	light.Type = LGT_POINT;
 	light.cAmbient.rgba(0.2, 0.2, 0.2, 1);
-	light.cDiffuse.rgba(1, 1, 1, 1);
+	light.cDiffuse.rgba(0, 0, 1, 1);
 	light.cSpecular.rgba(1, 0, 0, 1);
 	light.fAttenuation0 = 1.0f;
 	light.fAttenuation1 = 0.0f;
@@ -355,7 +355,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance,
 			mWorld.Identity();
 			g_pDevice->SetWorldTransform(&mWorld);
 
-			//sm->EnableShader(false);
+			sm->EnableShader(false);
 
 			g_pDevice->SetAmbientLight(0.1, 0.1, 0.1);
 			g_pDevice->SetLight(&light, 0);

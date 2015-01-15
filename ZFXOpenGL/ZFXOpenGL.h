@@ -146,7 +146,8 @@ public:
 
 	void SetAmbientLight(float fRed, float fGreen, float fBlue) override;
 
-	
+	virtual ZFXLIGHT GetLight() override;
+
 	// GL helper
 	bool ActivateGLTextureUnit(UCHAR n);
 
@@ -212,6 +213,9 @@ private:
 	
 
 	void Log(char *, ...);
+
+	
+
 };
 
 extern "C" _declspec(dllexport) HRESULT CreateRenderDevice(HINSTANCE hDLL, ZFXRenderDevice **pInterface);

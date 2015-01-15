@@ -128,6 +128,7 @@ typedef enum ZFXENGINEMODE_TYPE {
 } ZFXENGINEMODE;
 
 typedef enum ZFXLIGHTID_TYPE {
+	LGT_NONE = 0,
 	LGT_DIRECTIONAL,  // directional light source
 	LGT_POINT,        // point light source
 	LGT_SPOT          // spot light source
@@ -137,6 +138,7 @@ typedef enum ZFXDATATYPE_TYPE {
 	DAT_BOOL,          // boolean
 	DAT_INT,           // integer
 	DAT_FLOAT,         // floating point
+	DAT_FVEC4,
 	DAT_FMAT4,
 } ZFXDATATYPE;
 
@@ -311,6 +313,10 @@ typedef struct ZFXLIGHT_TYPE {
 	float      fAttenuation0;  // change of intensity over distance
 	float      fAttenuation1;  // change of intensity over distance
 	float	   fExponent;
+	ZFXLIGHT_TYPE()
+	{
+		Type = LGT_NONE;
+	}
 } ZFXLIGHT;
 /*----------------------------------------------------------------*/
 

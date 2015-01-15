@@ -1,4 +1,5 @@
 #include "ZFXGLSL.h"
+#include "ZFXOpenGL.h"
 
 /************************************************************************/
 /*
@@ -144,6 +145,7 @@ GLSLShaderManager::GLSLShaderManager(ZFXOpenGL *pOpenGL)
 			{ DAT_BOOL, GL_BOOL, },
 			{ DAT_INT, GL_INT, },
 			{ DAT_FLOAT, GL_FLOAT, },
+			{ DAT_FVEC4, GL_FLOAT_VEC4, },
 			{ DAT_FMAT4, GL_FLOAT_MAT4, },
 	};
 
@@ -171,13 +173,17 @@ ShaderObject* GLSLShaderManager::CreateShader(const void* pData, ZFXSHADERTYPE t
 	HRESULT hr = shaderobject->LoadSource(std::string((char*)pData), bLoadFromFile);
 
 	if (FAILED(hr))
+	{
+		delete shaderobject;
 		return NULL;
-
+	}
 	hr = shaderobject->Compile();
 
 	if (FAILED(hr))
+	{
+		delete shaderobject;
 		return NULL;
-
+	}
 	m_ShaderObjectMap[shaderobject->GetID()] = shaderobject;
 
 	return shaderobject;
@@ -528,8 +534,29 @@ ShaderObject* GLSLShaderManager::GetShaderByID(UINT id)
 }
 
 GLSLAutoConstant GLSLShaderManager::sGLSLAutoConstantDict[] = {
-	GLSLAutoConstant(ACT_WORLDVIEWPROJ_MATRIX, "modelviewproj_matrix", DAT_FMAT4),
+	GLSLAutoConstant(ACT_MODELVIEW_MATRIX, "modelview_matrix", DAT_FMAT4),
+	GLSLAutoConstant(ACT_MODELVIEWPROJ_MATRIX, "modelviewproj_matrix", DAT_FMAT4),
 	GLSLAutoConstant(ACT_NORMAL_MATRIX, "normal_matrix", DAT_FMAT4),
+
+	//  light
+	GLSLAutoConstant(ACT_LIGHT_AMBIENT, "light_ambient", DAT_FVEC4),
+	GLSLAutoConstant(ACT_LIGHT_DIFFUSE, "light_diffuse", DAT_FVEC4),
+	GLSLAutoConstant(ACT_LIGHT_SPECULAR, "light_specular", DAT_FVEC4),
+	GLSLAutoConstant(ACT_LIGHT_DIRECTION, "light_direction", DAT_FVEC4),
+	GLSLAutoConstant(ACT_LIGHT_POSITION, "light_position", DAT_FVEC4),
+	GLSLAutoConstant(ACT_LIGHT_STRENGTH, "light_strength", DAT_FLOAT),
+	GLSLAutoConstant(ACT_LIGHT_SPOT_CUTOFF, "light_cutoff", DAT_FLOAT),
+	GLSLAutoConstant(ACT_LIGHT_SPOT_EXPONENT, "light_exponent", DAT_FLOAT),
+	GLSLAutoConstant(ACT_LIGHT_CONSTANT_ATTENUATION, "light_constant_attenuation", DAT_FLOAT),
+	GLSLAutoConstant(ACT_LIGHT_LINEAR_ATTENUATION, "light_linear_attenuation", DAT_FLOAT),
+	GLSLAutoConstant(ACT_LIGHT_QUAD_ATTENUATION, "light_quad_attenuation", DAT_FLOAT),
+
+	GLSLAutoConstant(ACT_MATERIAL_AMBIENT, "material_ambient", DAT_FVEC4),
+	GLSLAutoConstant(ACT_MATERIAL_DIFFUSE, "material_diffuse", DAT_FVEC4),
+	GLSLAutoConstant(ACT_MATERIAL_SPECULAR, "material_specular", DAT_FVEC4),
+	GLSLAutoConstant(ACT_MATERIAL_EMISSION, "material_emission", DAT_FVEC4),
+	GLSLAutoConstant(ACT_MATERIAL_SHININESS, "material_shininess", DAT_FLOAT),
+	
 };
 
 HRESULT GLSLShaderManager::UpdateAutoConstant()
@@ -547,7 +574,14 @@ HRESULT GLSLShaderManager::UpdateAutoConstant()
 		{
 			switch (sGLSLAutoConstantDict[i].id)
 			{
-			case ACT_WORLDVIEWPROJ_MATRIX:
+			case ACT_MODELVIEW_MATRIX:
+			{
+				float val[16];
+				glGetFloatv(GL_MODELVIEW_MATRIX, val);
+				glUniform4fv(it->second.location, 1, val);
+			}
+				break;
+			case ACT_MODELVIEWPROJ_MATRIX:
 			{
 				float val[16];
 				ZFXMatrix modelview;
@@ -569,6 +603,101 @@ HRESULT GLSLShaderManager::UpdateAutoConstant()
 				glUniformMatrix4fv(it->second.location, 1, GL_FALSE, modelview.val);
 			}
 				break;
+			case ACT_LIGHT_AMBIENT:
+			{
+				ZFXLIGHT light = m_pRenderDevice->GetLight();
+				glUniform4fv(it->second.location, 1, light.cAmbient.c);
+			}
+				break;
+			case ACT_LIGHT_DIFFUSE:
+			{
+				ZFXLIGHT light = m_pRenderDevice->GetLight();
+				glUniform4fv(it->second.location, 1, light.cDiffuse.c);
+			}
+				break;
+			case ACT_LIGHT_SPECULAR:
+			{
+				ZFXLIGHT light = m_pRenderDevice->GetLight();
+				glUniform4fv(it->second.location, 1, light.cSpecular.c);
+			}
+				break;
+			case ACT_LIGHT_DIRECTION:
+			{
+				ZFXLIGHT light = m_pRenderDevice->GetLight();
+				glUniform4fv(it->second.location, 1, light.vcDirection.v);
+			}
+				break;
+			case ACT_LIGHT_POSITION:
+			{
+				ZFXLIGHT light = m_pRenderDevice->GetLight();
+				glUniform4fv(it->second.location, 1, light.vcPosition.v);
+			}
+				break;
+			case ACT_LIGHT_STRENGTH:
+			{
+				glUniform1f(it->second.location, 1);
+			}
+				break;
+			case ACT_LIGHT_SPOT_CUTOFF:
+			{
+				ZFXLIGHT light = m_pRenderDevice->GetLight();
+				glUniform1f(it->second.location, light.fPhi);
+			}
+				break;
+			case ACT_LIGHT_SPOT_EXPONENT:
+			{
+				ZFXLIGHT light = m_pRenderDevice->GetLight();
+				glUniform1f(it->second.location, light.fExponent);
+			}
+				break;
+			case ACT_LIGHT_CONSTANT_ATTENUATION:
+			{
+				ZFXLIGHT light = m_pRenderDevice->GetLight();
+				glUniform1f(it->second.location, light.fAttenuation0);
+			}
+				break;
+			case ACT_LIGHT_LINEAR_ATTENUATION:
+			{
+				ZFXLIGHT light = m_pRenderDevice->GetLight();
+				glUniform1f(it->second.location, light.fAttenuation1);
+			}
+				break;
+			case ACT_LIGHT_QUAD_ATTENUATION:
+			{
+				glUniform1f(it->second.location, 0);
+			}
+				break;
+			case ACT_MATERIAL_AMBIENT:
+			{
+				ZFXMATERIAL mat = m_pRenderDevice->GetSkinManager()->GetActiveMaterial();
+				glUniform4fv(it->second.location, 1, mat.cAmbient.c);
+			}
+				break;
+			case ACT_MATERIAL_DIFFUSE:
+			{
+				ZFXMATERIAL mat = m_pRenderDevice->GetSkinManager()->GetActiveMaterial();
+				glUniform4fv(it->second.location, 1, mat.cDiffuse.c);
+			}
+				break;
+			case ACT_MATERIAL_SPECULAR:
+			{
+				ZFXMATERIAL mat = m_pRenderDevice->GetSkinManager()->GetActiveMaterial();
+				glUniform4fv(it->second.location, 1, mat.cSpecular.c);
+			}
+				break;
+			case ACT_MATERIAL_EMISSION:
+			{
+				ZFXMATERIAL mat = m_pRenderDevice->GetSkinManager()->GetActiveMaterial();
+				glUniform4fv(it->second.location, 1, mat.cEmissive.c);
+			}
+				break;
+			case ACT_MATERIAL_SHININESS:
+			{
+				ZFXMATERIAL mat = m_pRenderDevice->GetSkinManager()->GetActiveMaterial();
+				glUniform1f(it->second.location, mat.fPower);
+			}
+				break;
+			
 			default:
 				break;
 			}

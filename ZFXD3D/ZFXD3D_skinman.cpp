@@ -1092,6 +1092,16 @@ HRESULT ZFXD3DSkinManager::ActiveSkin(UINT nSkinID)
 	throw std::logic_error("The method or operation is not implemented.");
 }
 
+ZFXSKIN ZFXD3DSkinManager::GetActiveSkin()
+{
+	throw std::logic_error("The method or operation is not implemented.");
+}
+
+ZFXMATERIAL ZFXD3DSkinManager::GetActiveMaterial()
+{
+	throw std::logic_error("The method or operation is not implemented.");
+}
+
 /*----------------------------------------------------------------*/
 
 

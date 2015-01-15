@@ -674,6 +674,8 @@ HRESULT ZFXOpenGL::SetLight(const ZFXLIGHT* pLight, UCHAR nStage)
 		return ZFX_OK;
 	}
 
+	m_light = (*pLight);
+
 	// 漫反射
 	glLightfv(gl_index, GL_DIFFUSE, (GLfloat*)pLight->cDiffuse.c);
 
@@ -1601,6 +1603,11 @@ HRESULT ZFXOpenGL::ActiveSkin(UINT nSkinID)
 
 	m_nActiveSkin = nSkinID;
 	return hr;
+}
+
+ZFXLIGHT ZFXOpenGL::GetLight()
+{
+	return m_light;
 }
 
 /*-----------------------------------------------------------*/

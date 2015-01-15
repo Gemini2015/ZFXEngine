@@ -38,6 +38,7 @@ protected:
 	ZFXMATERIAL *m_pMaterials;          // allocate mem for materials here
 	ZFXTEXTURE  *m_pTextures;           // allocate mem for textures here
 
+	UINT		 m_nActiveSkin;
 
 public:
 	ZFXSkinManager(void) {};
@@ -95,6 +96,10 @@ public:
 	virtual ZFXTEXTURE GetTexture(UINT nTexID) = 0;
 
 	virtual HRESULT ActiveSkin(UINT nSkinID) = 0;
+
+	virtual ZFXSKIN GetActiveSkin() = 0;
+
+	virtual ZFXMATERIAL GetActiveMaterial() = 0;
 };
 /*----------------------------------------------------------------*/
 
@@ -198,6 +203,7 @@ protected:
 	ZFXENGINEMODE   m_Mode;              // persp., ortho or 2d
 	int             m_nStage;            // stage (0-3) for viewport/projection
 	ZFXVIEWPORT     m_VP[4];             // viewports for all 4 stages
+	ZFXLIGHT		m_light;
 
 	ZFXSkinManager        *m_pSkinMan;   // material and textures
 	ZFXVertexCacheManager *m_pVertexMan; // manage vertices/indices
@@ -301,6 +307,8 @@ public:
 	virtual HRESULT SetTextureStage(UCHAR, ZFXRENDERSTATE) = 0;
 
 	virtual HRESULT SetLight(const ZFXLIGHT*, UCHAR) = 0;
+
+	virtual ZFXLIGHT GetLight() = 0;
 
 
 	// SHADER STUFF:

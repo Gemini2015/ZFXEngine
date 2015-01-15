@@ -77,7 +77,15 @@ class ZFXPolygon;
 // Our basic 4D vector class
 class __declspec(dllexport) ZFXVector {
 public:
-	float x, y, z, w;       // coordinateset
+	union
+	{
+		struct
+		{
+			float x, y, z, w;       // coordinateset
+		};
+		float v[4];
+	};
+	
 
 	//---------------------------------------
 

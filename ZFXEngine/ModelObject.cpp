@@ -307,13 +307,26 @@ HRESULT CModelObject::VertexProcess(std::vector<tagRawSubModel> &rawsubmodellist
 				v.y = vlist[faceit->v1 - 1].y;
 				v.z = vlist[faceit->v1 - 1].z;
 
-				//v.vcN[0] = v.vcN[1] = v.vcN[2] = 0;
-				v.vcN[0] = vnlist[faceit->vn1 - 1].x;
-				v.vcN[1] = vnlist[faceit->vn1 - 1].y; 
-				v.vcN[2] = vnlist[faceit->vn1 - 1].z;
-
-				v.tu = vtlist[faceit->vt1 - 1].u;
-				v.tv = vtlist[faceit->vt1 - 1].v;
+				if (m_VertexAttribFlag & VA_NORMAL)
+				{
+					v.vcN[0] = vnlist[faceit->vn1 - 1].x;
+					v.vcN[1] = vnlist[faceit->vn1 - 1].y;
+					v.vcN[2] = vnlist[faceit->vn1 - 1].z;
+				}
+				else
+				{
+					v.vcN[0] = v.vcN[1] = v.vcN[2] = 0;
+				}
+				
+				if (m_VertexAttribFlag & VA_TEX_COORD0)
+				{
+					v.tu = vtlist[faceit->vt1 - 1].u;
+					v.tv = vtlist[faceit->vt1 - 1].v;
+				}
+				else
+				{
+					v.tu = v.tv = 0;
+				}
 
 				m_VertexList.push_back(v);
 				index++;
@@ -339,13 +352,26 @@ HRESULT CModelObject::VertexProcess(std::vector<tagRawSubModel> &rawsubmodellist
 				v.y = vlist[faceit->v2 - 1].y;
 				v.z = vlist[faceit->v2 - 1].z;
 
-				//v.vcN[0] = v.vcN[1] = v.vcN[2] = 0;
-				v.vcN[0] = vnlist[faceit->vn2 - 1].x; 
-				v.vcN[1] = vnlist[faceit->vn2 - 1].y; 
-				v.vcN[2] = vnlist[faceit->vn2 - 1].z;
+				if (m_VertexAttribFlag & VA_NORMAL)
+				{
+					v.vcN[0] = vnlist[faceit->vn2 - 1].x;
+					v.vcN[1] = vnlist[faceit->vn2 - 1].y;
+					v.vcN[2] = vnlist[faceit->vn2 - 1].z;
+				}
+				else
+				{
+					v.vcN[0] = v.vcN[1] = v.vcN[2] = 0;
+				}
 
-				v.tu = vtlist[faceit->vt2 - 1].u;
-				v.tv = vtlist[faceit->vt2 - 1].v;
+				if (m_VertexAttribFlag & VA_TEX_COORD0)
+				{
+					v.tu = vtlist[faceit->vt2 - 1].u;
+					v.tv = vtlist[faceit->vt2 - 1].v;
+				}
+				else
+				{
+					v.tu = v.tv = 0;
+				}
 
 				m_VertexList.push_back(v);
 				index++;
@@ -372,12 +398,26 @@ HRESULT CModelObject::VertexProcess(std::vector<tagRawSubModel> &rawsubmodellist
 				v.z = vlist[faceit->v3 - 1].z;
 
 				//v.vcN[0] = v.vcN[1] = v.vcN[2] = 0;
-				v.vcN[0] = vnlist[faceit->vn3 - 1].x; 
-				v.vcN[1] = vnlist[faceit->vn3 - 1].y; 
-				v.vcN[2] = vnlist[faceit->vn3 - 1].z;
+				if (m_VertexAttribFlag & VA_NORMAL)
+				{
+					v.vcN[0] = vnlist[faceit->vn3 - 1].x;
+					v.vcN[1] = vnlist[faceit->vn3 - 1].y;
+					v.vcN[2] = vnlist[faceit->vn3 - 1].z;
+				}
+				else
+				{
+					v.vcN[0] = v.vcN[1] = v.vcN[2] = 0;
+				}
 
-				v.tu = vtlist[faceit->vt3 - 1].u;
-				v.tv = vtlist[faceit->vt3 - 1].v;
+				if (m_VertexAttribFlag & VA_TEX_COORD0)
+				{
+					v.tu = vtlist[faceit->vt3 - 1].u;
+					v.tv = vtlist[faceit->vt3 - 1].v;
+				}
+				else
+				{
+					v.tu = v.tv = 0;
+				}
 
 				m_VertexList.push_back(v);
 				index++;

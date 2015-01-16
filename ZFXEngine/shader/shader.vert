@@ -5,7 +5,8 @@ layout(location = 2) in vec3 vertex_normal;
 layout(location = 3) in vec2 uvcoord;
 
 out vec2 uv_pos;
-out vec3 LightAD;
+out vec3 LightD;
+out vec3 LightA;
 out vec3 LightS;
 
 // Matrix
@@ -40,18 +41,13 @@ void main()
 	vec3 eyeNorm = normalize(normal_mat3 * vertex_normal);
 	vec4 eyePosition = modelview_matrix * vertex_postion;
 
-	vec3 s;
-	if( light_position.w == 0.0)
-		s = normalize(vec3(light_position));
-	else
-		s = normalize(vec3(light_position - eyePosition));
+	vec3 s = normalize(vec3(light_position - eyePosition));
+	float diffcos = dot(s, eyeNorm);
+	LightD = light_diffuse.rgb * material_diffuse.rgb * diffcos;
+	LightA = light_ambient.rbg * material_ambient.rgb;
 
-	vec3 v = normalize(vec3(-eyePosition));
-	vec3 r = reflect(-s, eyeNorm);
+	vec3 specularReflect = reflect(-s, eyeNorm);
 
-	//vec3 light_Intensity = vec3(0.8, 0.2, 0.2);
-
-	LightAD = light_ambient.rgb * material_ambient.rgb +
-		light_diffuse.rgb * material_diffuse.rgb * max(dot(s, eyeNorm), 0.0);
-	LightS = light_specular.rgb * material_specular.rgb * pow(max(dot(r, v), 0.0), material_shininess);
+	LightS = (light_specular.rgb * material_specular.rgb);
+	LightS = LightS * pow(max(dot(specularReflect, eyeNorm), 0), material_shininess);
 }

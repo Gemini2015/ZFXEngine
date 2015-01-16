@@ -676,6 +676,14 @@ HRESULT ZFXOpenGL::SetLight(const ZFXLIGHT* pLight, UCHAR nStage)
 
 	m_light = (*pLight);
 
+	if (GetShaderManager()->IsUseShader())
+	{
+		// 当使用着色器时，glEnable(GL_LIGHTING) 和 glDisable(GL_LIGHTING) 均没有效果
+		//glDisable(GL_LIGHTING);
+		return ZFX_OK;
+	}
+
+
 	// 漫反射
 	glLightfv(gl_index, GL_DIFFUSE, (GLfloat*)pLight->cDiffuse.c);
 

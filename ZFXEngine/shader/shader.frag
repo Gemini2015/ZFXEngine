@@ -1,7 +1,8 @@
 #version 330 core
 
 in vec2 uv_pos;
-in vec3 LightAD;
+in vec3 LightA;
+in vec3 LightD;
 in vec3 LightS;
 
 out vec3 color;
@@ -15,5 +16,5 @@ void main()
 	// //color = uvcolor;
 	// color = min(uvcolor + 0.2 * LightColor, vec3(1.0));
 
-	color = LightAD * uvcolor + LightS;
+	color = (LightD + LightA) * uvcolor + LightS;
 }

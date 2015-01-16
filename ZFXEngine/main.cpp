@@ -305,7 +305,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance,
 		sm->EnableShader(true);
 
 	ZFXLIGHT light;
-	light.Type = LGT_POINT;
+	light.Type = LGT_SPOT;
 	light.cAmbient.rgba(0.2, 0.2, 0.2, 1);
 	light.cDiffuse.rgba(0, 0, 1, 1);
 	light.cSpecular.rgba(1, 0, 0, 1);

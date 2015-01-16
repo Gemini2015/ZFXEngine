@@ -374,7 +374,7 @@ HRESULT GLSLShaderManager::CollectConstant(GLuint program)
 			}
 		}
 	}
-
+	CHECK_ERROR;
 	return ZFX_OK;
 }
 
@@ -567,12 +567,13 @@ HRESULT GLSLShaderManager::UpdateAutoConstant()
 
 	if (!IsUseShader())
 		return ZFX_OK;
-
+	int counter = 0;
 	for (int i = 0; i < MAX_AUTOCONSTANT_ID; i++)
 	{
 		GLSLCONSTANT_MAP::iterator it = m_ConstantMap.find(sGLSLAutoConstantDict[i].name);
 		if (it != m_ConstantMap.end())
 		{
+			counter++;
 			switch (sGLSLAutoConstantDict[i].id)
 			{
 			case ACT_MODELVIEW_MATRIX:
@@ -732,6 +733,18 @@ HRESULT GLSLShaderManager::SetTextureSampler(int nTex)
 		glUniform1i(constant.location, nTex);
 	}
 	return ZFX_OK;
+}
+
+void GLSLShaderManager::Log(char *fmt, ...)
+{
+	char ch[1024];
+
+	va_list args;
+	va_start(args, fmt);
+	vsprintf_s(ch, fmt, args);
+	va_end(args);
+
+	GetLogger().Print(ch);
 }
 
 

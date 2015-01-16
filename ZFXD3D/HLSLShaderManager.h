@@ -34,5 +34,7 @@ public:
 
 	virtual ShaderObject* GetShaderByID(UINT id) override;
 
+	virtual void Log(char *fmt, ...) override;
+
 };
 

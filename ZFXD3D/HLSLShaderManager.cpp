@@ -70,3 +70,8 @@ ShaderObject* HLSLShaderManager::GetShaderByID(UINT id)
 {
 	throw std::logic_error("The method or operation is not implemented.");
 }
+
+void HLSLShaderManager::Log(char *fmt, ...)
+{
+	throw std::logic_error("The method or operation is not implemented.");
+}

@@ -15,6 +15,9 @@ uniform mat4 normal_matrix;
 
 // Light
 uniform vec4 light_position;
+uniform vec4 light_ambient;
+uniform vec4 light_diffuse;
+uniform vec4 light_specular;
 //uniform vec3 light_Intensity;
 
 // Material
@@ -46,9 +49,9 @@ void main()
 	vec3 v = normalize(vec3(-eyePosition));
 	vec3 r = reflect(-s, eyeNorm);
 
-	vec3 light_Intensity = vec3(0.8, 0.2, 0.2);
+	//vec3 light_Intensity = vec3(0.8, 0.2, 0.2);
 
-	LightAD = light_Intensity * (material_ambient.rgb +
-		material_diffuse.rgb * max(dot(s, eyeNorm), 0.0));
-	LightS = light_Intensity * material_specular.rgb * pow(max(dot(r, v), 0.0), material_shininess);
+	LightAD = light_ambient.rgb * material_ambient.rgb +
+		light_diffuse.rgb * material_diffuse.rgb * max(dot(s, eyeNorm), 0.0);
+	LightS = light_specular.rgb * material_specular.rgb * pow(max(dot(r, v), 0.0), material_shininess);
 }

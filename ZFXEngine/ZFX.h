@@ -140,6 +140,7 @@ typedef enum ZFXDATATYPE_TYPE {
 	DAT_FLOAT,         // floating point
 	DAT_FVEC4,
 	DAT_FMAT4,
+	DAT_TEX_2D,
 } ZFXDATATYPE;
 
 typedef enum ZFXSHADER_TYPE {

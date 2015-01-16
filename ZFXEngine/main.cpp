@@ -355,7 +355,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance,
 			mWorld.Identity();
 			g_pDevice->SetWorldTransform(&mWorld);
 
-			sm->EnableShader(false);
+			//sm->EnableShader(false);
 
 			g_pDevice->SetAmbientLight(0.1, 0.1, 0.1);
 			g_pDevice->SetLight(&light, 0);

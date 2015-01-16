@@ -157,6 +157,8 @@ public:
 
 	virtual HRESULT SetNamedConstant(std::string name, ZFXDATATYPE type, int count, void* data) override;
 
+	HRESULT SetTextureSampler(int nTex);
+
 	virtual ShaderObject* GetShaderByName(std::string file) override;
 
 	virtual ShaderObject* GetShaderByID(UINT id) override;

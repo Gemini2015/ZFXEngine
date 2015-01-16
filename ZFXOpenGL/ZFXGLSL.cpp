@@ -147,6 +147,7 @@ GLSLShaderManager::GLSLShaderManager(ZFXOpenGL *pOpenGL)
 			{ DAT_FLOAT, GL_FLOAT, },
 			{ DAT_FVEC4, GL_FLOAT_VEC4, },
 			{ DAT_FMAT4, GL_FLOAT_MAT4, },
+			{ DAT_TEX_2D, GL_SAMPLER_2D, },
 	};
 
 	for (int i = 0; i < sizeof(TypeMapping) / sizeof(GLTYPE_ZFXTYPE); i++)
@@ -391,7 +392,7 @@ HRESULT GLSLShaderManager::SetNamedConstant(std::string name, bool val)
 
 	GLSLConstant constant = it->second;
 
-	if (constant.type == GL_FLOAT)
+	if (constant.type == DAT_BOOL)
 	{
 		glUniform1i(constant.location, val);
 	}
@@ -412,7 +413,7 @@ HRESULT GLSLShaderManager::SetNamedConstant(std::string name, int val)
 
 	GLSLConstant constant = it->second;
 
-	if (constant.type == GL_FLOAT)
+	if (constant.type == DAT_INT)
 	{
 		glUniform1i(constant.location, val);
 	}
@@ -433,7 +434,7 @@ HRESULT GLSLShaderManager::SetNamedConstant(std::string name, float val)
 
 	GLSLConstant constant = it->second;
 
-	if (constant.type == GL_FLOAT)
+	if (constant.type == DAT_FLOAT)
 	{
 		glUniform1f(constant.location, val);
 	}
@@ -454,7 +455,7 @@ HRESULT GLSLShaderManager::SetNamedConstant(std::string name, ZFXMatrix m)
 
 	GLSLConstant constant = it->second;
 
-	if (constant.type == GL_FLOAT)
+	if (constant.type == DAT_FMAT4)
 	{
 		glUniformMatrix4fv(constant.location, 1, GL_FALSE, &m._11);
 	}
@@ -480,16 +481,16 @@ HRESULT GLSLShaderManager::SetNamedConstant(std::string name, ZFXDATATYPE type, 
 	switch (type)
 	{
 	case DAT_BOOL:
-		glUniform1iv(constant.location, 1, (GLint*)data);
+		glUniform1iv(constant.location, count, (GLint*)data);
 		break;
 	case DAT_INT:
-		glUniform1iv(constant.location, 1, (GLint*)data);
+		glUniform1iv(constant.location, count, (GLint*)data);
 		break;
 	case DAT_FLOAT:
-		glUniform1fv(constant.location, 1, (GLfloat*)data);
+		glUniform1fv(constant.location, count, (GLfloat*)data);
 		break;
 	case DAT_FMAT4:
-		glUniformMatrix4fv(constant.location, 1, GL_FALSE, (GLfloat*)data);
+		glUniformMatrix4fv(constant.location, count, GL_FALSE, (GLfloat*)data);
 		break;
 	default:
 		hr = ZFX_FAIL;
@@ -702,6 +703,33 @@ HRESULT GLSLShaderManager::UpdateAutoConstant()
 				break;
 			}
 		}
+	}
+	return ZFX_OK;
+}
+
+HRESULT GLSLShaderManager::SetTextureSampler(int nTex)
+{
+	if (nTex < 0 || nTex >= 8)
+		return ZFX_INVALIDPARAM;
+
+	char buf[MAX_PATH];
+	sprintf_s(buf, "tex_sample%d", nTex);
+
+	if (!m_ActiveProgram)
+		return ZFX_FAIL;
+	if (!glIsProgram(m_ActiveProgram->m_program))
+		return ZFX_FAIL;
+	GLSLCONSTANT_MAP::iterator it = m_ConstantMap.find(buf);
+	if (it == m_ConstantMap.end())
+	{
+		return ZFX_FAIL;
+	}
+
+	GLSLConstant constant = it->second;
+
+	if (constant.type == DAT_TEX_2D)
+	{
+		glUniform1i(constant.location, nTex);
 	}
 	return ZFX_OK;
 }

@@ -915,9 +915,8 @@ HRESULT ZFXOpenGLSkinManager::ActiveSkin(UINT nSkinID)
 							//gluniform1
 							if (m_pOpenGL->GetShaderManager())
 							{
-								char buf[MAX_PATH];
-								sprintf_s(buf, "tex_sample%d", i);
-								m_pOpenGL->GetShaderManager()->SetNamedConstant(buf, i);
+								GLSLShaderManager* sm = (GLSLShaderManager*)m_pOpenGL->GetShaderManager();
+								sm->SetTextureSampler(i);
 							}
 						}
 

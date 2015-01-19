@@ -15,6 +15,7 @@ uniform mat4 modelviewproj_matrix;
 uniform mat4 normal_matrix;
 
 // Light
+uniform vec4 light_direction;
 uniform vec4 light_position;
 uniform vec4 light_ambient;
 uniform vec4 light_diffuse;
@@ -41,7 +42,7 @@ void main()
 	vec3 eyeNorm = normalize(normal_mat3 * vertex_normal);
 	vec4 ModelViewVertexPosition = modelview_matrix * vertex_postion;
 
-	vec3 s = normalize(vec3(light_position - ModelViewVertexPosition));
+	vec3 s = normalize(-light_direction.rgb);
 	float diffcos = dot(s, eyeNorm);
 	LightD = light_diffuse.rgb * material_diffuse.rgb * diffcos;
 	LightA = light_ambient.rbg * material_ambient.rgb;

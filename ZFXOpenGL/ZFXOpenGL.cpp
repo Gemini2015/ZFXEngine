@@ -714,7 +714,9 @@ HRESULT ZFXOpenGL::SetLight(const ZFXLIGHT* pLight, UCHAR nStage)
 		break;
 	case LGT_DIRECTIONAL:
 	{
-		glLightfv(gl_index, GL_SPOT_DIRECTION, (GLfloat*)(&(pLight->vcDirection)));
+		ZFXVector direction = pLight->vcDirection;
+		direction = -direction;
+		glLightfv(gl_index, GL_POSITION, (GLfloat*)(&(direction)));
 		glLightf(gl_index, GL_SPOT_CUTOFF, 180.0f);
 		CHECK_ERROR;
 	}

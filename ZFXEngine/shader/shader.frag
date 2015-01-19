@@ -3,16 +3,21 @@
 in vec2 uv_pos;
 in vec3 PSNormal;
 in vec4 ViewPosition;
-in vec4 LightDirection;
+
+in vec4 ViewLightPosition;
+in vec4 ViewLightDirection;
 
 out vec3 color;
 
 uniform sampler2D tex_sample0;
 // Light
-uniform vec4 light_position;
+// uniform vec4 light_position;
+// uniform vec4 light_direction;
 uniform vec4 light_ambient;
 uniform vec4 light_diffuse;
 uniform vec4 light_specular;
+uniform float light_cutoff;
+uniform float light_exponent;
 //uniform vec3 light_Intensity;
 
 // Material
@@ -25,18 +30,30 @@ void main()
 {
 	vec3 uvcolor = texture(tex_sample0, uv_pos).rgb;
 	
-    vec3 LightVector = normalize(-LightDirection.xyz);
+    vec3 LightVector = normalize(ViewLightPosition.xyz - ViewPosition.xyz);
+    vec3 LightDirection = normalize(ViewLightDirection.xyz);
 
-    vec4 ambient = light_ambient * material_ambient;
+    vec3 ambient = (light_ambient * material_ambient).rgb;
 
-    float diffuseFactor = dot(LightVector, PSNormal);
-    vec4 diffuse = light_diffuse * material_diffuse * diffuseFactor;
+    float LightAngle = acos(dot(-LightVector, LightDirection));
+    float cutoff = radians(clamp(light_cutoff, 0.0, 90.0));
 
-    // in View Space , Eye Position is (0, 0, 0)
-    vec3 ViewDirection = normalize(-ViewPosition.xyz);
-    vec3 reflection = reflect(-LightVector, PSNormal);
-    float specularFactor = pow(max(dot(reflection, ViewDirection), 0.0f), material_shininess);
-    vec4 specular = light_specular * material_specular * specularFactor;
+    if(LightAngle < cutoff)
+    {
+        float diffuseFactor = max(dot(LightVector, PSNormal), 0.0);
+        vec3 diffuse = (light_diffuse * material_diffuse).rgb * diffuseFactor;
 
-    color = (ambient + diffuse).rgb * uvcolor + specular.rgb;
+        float LightFactor = pow(dot(-LightVector, LightDirection), light_exponent);
+        
+        vec3 ViewDirection = normalize(vec3(-ViewPosition));
+        vec3 h = normalize(ViewDirection + LightVector);
+        float spotFactor = pow(max(dot(h, PSNormal), 0.0), material_shininess);
+        vec3 specular = (light_specular * material_specular).rgb * spotFactor;
+
+        color = ambient + LightFactor * (diffuse + specular);
+    }
+    else
+    {
+        color = ambient;
+    }
 }

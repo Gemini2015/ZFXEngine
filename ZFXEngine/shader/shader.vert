@@ -8,11 +8,15 @@ out vec2 uv_pos;
 
 out vec3 PSNormal;
 out vec4 ViewPosition;
-out vec4 LightDirection;
+
+out vec4 ViewLightPosition;
+out vec4 ViewLightDirection;
 
 uniform mat4 modelviewproj_matrix;
 uniform mat4 normal_matrix;
 uniform mat4 modelview_matrix;
+
+uniform vec4 light_position;
 uniform vec4 light_direction;
 
 void main()
@@ -26,5 +30,7 @@ void main()
 	PSNormal = normal_matrix_mat3 * vertex_normal;
 
 	ViewPosition = modelview_matrix * vertex_postion;
-	LightDirection = modelview_matrix * light_direction;
+
+	ViewLightPosition = modelview_matrix * light_position;
+	ViewLightDirection = modelview_matrix * light_direction;
 }

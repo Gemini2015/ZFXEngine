@@ -994,7 +994,7 @@ void ZFXOpenGL::SetAmbientLight(float fRed, float fGreen, float fBlue)
 	GLfloat lmodel_ambient[] = { fRed, fGreen, fBlue, 1.0f };
 	// 整个场景的全局环境光
 	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lmodel_ambient);
-
+	glLightModeli(GL_LIGHT_MODEL_COLOR_CONTROL, GL_SEPARATE_SPECULAR_COLOR);
 	if (m_pShaderManager->IsCanUseShader())
 	{
 		//

@@ -60,7 +60,7 @@ float xAngleStep = 0.05f;
 float yAngleStep = 0.05f;
 float distanceStep = 0.1f;
 
-ZFXVector g_lightPos(5, 0, 0);
+ZFXVector g_lightPos(0, 0, 5);
 float xLightAngle = 0.0f;
 float yLightAngle = 0.0f;
 float LightDistantce = 5.0f;

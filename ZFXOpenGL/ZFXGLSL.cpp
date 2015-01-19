@@ -489,6 +489,9 @@ HRESULT GLSLShaderManager::SetNamedConstant(std::string name, ZFXDATATYPE type, 
 	case DAT_FLOAT:
 		glUniform1fv(constant.location, count, (GLfloat*)data);
 		break;
+	case DAT_FVEC4:
+		glUniform4fv(constant.location, count, (GLfloat*)data);
+		break;;
 	case DAT_FMAT4:
 		glUniformMatrix4fv(constant.location, count, GL_FALSE, (GLfloat*)data);
 		break;
@@ -580,7 +583,7 @@ HRESULT GLSLShaderManager::UpdateAutoConstant()
 			{
 				float val[16];
 				glGetFloatv(GL_MODELVIEW_MATRIX, val);
-				glUniform4fv(it->second.location, 1, val);
+				glUniformMatrix4fv(it->second.location, 1, GL_FALSE, val);
 			}
 				break;
 			case ACT_MODELVIEWPROJ_MATRIX:
@@ -705,6 +708,7 @@ HRESULT GLSLShaderManager::UpdateAutoConstant()
 			}
 		}
 	}
+	CHECK_ERROR;
 	return ZFX_OK;
 }
 

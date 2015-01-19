@@ -347,6 +347,8 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance,
 			g_pDevice->UseWindow(0);
 			
 			g_pDevice->SetViewLookAt(g_pos, ZFXVector(0, 0, 0), vU);
+			IShaderManager *sm = g_pDevice->GetShaderManager();
+			sm->SetNamedConstant("camera_position", DAT_FVEC4, 1, g_pos.v);
 			GLfloat f[16] = { 0.0 };
 			glGetFloatv(GL_MODELVIEW_MATRIX, f);
 			glGetFloatv(GL_PROJECTION_MATRIX, f);

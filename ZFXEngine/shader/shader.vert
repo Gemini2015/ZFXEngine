@@ -27,7 +27,7 @@ uniform vec4 material_ambient;
 uniform vec4 material_specular;
 uniform float material_shininess;
 
-
+uniform vec4 camera_position;
 
 void main()
 {
@@ -39,15 +39,18 @@ void main()
 	mat3 normal_mat3 = mat3x3(normal_matrix);
 
 	vec3 eyeNorm = normalize(normal_mat3 * vertex_normal);
-	vec4 eyePosition = modelview_matrix * vertex_postion;
+	vec4 ModelViewVertexPosition = modelview_matrix * vertex_postion;
 
-	vec3 s = normalize(vec3(light_position - eyePosition));
+	vec3 s = normalize(vec3(light_position - ModelViewVertexPosition));
 	float diffcos = dot(s, eyeNorm);
 	LightD = light_diffuse.rgb * material_diffuse.rgb * diffcos;
 	LightA = light_ambient.rbg * material_ambient.rgb;
 
 	vec3 specularReflect = reflect(-s, eyeNorm);
 
+	vec4 camera_position_view = modelview_matrix * camera_position;
+	vec3 viewDir = normalize((camera_position_view - ModelViewVertexPosition).xyz);
+
 	LightS = (light_specular.rgb * material_specular.rgb);
-	LightS = LightS * pow(max(dot(specularReflect, eyeNorm), 0), material_shininess);
+	LightS = LightS * pow(max(dot(specularReflect, viewDir), 0), material_shininess);
 }

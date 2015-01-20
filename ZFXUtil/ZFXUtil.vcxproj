@@ -78,9 +78,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="ITimer.h" />
+    <ClInclude Include="Win32\Win32Timer.h" />
     <ClInclude Include="ZFXUtil.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Win32\Win32Timer.cpp" />
     <ClCompile Include="ZFXUtil.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

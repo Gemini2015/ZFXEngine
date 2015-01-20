@@ -37,6 +37,8 @@ bool g_bDone = false;
 int g_MAXWND = 0;
 int g_nWndCtl = 0;
 
+float g_fps = 0.0f;
+
 // renderer object
 LPZFXRENDERER     g_pRenderer = NULL;
 LPZFXRENDERDEVICE g_pDevice = NULL;
@@ -167,8 +169,8 @@ void DrawOBJModel()
 	g_pDevice->BeginRendering(true, true, true);
 
 	g_pSphere->Render();
-	//g_pCube->Render();
-	//g_pMonkey->Render();
+	g_pCube->Render();
+	g_pMonkey->Render();
 
 	g_pDevice->EndRendering();
 }
@@ -202,6 +204,25 @@ void DrawVertex()
 	};
 
 	g_pDevice->GetVertexManager()->CreateStaticBuffer(VID_PS, 0, 8, 36, vertexs, first, &nID);
+}
+
+void UpdateFPS()
+{
+	static unsigned long start = GetTimer()->getMillisecondTime();
+	static long counter = 0;
+
+	unsigned long end = GetTimer()->getMillisecondTime();
+	unsigned long offset = end - start;
+	counter++;
+	if (offset >= 1000)
+	{
+		g_fps = counter / (offset / 1000.0);
+		char buf[256] = { 0 };
+		sprintf_s(buf, "FPS: %f cutoff %f exponent %f LightDistance %f ", g_fps, g_cutoff, g_exponent, LightDistantce);
+		SetWindowText(g_hWnd, buf);
+		counter = 0;
+		start = end;
+	}
 }
 
 /**
@@ -315,7 +336,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance,
 	light.fPhi = 60;
 	light.fRange = 50;
 	light.vcDirection = ZFXVector(0, 0, 0);
-
+	GetTimer()->Reset();
 
 	while (!g_bDone)
 	{
@@ -327,6 +348,11 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance,
 
 		if (g_bIsActive)
 		{
+			UpdateFPS();
+
+
+
+
 			// compute camera 
 			g_pos.y = distance * sin(yAngle);
 			g_pos.x = distance * cos(yAngle) * sin(-xAngle);
@@ -921,7 +947,7 @@ HRESULT KeyProc(UCHAR key)
 	}
 
 	char buf[256] = { 0 };
-	sprintf_s(buf, "cutoff %f exponent %f LightDistance %f ", g_cutoff, g_exponent, LightDistantce);
+	sprintf_s(buf, "FPS: %f cutoff %f exponent %f LightDistance %f ", g_fps, g_cutoff, g_exponent, LightDistantce);
 	SetWindowText(g_hWnd, buf);
 	return hr;
 	

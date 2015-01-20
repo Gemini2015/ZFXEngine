@@ -74,4 +74,17 @@ inline ZFXLogger& GetLogger()
 	return logger;
 }
 
+#include "ITimer.h"
+#include "Win32/Win32Timer.h"
+
+inline ITimer* GetTimer()
+{
+	static ITimer *timer;
+	if (timer == NULL)
+	{
+		timer = new Win32Timer();
+	}
+	return timer;
+}
+
 #endif

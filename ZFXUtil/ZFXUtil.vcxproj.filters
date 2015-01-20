@@ -18,9 +18,18 @@
     <ClInclude Include="ZFXUtil.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="ITimer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Win32\Win32Timer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ZFXUtil.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Win32\Win32Timer.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

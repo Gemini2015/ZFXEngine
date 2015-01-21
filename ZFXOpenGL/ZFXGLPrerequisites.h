@@ -13,6 +13,7 @@ class ZFXOpenGLVCache;
 
 #include <windows.h>
 #include <gl\glew.h>
+#include <gl\wglew.h>
 #include <gl\GL.h>
 #include <gl\GLU.h>
 #include <string>

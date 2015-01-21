@@ -207,6 +207,14 @@ private:
 	
 
 	bool InitPixelFormat(int nHWnd);
+	
+	bool m_bVSync;
+	/*
+	*	设置垂直同步
+	*
+	*	开启垂直同步之后，会将帧率锁定到显示器刷新率上。
+	*/
+	void SetVSyncEnable(bool enable);
 
 	HRESULT Go(void);
 

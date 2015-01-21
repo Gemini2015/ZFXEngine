@@ -1153,6 +1153,7 @@ HRESULT ZFXOpenGL::Go(void)
 
 	SetWorldTransform(NULL);
 
+	//SetVSyncEnable(false);
 
 	Log("OpenGL Device is running");
 	return ZFX_OK;
@@ -1618,6 +1619,16 @@ HRESULT ZFXOpenGL::ActiveSkin(UINT nSkinID)
 ZFXLIGHT ZFXOpenGL::GetLight()
 {
 	return m_light;
+}
+
+void ZFXOpenGL::SetVSyncEnable(bool enable)
+{
+	m_bVSync = enable;
+
+	PFNWGLSWAPINTERVALEXTPROC _wglSwapIntervalEXT =
+		(PFNWGLSWAPINTERVALEXTPROC)wglGetProcAddress("wglSwapIntervalEXT");
+	if (_wglSwapIntervalEXT)
+		_wglSwapIntervalEXT(m_bVSync ? 1 : 0);
 }
 
 /*-----------------------------------------------------------*/

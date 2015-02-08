@@ -1153,7 +1153,7 @@ HRESULT ZFXOpenGL::Go(void)
 
 	SetWorldTransform(NULL);
 
-	//SetVSyncEnable(false);
+	SetVSyncEnable(false);
 
 	Log("OpenGL Device is running");
 	return ZFX_OK;

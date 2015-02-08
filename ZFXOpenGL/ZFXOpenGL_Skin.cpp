@@ -989,3 +989,8 @@ ZFXMATERIAL ZFXOpenGLSkinManager::GetActiveMaterial()
 	}
 	return mat;
 }
+
+HRESULT ZFXOpenGLSkinManager::AddTextureFromMemory(UINT nSkinID, const void* data, bool bAlpha, float fAlpha, ZFXCOLOR *cColorKeys, DWORD dwNumColorKeys)
+{
+	throw std::logic_error("The method or operation is not implemented.");
+}

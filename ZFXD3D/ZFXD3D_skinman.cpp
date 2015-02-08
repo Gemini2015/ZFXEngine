@@ -1102,6 +1102,11 @@ ZFXMATERIAL ZFXD3DSkinManager::GetActiveMaterial()
 	throw std::logic_error("The method or operation is not implemented.");
 }
 
+HRESULT ZFXD3DSkinManager::AddTextureFromMemory(UINT nSkinID, const void* data, bool bAlpha, float fAlpha, ZFXCOLOR *cColorKeys, DWORD dwNumColorKeys)
+{
+	throw std::logic_error("The method or operation is not implemented.");
+}
+
 /*----------------------------------------------------------------*/
 
 

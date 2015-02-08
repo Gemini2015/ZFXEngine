@@ -58,6 +58,12 @@ public:
 		ZFXCOLOR *cColorKeys,
 		DWORD dwNumColorKeys) = 0;
 
+	virtual HRESULT		AddTextureFromMemory(UINT nSkinID, const void* data,
+		/*int width, int height,*/
+		bool bAlpha, float fAlpha,
+		ZFXCOLOR *cColorKeys,
+		DWORD dwNumColorKeys) = 0;
+
 	virtual HRESULT     AddTextureHeightmapAsBump(UINT nSkinID,
 		const char *chName) = 0;
 

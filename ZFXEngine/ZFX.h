@@ -270,6 +270,45 @@ typedef struct _ZFXMaterial
 	}
 }ZFXMATERIAL;
 
+typedef struct _Image
+{
+	enum ImagePixel_Format
+	{
+		IPF_NONE = 0,
+		IPF_RGBA = 1, // R8G8B8A8
+	};
+
+	UINT width;
+	UINT height;
+	UINT pitch;
+	short pixelsize;
+	ImagePixel_Format format;
+	void* data;
+
+	_Image()
+	{
+		width = 0;
+		height = 0;
+		pitch = 0;
+		pixelsize = 0;
+		format = IPF_NONE;
+		data = NULL;
+	}
+
+	bool operator == (const _Image &img) const
+	{
+		if (this->width == img.width &&
+			this->height == img.height &&
+			this->pitch == img.pitch &&
+			this->pixelsize == img.pixelsize &&
+			this->format == img.format &&
+			this->data == img.data)
+			return true;
+		else return false;
+	}
+
+}ZFXIAMGE;
+
 typedef struct _ZFXTexture
 {
 	float fAlpha;

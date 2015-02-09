@@ -301,6 +301,124 @@ HRESULT ZFXOpenGLSkinManager::AddTexture(UINT nSkinID, const char *chName, bool 
 	return ZFX_OK;
 }
 
+HRESULT ZFXOpenGLSkinManager::AddTextureFromMemory(UINT nSkinID,
+	const char* name, const ZFXIAMGE* img,
+	bool bAlpha, float fAlpha, ZFXCOLOR *cColorKeys, DWORD dwNumColorKeys)
+{
+	ZFXTEXTURE *pZFXTex = NULL;
+	HRESULT     hr;
+	UINT        nTex, n;
+	bool        bTex = false;
+
+	m_nActiveSkin = MAX_ID;
+
+	// is skin ID valid at all
+	if (nSkinID >= m_nNumSkins) return ZFX_INVALIDID;
+
+	// all 8 stages for this skin already set?
+	if (m_pSkins[nSkinID].nTexture[7] != MAX_ID)
+	{
+		Log("error: AddTexture() failed, all 8 stages set");
+		return ZFX_BUFFERSIZE;
+	}
+
+	// do we already have this texture
+	// 查看纹理是否存在
+	for (nTex = 0; nTex < m_nNumTextures; nTex++)
+	{
+		if (strcmp(name, m_pTextures[nTex].chName) == 0)
+		{
+			bTex = true;
+			break;
+		}
+	} // for [TEXTURES]
+
+	// load new texture if not yet done
+	if (!bTex)
+	{
+		// allocate 50 new memory slots for textures if necessary
+		if ((m_nNumTextures % 50) == 0)
+		{
+			n = (m_nNumTextures + 50)*sizeof(ZFXTEXTURE);
+			m_pTextures = (ZFXTEXTURE*)realloc(m_pTextures, n);
+			if (!m_pTextures) {
+				Log("error: AddTexture() failed, realloc()");
+				return ZFX_OUTOFMEMORY;
+			}
+		}
+
+		// we use alphablending at least from now on
+		if (bAlpha) m_pSkins[nSkinID].bAlpha = true;
+		else m_pTextures[m_nNumTextures].fAlpha = 1.0f;
+
+		m_pTextures[m_nNumTextures].pClrKeys = NULL;
+
+		// save texture name
+		m_pTextures[m_nNumTextures].chName = new char[strlen(name) + 1];
+		memcpy(m_pTextures[m_nNumTextures].chName, name, strlen(name) + 1);
+
+		// create d3d texture from that pointer
+		// 创建纹理对象
+		hr = CreateTextureFromMemory(&m_pTextures[m_nNumTextures], img, bAlpha);
+		if (FAILED(hr)) {
+			Log("error: CreateTexture() failed");
+			return hr;
+		}
+
+		// add alpha values if needed
+		if (bAlpha) {
+
+			pZFXTex = &m_pTextures[m_nNumTextures];
+
+			// remind information
+			pZFXTex->dwNum = dwNumColorKeys;
+			pZFXTex->pClrKeys = new ZFXCOLOR[dwNumColorKeys];
+			memcpy(pZFXTex->pClrKeys, cColorKeys,
+				sizeof(ZFXCOLOR)*pZFXTex->dwNum);
+
+			GLuint texture = (*(GLuint*)pZFXTex->pData);
+
+			// set alpha keys first
+			for (DWORD dw = 0; dw < dwNumColorKeys; dw++) {
+				hr = SetAlphaKey(texture,
+					UCHAR(cColorKeys[dw].fR * 255),
+					UCHAR(cColorKeys[dw].fG * 255),
+					UCHAR(cColorKeys[dw].fB * 255),
+					UCHAR(cColorKeys[dw].fA * 255));
+				if (FAILED(hr)) {
+					Log("error: SetAlphaKey() failed");
+					return hr;
+				}
+			}
+
+			if (fAlpha < 1.0f) {
+				// remind that value for info purpose
+				pZFXTex->fAlpha = fAlpha;
+
+				// now generell transparency
+				// 设置全局alpha
+				hr = SetTransparency(texture, UCHAR(fAlpha * 255));
+				if (FAILED(hr)) {
+					Log("error: SetTransparency() failed");
+					return hr;
+				}
+			}
+		}
+		// save ID and add to count
+		nTex = m_nNumTextures;
+		m_nNumTextures++;
+	}
+
+	// put texture ID to skin ID
+	for (int i = 0; i < 8; i++) {
+		if (m_pSkins[nSkinID].nTexture[i] == MAX_ID) {
+			m_pSkins[nSkinID].nTexture[i] = nTex;
+			break;
+		}
+	}
+	return ZFX_OK;
+}
+
 HRESULT ZFXOpenGLSkinManager::AddTextureHeightmapAsBump(UINT nSkinID, const char *chName)
 {
 	ZFXTEXTURE *pZFXTex = NULL;
@@ -694,6 +812,46 @@ HRESULT ZFXOpenGLSkinManager::CreateTexture(ZFXTEXTURE *pTexture, bool bAlpha)
 	return ZFX_OK;
 }
 
+HRESULT ZFXOpenGLSkinManager::CreateTextureFromMemory(ZFXTEXTURE *pTexture, const ZFXIAMGE *img, bool bAlpha)
+{
+	if (pTexture == NULL)
+		return E_INVALIDARG;
+	if (img == NULL)
+		return ZFX_INVALIDPARAM;
+
+	GLenum fmt;
+	DIBSECTION dibs;
+	HRESULT hr;
+
+	if (bAlpha)  fmt = GL_RGB;
+	else fmt = GL_RGB;
+
+	long lWidth = img->width;
+	long lHeight = img->height;
+	BYTE *pBMPBits = (BYTE*)img->data;
+
+	pTexture->pData = (void *) new GLuint;
+
+	// 创建一个纹理对象
+	GLuint texture = 0;
+	glGenTextures(1, &texture);
+	// 判断是否创建失败
+	CHECK_ERROR;
+
+	// 绑定一个纹理对象
+	glBindTexture(GL_TEXTURE_2D, texture);
+	CHECK_ERROR;
+
+	// 为当前绑定的纹理对象填充数据
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, lWidth, lHeight, 0, fmt, GL_UNSIGNED_BYTE, pBMPBits);
+	CHECK_ERROR;
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+	(*(GLuint*)pTexture->pData) = texture;
+	return ZFX_OK;
+}
+
 // encode vector data as RGBA color value for normal map
 DWORD VectortoRGBA(ZFXVector *vc, float fHeight) {
 	DWORD r = (DWORD)(127.0f * vc->x + 128.0f);
@@ -990,7 +1148,6 @@ ZFXMATERIAL ZFXOpenGLSkinManager::GetActiveMaterial()
 	return mat;
 }
 
-HRESULT ZFXOpenGLSkinManager::AddTextureFromMemory(UINT nSkinID, const void* data, bool bAlpha, float fAlpha, ZFXCOLOR *cColorKeys, DWORD dwNumColorKeys)
-{
-	throw std::logic_error("The method or operation is not implemented.");
-}
+
+
+

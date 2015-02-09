@@ -58,7 +58,9 @@ public:
 		ZFXCOLOR *cColorKeys,
 		DWORD dwNumColorKeys) = 0;
 
-	virtual HRESULT		AddTextureFromMemory(UINT nSkinID, const void* data,
+	// 不必使用纯虚函数
+	virtual HRESULT		AddTextureFromMemory(UINT nSkinID, 
+		const char *name, const ZFXIAMGE* img,
 		/*int width, int height,*/
 		bool bAlpha, float fAlpha,
 		ZFXCOLOR *cColorKeys,

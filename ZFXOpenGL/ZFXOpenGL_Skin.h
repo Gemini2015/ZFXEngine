@@ -35,7 +35,7 @@ public:
 		DWORD dwNumColorKeys) override;
 
 	virtual HRESULT AddTextureFromMemory(UINT nSkinID, 
-		const void* data, 
+		const char* name, const ZFXIAMGE* img, 
 		bool bAlpha, float fAlpha, 
 		ZFXCOLOR *cColorKeys, DWORD dwNumColorKeys) override;
 
@@ -90,6 +90,7 @@ protected:
 
 	void Log(char *fmt, ...);
 
+	HRESULT CreateTextureFromMemory(ZFXTEXTURE *pTexture, const ZFXIAMGE *img, bool bAlpha);
 	HRESULT CreateTexture(ZFXTEXTURE *pTexture, bool bAlpha);
 	HRESULT ConvertToNormalmap(ZFXTEXTURE *pTexture);
 	HRESULT SetAlphaKey(GLuint texture, UCHAR R, UCHAR G, UCHAR B, UCHAR A);

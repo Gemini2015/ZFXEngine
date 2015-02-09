@@ -12,6 +12,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\ZFXEngine\ZFX.h" />
+    <ClInclude Include="ZFXFontManager.h" />
     <ClInclude Include="ZFXInclude.h" />
     <ClInclude Include="ZFXPrerequisites.h" />
     <ClInclude Include="ZFXRenderDevice.h" />

@@ -4,10 +4,12 @@
 #include "ZFX.h"
 
 class ShaderObject;
+class Font;
 class IShaderManager;
 class ZFXRenderDevice;
 class ZFXRenderer;
 class ZFXSkinManager;
 class ZFXVertexCacheManager;
+class IFontManager;
 
 #endif

@@ -302,7 +302,7 @@ HRESULT ZFXOpenGLSkinManager::AddTexture(UINT nSkinID, const char *chName, bool 
 }
 
 HRESULT ZFXOpenGLSkinManager::AddTextureFromMemory(UINT nSkinID,
-	const char* name, const ZFXIAMGE* img,
+	const char* name, const ZFXIMAGE* img,
 	bool bAlpha, float fAlpha, ZFXCOLOR *cColorKeys, DWORD dwNumColorKeys)
 {
 	ZFXTEXTURE *pZFXTex = NULL;
@@ -812,7 +812,7 @@ HRESULT ZFXOpenGLSkinManager::CreateTexture(ZFXTEXTURE *pTexture, bool bAlpha)
 	return ZFX_OK;
 }
 
-HRESULT ZFXOpenGLSkinManager::CreateTextureFromMemory(ZFXTEXTURE *pTexture, const ZFXIAMGE *img, bool bAlpha)
+HRESULT ZFXOpenGLSkinManager::CreateTextureFromMemory(ZFXTEXTURE *pTexture, const ZFXIMAGE *img, bool bAlpha)
 {
 	if (pTexture == NULL)
 		return E_INVALIDARG;

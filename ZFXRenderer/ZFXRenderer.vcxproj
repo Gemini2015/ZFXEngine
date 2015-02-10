@@ -11,7 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\ZFXEngine\ZFX.h" />
+    <ClInclude Include="ZFX.h" />
     <ClInclude Include="ZFXFontManager.h" />
     <ClInclude Include="ZFXInclude.h" />
     <ClInclude Include="ZFXPrerequisites.h" />
@@ -20,6 +20,7 @@
     <ClInclude Include="ZFXShaderManager.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ZFXFontManager.cpp" />
     <ClCompile Include="ZFXRenderer.cpp" />
     <ClCompile Include="ZFXShaderManager.cpp" />
   </ItemGroup>

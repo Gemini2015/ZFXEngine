@@ -92,7 +92,7 @@ protected:
 
 	virtual ZFXMATERIAL GetActiveMaterial() override;
 
-	virtual HRESULT AddTextureFromMemory(UINT nSkinID, const char* name, const ZFXIAMGE* img, bool bAlpha, float fAlpha, ZFXCOLOR *cColorKeys, DWORD dwNumColorKeys) override;
+	virtual HRESULT AddTextureFromMemory(UINT nSkinID, const char* name, const ZFXIMAGE* img, bool bAlpha, float fAlpha, ZFXCOLOR *cColorKeys, DWORD dwNumColorKeys) override;
 
 	
 

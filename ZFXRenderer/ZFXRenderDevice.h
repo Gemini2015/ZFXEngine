@@ -60,7 +60,7 @@ public:
 
 	// 不必使用纯虚函数
 	virtual HRESULT		AddTextureFromMemory(UINT nSkinID, 
-		const char *name, const ZFXIAMGE* img,
+		const char *name, const ZFXIMAGE* img,
 		/*int width, int height,*/
 		bool bAlpha, float fAlpha,
 		ZFXCOLOR *cColorKeys,

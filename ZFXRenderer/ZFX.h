@@ -1,7 +1,7 @@
 #ifndef _ZFX_H_
 #define _ZFX_H_
 
-#include <windows.h>
+//#include <windows.h>
 
 #include "zfx3d.h"
 #include "..\ZFXUtil\ZFXUtil.h"
@@ -307,7 +307,7 @@ typedef struct _Image
 		else return false;
 	}
 
-}ZFXIAMGE;
+}ZFXIMAGE;
 
 typedef struct _ZFXTexture
 {

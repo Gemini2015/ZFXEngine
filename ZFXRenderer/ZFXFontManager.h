@@ -7,22 +7,13 @@
 
 #include "ZFXPrerequisites.h"
 //#include "ZFX.h"
-#include<string>
-#include<map>
+#include <string>
+#include <map>
+#include <vector>
 
 // 字体抽象
 class Font
 {
-public:
-	Font(const char* name, const char* file, float size, UINT nID);
-	~Font();
-
-	virtual HRESULT CreateImpl();
-	virtual HRESULT DestoryImpl();
-
-private:
-	HRESULT CreateTextureFromFont(ZFXIMAGE *img);
-
 public:
 	enum FontType
 	{
@@ -49,7 +40,7 @@ public:
 	// 字形结构
 	typedef struct tagGlyph
 	{
-		DWORD charcode;
+		DWORD codepoint;
 		float left;
 		float top;
 		float right;
@@ -57,27 +48,122 @@ public:
 
 		tagGlyph()
 		{
-			charcode = 0;
+			codepoint = 0;
 			left = top = right = bottom = 0;
+		}
+
+		tagGlyph(DWORD codepoint, float left, float top, float right, float bottom)
+		{
+			this->codepoint = codepoint;
+			this->left = left;
+			this->top = top;
+			this->right = right;
+			this->bottom = bottom;
 		}
 
 	}Glyph;
 
-	
 	typedef std::map<DWORD, Glyph> Glyph_Map;
 
 	// 字符映射表
 	Glyph_Map m_glyphMap;
 
-	// 字体对应的SkinID
-	UINT m_nSkinID;
+	
 
+public:
+	Font(ZFXRenderDevice* pDevice, const char* name, const char* file, float size, UINT nID);
+	~Font();
+
+	virtual HRESULT CreateImpl();
+	virtual HRESULT DestoryImpl();
+
+	void AddCodePointRange(DWORD from, DWORD to);
+	HRESULT LoadFont();
+	UINT GetSkinID(DWORD codepoint);
+	Glyph GetGlyph(DWORD codepoint);
+
+
+private:
+	ZFXRenderDevice* m_pDevice;
+
+	typedef struct tagCodePointRange
+	{
+		DWORD from;
+		DWORD to;
+		UINT nSkinID;
+
+		tagCodePointRange()
+		{
+			from = to = 0;
+			nSkinID = -1;
+		}
+
+		tagCodePointRange(DWORD from, DWORD to)
+		{
+			this->from = from;
+			this->to = to;
+		}
+
+		bool IsIntersect(const tagCodePointRange &range)
+		{
+			bool intersect = true;
+			if (this->to < range.from ||
+				this->from >= range.to)
+			{
+				intersect = false;
+			}
+			return intersect;
+		}
+
+		std::vector<tagCodePointRange> Subtract(const tagCodePointRange &range)
+		{
+			std::vector<tagCodePointRange> rangelist;
+			DWORD from = this->from;
+			DWORD to = this->to;
+			if (from <= range.from)
+			{
+				if (to <= range.from)
+				{
+					rangelist.push_back(*this);
+				}
+				else if (to <= range.to)
+				{
+					rangelist.push_back(tagCodePointRange(from, range.from - 1));
+				}
+				else
+				{
+					rangelist.push_back(tagCodePointRange(from, range.from - 1));
+					rangelist.push_back(tagCodePointRange(range.to + 1, to));
+				}
+			}
+			else if(from <= range.to)
+			{
+				if (to > range.to)
+				{
+					rangelist.push_back(tagCodePointRange(range.to + 1, to));
+				}
+			}
+			else
+			{
+				rangelist.push_back(*this);
+			}
+			return rangelist;
+		}
+
+	}CodePointRange;
+
+	typedef std::vector<CodePointRange> CodePointRange_Vec;
+	CodePointRange_Vec m_codePointRangeList;
+	
+	CodePointRange_Vec m_tempCodePointRangeList;
+
+	int m_nSkinCount;
 };
 
 class IFontManager
 {
 public:
-	IFontManager();
+	IFontManager(ZFXRenderDevice* pDevice);
 	~IFontManager();
 
 	HRESULT CreateFont(const char* name, const char* file, float size, UINT* nID);
@@ -88,6 +174,9 @@ public:
 
 	typedef std::map<UINT, Font*> Font_Map;
 	Font_Map m_fontMap;
+
+private:
+	ZFXRenderDevice* m_pDevice;
 	
 };
 

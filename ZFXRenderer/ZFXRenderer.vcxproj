@@ -55,7 +55,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)ZFX3D;$(SolutionDir)ZFXEngine;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)ZFX3D;$(SolutionDir)ZFXEngine;$(SolutionDir)Deps\freetype\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>

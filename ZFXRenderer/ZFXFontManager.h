@@ -64,10 +64,9 @@ public:
 	}Glyph;
 
 	typedef std::map<DWORD, Glyph> Glyph_Map;
-
-	// ×Ö·ûÓ³Éä±í
-	Glyph_Map m_glyphMap;
-
+	typedef std::map<UINT, Glyph_Map> SkinGlyph_Map;
+	
+	SkinGlyph_Map m_skinGlyphMap;
 	
 
 public:
@@ -80,7 +79,7 @@ public:
 	void AddCodePointRange(DWORD from, DWORD to);
 	HRESULT LoadFont();
 	UINT GetSkinID(DWORD codepoint);
-	Glyph GetGlyph(DWORD codepoint);
+	Glyph GetGlyph(UINT nSkinID, DWORD codepoint);
 
 
 private:

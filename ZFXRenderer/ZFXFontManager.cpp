@@ -67,18 +67,23 @@ UINT Font::GetSkinID(DWORD codepoint)
 	return skinID;
 }
 
-Font::Glyph Font::GetGlyph(DWORD codepoint)
+Font::Glyph Font::GetGlyph(UINT nSkinID, DWORD codepoint)
 {
-	Glyph_Map::iterator it = m_glyphMap.find(codepoint);
-	if (it != m_glyphMap.end())
+	Glyph glyph;
+	SkinGlyph_Map::iterator it = m_skinGlyphMap.find(nSkinID);
+	if (it != m_skinGlyphMap.end())
 	{
-		return it->second;
+		Glyph_Map::iterator it_glyph = it->second.find(codepoint);
+		if (it_glyph != it->second.end())
+		{
+			return it_glyph->second;
+		}
+		else
+		{
+			return glyph;
+		}
 	}
-	else
-	{
-		Glyph glyph;
-		return glyph;
-	}
+	else return glyph;
 }
 
 HRESULT Font::LoadFont()
@@ -158,6 +163,8 @@ HRESULT Font::LoadFont()
 	ZFXCOLOR color(1, 1, 1, 1);
 	ZFXCOLOR emissive(0, 0, 0, 0);
 	pSkinManager->AddSkin(&color, &color, &emissive, &emissive, 50, &nSkinID);
+	Glyph_Map glyphmap;
+	m_skinGlyphMap[nSkinID] = glyphmap;
 
 	int penx = 0;
 	int peny = 0;
@@ -203,6 +210,8 @@ HRESULT Font::LoadFont()
 
 				// 创建一张新的纹理
 				pSkinManager->AddSkin(&color, &color, &emissive, &emissive, 50, &nSkinID);
+				Glyph_Map glyphmap;
+				m_skinGlyphMap[nSkinID] = glyphmap;
 				
 				penx = peny = 0;
 				right = penx + slot->advance.x;
@@ -238,12 +247,14 @@ HRESULT Font::LoadFont()
 				(float)bottom / img.height);
 
 			// 若出现重合字符，此处会出问题
-			m_glyphMap[codepoint] = glyph;
+			m_skinGlyphMap[nSkinID][codepoint] = glyph;
+
+			penx = penx + max_width;
 
 		}
 
 		// 区间结束
-		CodePointRange range(rangefrom, rangeto);
+		CodePointRange range(rangefrom, rangeto - 1);
 		range.nSkinID = nSkinID;
 		m_codePointRangeList.push_back(range);
 

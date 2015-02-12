@@ -19,13 +19,15 @@
 
 
 
-Font::Font(ZFXRenderDevice* pDevice, const char* name, const char* file, float size, UINT nID)
+Font::Font(ZFXRenderDevice* pDevice, const char* name, const char* file, 
+	float texSize, float fontSize, UINT nID)
 {
 	m_name.assign(name);
 	m_sourceName.assign(file);
-	m_size = size;
+	m_size = fontSize;
 	m_uuid = nID;
 	m_type = FT_NONE;
+	m_texSize = texSize;
 	m_pDevice = pDevice;
 }
 
@@ -128,6 +130,7 @@ HRESULT Font::LoadFont()
 
 	// 获取Cell大小
 	int max_width = 0, max_height = 0;
+	int max_bearingY = 0;
 	CodePointRange_Vec::iterator it = m_tempCodePointRangeList.begin();
 	while (it != m_tempCodePointRangeList.begin())
 	{
@@ -143,18 +146,22 @@ HRESULT Font::LoadFont()
 				continue;
 			}
 			
-			if (face->glyph->bitmap.rows > max_height)
-				max_height = face->glyph->bitmap.rows;
+			int height = 2 * (face->glyph->bitmap.rows) - (face->glyph->metrics.horiBearingY >> 6);
+			if (height > max_height)
+				max_height = height;
 			if (face->glyph->advance.x > max_width)
 				max_width = face->glyph->advance.x;
+			if (face->glyph->metrics.horiBearingY > max_bearingY)
+				max_bearingY = face->glyph->metrics.horiBearingY;
 		}
 		it++;
 	}
+	max_bearingY = max_bearingY >> 6;
 
 	// 创建一张 2048 * 2048 的纹理
 	ZFXIMAGE img;
-	img.width = 2048;
-	img.height = 2048;
+	img.width = m_texSize;
+	img.height = m_texSize;
 	int image_size = img.width * img.height;
 	img.data = new unsigned char[image_size];
 	memset(img.data, 0, image_size);
@@ -190,56 +197,52 @@ HRESULT Font::LoadFont()
 			
 			FT_GlyphSlot slot = face->glyph;
 
-			int right = penx + max_width;//slot->advance.x;
-			int bottom = peny + 2 * max_height;
+			int pitch = slot->bitmap.pitch;
 
-			if (right > img.width &&
-				bottom > img.height)
+			if (penx + max_width > img.width &&
+				peny + 2 * max_height > img.height)
 			{
 				// 当前纹理已填充满
 				char buf[255] = { 0 };
-				sprintf_s(buf, "%s-%d", m_name.c_str(), m_nSkinCount);
+				sprintf_s(buf, "%s-%d", m_name.c_str(), nSkinID);
 				pSkinManager->AddTextureFromMemory(nSkinID, buf, &img, false, 1.0f, NULL, 0);
 
-				rangeto--;
-				CodePointRange range(rangefrom, rangeto);
+				CodePointRange range(rangefrom, rangeto - 1);
 				range.nSkinID = nSkinID;
+				m_codePointRangeList.push_back(range);
 
-				rangefrom = rangeto + 1;
-				m_nSkinCount++;
+				rangefrom = rangeto;
 
 				// 创建一张新的纹理
 				pSkinManager->AddSkin(&color, &color, &emissive, &emissive, 50, &nSkinID);
+				memset(img.data, 0, image_size);
 				Glyph_Map glyphmap;
 				m_skinGlyphMap[nSkinID] = glyphmap;
 				
 				penx = peny = 0;
-				right = penx + slot->advance.x;
-				bottom = peny + slot->bitmap.rows;
 			}
 
-			if (right > img.width)
+			if (penx + pitch > img.width)
 			{
 				// 换行
 				penx = 0;
 				peny += max_height;
-				right = penx + slot->advance.x;
-				bottom = peny + slot->bitmap.rows;
 			}
 
 			unsigned char* pBuf = (unsigned char*)img.data;
-			for (int row = peny; row < peny + slot->bitmap.rows; row++)
+			for (int j = 0; j < slot->bitmap.rows; j++)
 			{
-				for (int col = penx; col < penx + slot->advance.x; col++)
+				int row = j + peny + max_bearingY - (slot->metrics.horiBearingY >> 6);
+				for (int i = 0; i < slot->bitmap.width; i++)
 				{
-					int x = col - penx;
-					int y = row - peny;
-					pBuf[row * img.width + col] = slot->bitmap.buffer[y * slot->bitmap.pitch + x];
+					int col = i + penx + (slot->metrics.horiBearingX >> 6);
+					pBuf[row * img.width + col] = slot->bitmap.buffer[j * slot->bitmap.pitch + i];
 				}
 			}
 
 			// 此处涉及到 y 轴方向的问题
-
+			int right = penx + (slot->advance.x >> 6);
+			int bottom = peny + max_height;
 			Glyph glyph(codepoint,
 				(float)penx / img.width,
 				(float)peny / img.height,
@@ -262,12 +265,16 @@ HRESULT Font::LoadFont()
 	}
 
 	char buf[255] = { 0 };
-	sprintf_s(buf, "%s-%d", m_name.c_str(), m_nSkinCount);
+	sprintf_s(buf, "%s-%d", m_name.c_str(), nSkinID);
 	pSkinManager->AddTextureFromMemory(nSkinID, buf, &img, false, 1.0f, NULL, 0);
-	m_nSkinCount++;
 
 	FT_Done_Face(face);
 	FT_Done_FreeType(library);
+
+	m_tempCodePointRangeList.clear();
+
+	if (img.data)
+		delete img.data;
 
 	return ZFX_OK;
 }
@@ -293,15 +300,15 @@ IFontManager::~IFontManager()
 	}
 }
 
-HRESULT IFontManager::CreateFont(const char* name, const char* file, float size, UINT* nID)
+HRESULT IFontManager::CreateFont(const char* name, const char* file, float fontSize, UINT* nID, int texSize /*= 2048*/)
 {
 	if (name == NULL || strlen(name) == 0 ||
 		file == NULL || strlen(file) == 0 ||
-		size == 0)
+		fontSize == 0 || texSize == 0)
 		return ZFX_INVALIDPARAM;
 
 	UINT id = ++s_UUIDCounter;
-	Font* font = new Font(m_pDevice, name, file, size, id);
+	Font* font = new Font(m_pDevice, name, file, texSize, fontSize, id);
 
 	HRESULT hr = font->CreateImpl();
 	if(!FAILED(hr))

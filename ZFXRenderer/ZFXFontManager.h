@@ -6,7 +6,6 @@
 
 
 #include "ZFXPrerequisites.h"
-//#include "ZFX.h"
 #include <string>
 #include <map>
 #include <vector>
@@ -36,6 +35,9 @@ public:
 
 	// 字号(以像素为单位)
 	float m_size;
+
+	// 纹理大小
+	int m_texSize;
 
 	// 字形结构
 	typedef struct tagGlyph
@@ -70,7 +72,7 @@ public:
 	
 
 public:
-	Font(ZFXRenderDevice* pDevice, const char* name, const char* file, float size, UINT nID);
+	Font(ZFXRenderDevice* pDevice, const char* name, const char* file, float texSize, float fontSize, UINT nID);
 	~Font();
 
 	virtual HRESULT CreateImpl();
@@ -80,6 +82,11 @@ public:
 	HRESULT LoadFont();
 	UINT GetSkinID(DWORD codepoint);
 	Glyph GetGlyph(UINT nSkinID, DWORD codepoint);
+	float GetFontSize()
+	{
+		return m_size;
+	}
+
 
 
 private:
@@ -155,8 +162,6 @@ private:
 	CodePointRange_Vec m_codePointRangeList;
 	
 	CodePointRange_Vec m_tempCodePointRangeList;
-
-	int m_nSkinCount;
 };
 
 class IFontManager
@@ -165,7 +170,7 @@ public:
 	IFontManager(ZFXRenderDevice* pDevice);
 	~IFontManager();
 
-	HRESULT CreateFont(const char* name, const char* file, float size, UINT* nID);
+	HRESULT CreateFont(const char* name, const char* file, float size, UINT* nID, int texSize = 2048);
 	Font* GetFont(UINT nFontID);
 
 public:

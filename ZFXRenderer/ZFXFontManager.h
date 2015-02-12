@@ -68,11 +68,12 @@ public:
 	typedef std::map<DWORD, Glyph> Glyph_Map;
 	typedef std::map<UINT, Glyph_Map> SkinGlyph_Map;
 	
+	// 二重映射， Skin -> Glyph_Map, CodePoint -> Glyph
 	SkinGlyph_Map m_skinGlyphMap;
 	
 
 public:
-	Font(ZFXRenderDevice* pDevice, const char* name, const char* file, float texSize, float fontSize, UINT nID);
+	Font(ZFXRenderDevice* pDevice, const char* name, const char* file, int texSize, float fontSize, UINT nID);
 	~Font();
 
 	virtual HRESULT CreateImpl();
@@ -86,8 +87,6 @@ public:
 	{
 		return m_size;
 	}
-
-
 
 private:
 	ZFXRenderDevice* m_pDevice;
@@ -109,58 +108,13 @@ private:
 			this->from = from;
 			this->to = to;
 		}
-
-		bool IsIntersect(const tagCodePointRange &range)
-		{
-			bool intersect = true;
-			if (this->to < range.from ||
-				this->from >= range.to)
-			{
-				intersect = false;
-			}
-			return intersect;
-		}
-
-		std::vector<tagCodePointRange> Subtract(const tagCodePointRange &range)
-		{
-			std::vector<tagCodePointRange> rangelist;
-			DWORD from = this->from;
-			DWORD to = this->to;
-			if (from <= range.from)
-			{
-				if (to <= range.from)
-				{
-					rangelist.push_back(*this);
-				}
-				else if (to <= range.to)
-				{
-					rangelist.push_back(tagCodePointRange(from, range.from - 1));
-				}
-				else
-				{
-					rangelist.push_back(tagCodePointRange(from, range.from - 1));
-					rangelist.push_back(tagCodePointRange(range.to + 1, to));
-				}
-			}
-			else if(from <= range.to)
-			{
-				if (to > range.to)
-				{
-					rangelist.push_back(tagCodePointRange(range.to + 1, to));
-				}
-			}
-			else
-			{
-				rangelist.push_back(*this);
-			}
-			return rangelist;
-		}
-
 	}CodePointRange;
 
 	typedef std::vector<CodePointRange> CodePointRange_Vec;
+
+	// 内部保存字符区间
 	CodePointRange_Vec m_codePointRangeList;
-	
+	// 暂存用户输入的字符区间
 	CodePointRange_Vec m_tempCodePointRangeList;
 };
 

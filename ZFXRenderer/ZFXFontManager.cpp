@@ -20,7 +20,7 @@
 
 
 Font::Font(ZFXRenderDevice* pDevice, const char* name, const char* file, 
-	float texSize, float fontSize, UINT nID)
+	int texSize, float fontSize, UINT nID)
 {
 	m_name.assign(name);
 	m_sourceName.assign(file);

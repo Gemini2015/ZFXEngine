@@ -116,6 +116,9 @@ private:
 	CodePointRange_Vec m_codePointRangeList;
 	// 暂存用户输入的字符区间
 	CodePointRange_Vec m_tempCodePointRangeList;
+
+	virtual UINT CreateSkin();
+	virtual HRESULT UpdateSkinTexture(UINT nSkinID, ZFXIMAGE *img);
 };
 
 class IFontManager

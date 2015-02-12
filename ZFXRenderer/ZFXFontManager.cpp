@@ -166,10 +166,7 @@ HRESULT Font::LoadFont()
 	img.data = new unsigned char[image_size];
 	memset(img.data, 0, image_size);
 
-	UINT nSkinID = 0;
-	ZFXCOLOR color(1, 1, 1, 1);
-	ZFXCOLOR emissive(0, 0, 0, 0);
-	pSkinManager->AddSkin(&color, &color, &emissive, &emissive, 50, &nSkinID);
+	UINT nSkinID = CreateSkin();
 	Glyph_Map glyphmap;
 	m_skinGlyphMap[nSkinID] = glyphmap;
 
@@ -203,9 +200,7 @@ HRESULT Font::LoadFont()
 				peny + 2 * max_height > img.height)
 			{
 				// 当前纹理已填充满
-				char buf[255] = { 0 };
-				sprintf_s(buf, "%s-%d", m_name.c_str(), nSkinID);
-				pSkinManager->AddTextureFromMemory(nSkinID, buf, &img, false, 1.0f, NULL, 0);
+				UpdateSkinTexture(nSkinID, &img);
 
 				CodePointRange range(rangefrom, rangeto - 1);
 				range.nSkinID = nSkinID;
@@ -214,7 +209,7 @@ HRESULT Font::LoadFont()
 				rangefrom = rangeto;
 
 				// 创建一张新的纹理
-				pSkinManager->AddSkin(&color, &color, &emissive, &emissive, 50, &nSkinID);
+				nSkinID = CreateSkin();
 				memset(img.data, 0, image_size);
 				Glyph_Map glyphmap;
 				m_skinGlyphMap[nSkinID] = glyphmap;
@@ -264,9 +259,7 @@ HRESULT Font::LoadFont()
 		it++;
 	}
 
-	char buf[255] = { 0 };
-	sprintf_s(buf, "%s-%d", m_name.c_str(), nSkinID);
-	pSkinManager->AddTextureFromMemory(nSkinID, buf, &img, false, 1.0f, NULL, 0);
+	UpdateSkinTexture(nSkinID, &img);
 
 	FT_Done_Face(face);
 	FT_Done_FreeType(library);
@@ -276,6 +269,25 @@ HRESULT Font::LoadFont()
 	if (img.data)
 		delete img.data;
 
+	return ZFX_OK;
+}
+
+UINT Font::CreateSkin()
+{
+	UINT nSkinID = 0;
+	ZFXSkinManager* pSkinManager = m_pDevice->GetSkinManager();
+	ZFXCOLOR color(1, 1, 1, 1);
+	ZFXCOLOR emissive(0, 0, 0, 0);
+	pSkinManager->AddSkin(&color, &color, &emissive, &emissive, 50, &nSkinID);
+	return nSkinID;
+}
+
+HRESULT Font::UpdateSkinTexture(UINT nSkinID, ZFXIMAGE *img)
+{
+	char buf[255] = { 0 };
+	sprintf_s(buf, "%s-%d", m_name.c_str(), nSkinID);
+	ZFXSkinManager* pSkinManager = m_pDevice->GetSkinManager();
+	pSkinManager->AddTextureFromMemory(nSkinID, buf, img, false, 1.0f, NULL, 0);
 	return ZFX_OK;
 }
 

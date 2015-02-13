@@ -61,6 +61,7 @@
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(SolutionDir)ZFX3D;$(SolutionDir)ZFXRenderer;$(SolutionDir)ZFXUtil;$(IncludePath)</IncludePath>
     <LibraryWPath>$(LibraryWPath)</LibraryWPath>
+    <LibraryPath>$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>

@@ -6,6 +6,7 @@
 #include "ZFXGLSL.h"
 #include "ZFXOpenGL_Skin.h"
 #include "ZFXOpenGL_VCM.h"
+#include "ZFXFontManager.h"
 
 bool g_bLF = false;
 
@@ -15,6 +16,7 @@ ZFXOpenGL::ZFXOpenGL(HINSTANCE hDLL)
 	m_pShaderManager = NULL;
 	m_pSkinMan = NULL;
 	m_pVertexMan = NULL;
+	m_pFontManager = NULL;
 	
 	m_bRunning = false;
 	m_bIsSceneRunning = false;
@@ -1115,6 +1117,17 @@ HRESULT ZFXOpenGL::Go(void)
 		if (m_pShaderManager == NULL)
 		{
 			Log("create GLSLShaderManager error");
+			return E_FAIL;
+		}
+	}
+
+	if (m_pFontManager == NULL)
+	{
+		ZFXOpenGL* pRenderDevice = this;
+		m_pFontManager = new IFontManager(pRenderDevice);
+		if (m_pFontManager == NULL)
+		{
+			Log("Create Font Manager error");
 			return E_FAIL;
 		}
 	}

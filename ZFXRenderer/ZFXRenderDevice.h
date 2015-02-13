@@ -213,9 +213,10 @@ protected:
 	ZFXVIEWPORT     m_VP[4];             // viewports for all 4 stages
 	ZFXLIGHT		m_light;
 
-	ZFXSkinManager        *m_pSkinMan;   // material and textures
-	ZFXVertexCacheManager *m_pVertexMan; // manage vertices/indices
-	IShaderManager* m_pShaderManager;
+	ZFXSkinManager*			m_pSkinMan;   // material and textures
+	ZFXVertexCacheManager*	m_pVertexMan; // manage vertices/indices
+	IShaderManager*			m_pShaderManager;
+	IFontManager*			m_pFontManager;
 
 public:
 	ZFXRenderDevice(void) {};
@@ -223,6 +224,8 @@ public:
 
 	virtual ZFXSkinManager* GetSkinManager(void) = 0;
 	virtual ZFXVertexCacheManager* GetVertexManager(void) = 0;
+	IShaderManager* GetShaderManager() const { return m_pShaderManager; }
+	IFontManager*	GetFontManager() const { return m_pFontManager;	}
 
 
 	// INIT/RELEASE STUFF:
@@ -374,7 +377,6 @@ public:
 	// draw text: font id, x, y, color, string
 	virtual HRESULT DrawText(UINT, int, int, DWORD, char*) = 0;
 
-	IShaderManager* GetShaderManager() const { return m_pShaderManager; };
 	// LIGHT STUFF:
 	// ============
 

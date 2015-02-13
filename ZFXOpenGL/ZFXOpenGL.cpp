@@ -1093,7 +1093,7 @@ HRESULT ZFXOpenGL::Init(HWND mainWnd, const HWND* childWnds, int nWndsNum, int n
 	}
 
 	RECT rc;
-	GetWindowRect(m_hWnd[0], &rc);
+	GetClientRect(m_hWnd[0], &rc);
 	m_dwWidth = rc.right - rc.left;
 	m_dwHeight = rc.bottom - rc.top;
 

@@ -978,19 +978,40 @@ HRESULT ZFXOpenGL::CreateFont(const char*, int, bool, bool, bool, DWORD, UINT*)
 	throw std::logic_error("The method or operation is not implemented.");
 }
 
-HRESULT ZFXOpenGL::DrawText(UINT, int, int, UCHAR, UCHAR, UCHAR, char*, ...)
+HRESULT ZFXOpenGL::DrawText(UINT nFontID, int x, int y, UCHAR r, UCHAR g, UCHAR b, const char* str, ...)
 {
 	throw std::logic_error("The method or operation is not implemented.");
 }
 
-HRESULT ZFXOpenGL::DrawText(UINT, int, int, DWORD, char*, ...)
-{
-	throw std::logic_error("The method or operation is not implemented.");
-}
+//HRESULT ZFXOpenGL::DrawText(UINT nFontID, int x, int y, DWORD color, const char* str, ...)
+//{
+//	throw std::logic_error("The method or operation is not implemented.");
+//}
 
-HRESULT ZFXOpenGL::DrawText(UINT, int, int, DWORD, char*)
+HRESULT ZFXOpenGL::DrawText(UINT nFontID, int x, int y, DWORD color, const char* str, ...)
 {
-	throw std::logic_error("The method or operation is not implemented.");
+	if (m_pFontManager == NULL || m_pSkinMan == NULL)
+		return ZFX_FAIL;
+	Font* pFont = m_pFontManager->GetFont(nFontID);
+	if (pFont == NULL)
+	{
+		Log("Font no found");
+		return ZFX_FAIL;
+	}
+
+	int advance = 0;
+	int penx = x;
+	int peny = y;
+	ZFXCOLOR c;
+	HRESULT hr;
+	for (int i = 0; i < strlen(str); i++)
+	{
+		hr = DrawCharacter(pFont, str[i], penx, peny, pFont->GetFontSize(), c, &advance);
+		penx += advance;
+		if (FAILED(hr))
+			return hr;
+	}
+	return ZFX_OK;
 }
 
 void ZFXOpenGL::SetAmbientLight(float fRed, float fGreen, float fBlue)
@@ -1642,6 +1663,86 @@ void ZFXOpenGL::SetVSyncEnable(bool enable)
 		(PFNWGLSWAPINTERVALEXTPROC)wglGetProcAddress("wglSwapIntervalEXT");
 	if (_wglSwapIntervalEXT)
 		_wglSwapIntervalEXT(m_bVSync ? 1 : 0);
+}
+
+HRESULT ZFXOpenGL::DrawCharacter(Font* pFont, unsigned long codepoint, int x, int y, int size, ZFXCOLOR color, int *advance)
+{
+	if (pFont == NULL)
+		return ZFX_FAIL;
+	if (codepoint == 32)	// ' '
+	{
+		if (advance)
+			*advance = size * 0.5;
+		return ZFX_OK;
+	}
+
+	HRESULT hr = ZFX_OK;
+	UINT nSkinID = pFont->GetSkinID(codepoint);
+	if (nSkinID == -1)
+	{
+		if (advance)
+			*advance = size;
+		return ZFX_OK;
+	}
+	m_pSkinMan->ActiveSkin(nSkinID);
+
+	Font::Glyph uv = pFont->GetGlyph(nSkinID, codepoint);
+	float u = uv.right - uv.left; // hori
+	float v = uv.bottom - uv.top; // ver
+
+	GLuint vao;
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
+
+	GLuint vertex;
+	glGenBuffers(1, &vertex);
+	glBindBuffer(GL_ARRAY_BUFFER, vertex);
+	float width = m_VP[m_nStage].Width;
+	float height = m_VP[m_nStage].Height;
+	if (u > v)
+	{
+		// width > height, like '——'
+		float aspect = v / u;
+		GLfloat buf[6][4] = {
+				{ x / width,			(y + size * (1 + aspect) / 2) / height, uv.left, uv.top },
+				{ (x + size) / width,	(y + size * (1 + aspect) / 2) / height, uv.right, uv.top },
+				{ x / width,			(y + size * (1 - aspect) / 2) / height, uv.left, uv.bottom },
+				{ (x + size) / width,	(y + size * (1 + aspect) / 2) / height, uv.right, uv.top },
+				{ (x + size) / width,	(y + size * (1 - aspect) / 2) / height, uv.right, uv.bottom },
+				{ x / width,			(y + size * (1 - aspect) / 2) / height, uv.left, uv.bottom },
+		};
+		glBufferData(GL_ARRAY_BUFFER, 4 * 6 * sizeof(GLfloat), buf, GL_STATIC_DRAW);
+		if (advance)
+			*advance = size;		
+	}
+	else
+	{
+		// height > width, like '|'
+		float aspect = u / v;
+		GLfloat buf[6][4] = {
+				{ (x) / width,					(y + size) / height, uv.left, uv.top },
+				{ (x + size * aspect) / width,	(y + size) / height, uv.right, uv.top },
+				{ (x) / width,					y / height, uv.left, uv.bottom },
+				{ (x + size * aspect) / width,	(y + size) / height, uv.right, uv.top },
+				{ (x + size * aspect) / width,	y / height, uv.right, uv.bottom },
+				{ (x) / width,					y / height, uv.left, uv.bottom },
+		};
+		glBufferData(GL_ARRAY_BUFFER, 4 * 6 * sizeof(GLfloat), buf, GL_STATIC_DRAW);
+		if (advance)
+			*advance = size * aspect;
+	}
+
+	glVertexPointer(2, GL_FLOAT, 4 * sizeof(GLfloat), 0);
+	glTexCoordPointer(2, GL_FLOAT, 4 * sizeof(GLfloat), (const void*)(2 * sizeof(float)));
+
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+	glDeleteBuffers(1, &vertex);
+	glDeleteVertexArrays(1, &vao);
+	CHECK_ERROR_RETURN(hr);
 }
 
 /*-----------------------------------------------------------*/

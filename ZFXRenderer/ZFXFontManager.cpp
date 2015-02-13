@@ -132,7 +132,7 @@ HRESULT Font::LoadFont()
 	int max_width = 0, max_height = 0;
 	int max_bearingY = 0;
 	CodePointRange_Vec::iterator it = m_tempCodePointRangeList.begin();
-	while (it != m_tempCodePointRangeList.begin())
+	while (it != m_tempCodePointRangeList.end())
 	{
 		//遍历每个区间
 		DWORD from = it->from;
@@ -149,8 +149,8 @@ HRESULT Font::LoadFont()
 			int height = 2 * (face->glyph->bitmap.rows) - (face->glyph->metrics.horiBearingY >> 6);
 			if (height > max_height)
 				max_height = height;
-			if (face->glyph->advance.x > max_width)
-				max_width = face->glyph->advance.x;
+			if ((face->glyph->bitmap.pitch) > max_width)
+				max_width = (face->glyph->bitmap.pitch);
 			if (face->glyph->metrics.horiBearingY > max_bearingY)
 				max_bearingY = face->glyph->metrics.horiBearingY;
 		}
@@ -162,6 +162,7 @@ HRESULT Font::LoadFont()
 	ZFXIMAGE img;
 	img.width = m_texSize;
 	img.height = m_texSize;
+	img.format = ZFXIMAGE::IPF_LUMINANCE;
 	int image_size = img.width * img.height;
 	img.data = new unsigned char[image_size];
 	memset(img.data, 0, image_size);
@@ -176,13 +177,13 @@ HRESULT Font::LoadFont()
 	int rangeto = 0;
 
 	it = m_tempCodePointRangeList.begin();
-	while (it != m_tempCodePointRangeList.begin())
+	while (it != m_tempCodePointRangeList.end())
 	{
 		//遍历每个区间
 		DWORD from = it->from;
 		DWORD to = it->to;
 		rangefrom = from;
-		rangeto = to;
+		rangeto = from;
 		for (DWORD codepoint = from; codepoint <= to; codepoint++, rangeto++)
 		{
 			// 遍历每个字符

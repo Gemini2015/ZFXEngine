@@ -41,7 +41,7 @@ HRESULT ZFXD3D::CreateFont(const char *chType, int nWeight, bool bItalic,
 * Draws text using the previously created font object.
 */
 HRESULT ZFXD3D::DrawText(UINT nID, int x, int y, UCHAR r,
-	UCHAR g, UCHAR b, char *ch, ...)
+	UCHAR g, UCHAR b, const char *ch, ...)
 {
 	RECT rc = { x, y, 0, 0 };
 	char cch[1024];
@@ -62,7 +62,7 @@ HRESULT ZFXD3D::DrawText(UINT nID, int x, int y, UCHAR r,
 	return ZFX_OK;
 } // DrawText
 
-HRESULT ZFXD3D::DrawText(UINT nID, int x, int y, DWORD color, char* ch, ...)
+HRESULT ZFXD3D::DrawText(UINT nID, int x, int y, DWORD color, const char* ch, ...)
 {
 	RECT rc = { x, y, 0, 0 };
 	char cch[1024];
@@ -82,7 +82,7 @@ HRESULT ZFXD3D::DrawText(UINT nID, int x, int y, DWORD color, char* ch, ...)
 	return ZFX_OK;
 }
 
-HRESULT ZFXD3D::DrawText(UINT nID, int x, int y, DWORD color, char* str)
+HRESULT ZFXD3D::DrawText(UINT nID, int x, int y, DWORD color, const char* str)
 {
 	RECT rc = { x, y, 0, 0 };
 

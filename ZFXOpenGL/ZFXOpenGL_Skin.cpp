@@ -823,8 +823,21 @@ HRESULT ZFXOpenGLSkinManager::CreateTextureFromMemory(ZFXTEXTURE *pTexture, cons
 	DIBSECTION dibs;
 	HRESULT hr;
 
-	if (bAlpha)  fmt = GL_RGB;
-	else fmt = GL_RGB;
+	switch (img->format)
+	{
+	case ZFXIMAGE::IPF_RGBA:
+	{
+		fmt = GL_RGBA;
+	}
+		break;
+	case ZFXIMAGE::IPF_LUMINANCE:
+	{
+		fmt = GL_LUMINANCE;
+	}
+		break;
+	default:
+		break;
+	}
 
 	long lWidth = img->width;
 	long lHeight = img->height;

@@ -198,9 +198,9 @@ public:
 	
 	// Font & Text
 	HRESULT   CreateFont(const char*, int, bool, bool, bool, DWORD, UINT*);
-	HRESULT   DrawText(UINT, int, int, UCHAR, UCHAR, UCHAR, char*, ...);
-	HRESULT   DrawText(UINT, int, int, DWORD, char*, ...);
-	HRESULT   DrawText(UINT, int, int, DWORD, char*);
+	HRESULT   DrawText(UINT nFontID, int x, int y, UCHAR r, UCHAR g, UCHAR b, const char* str, ...);
+	HRESULT   DrawText(UINT nFontID, int x, int y, DWORD color, const char* str, ...);
+	HRESULT   DrawText(UINT nFontID, int x, int y, DWORD color, const char* str);
 	// main/rendering stuff
 	HRESULT   BeginRendering(bool, bool, bool);
 	HRESULT   Clear(bool, bool, bool);

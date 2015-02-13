@@ -138,11 +138,11 @@ public:
 
 	HRESULT CreateFont(const char*, int, bool, bool, bool, DWORD, UINT*) override;
 
-	HRESULT DrawText(UINT, int, int, UCHAR, UCHAR, UCHAR, char*, ...) override;
+	HRESULT DrawText(UINT nFontID, int x, int y, UCHAR r, UCHAR g, UCHAR b, const char* str, ...) override;
 
-	HRESULT DrawText(UINT, int, int, DWORD, char*, ...) override;
+	HRESULT DrawText(UINT nFontID, int x, int y, DWORD color, const char* str, ...) override;
 
-	HRESULT DrawText(UINT, int, int, DWORD, char*) override;
+	//HRESULT DrawText(UINT nFontID, int x, int y, DWORD color, const char* str) override;
 
 	void SetAmbientLight(float fRed, float fGreen, float fBlue) override;
 
@@ -218,12 +218,9 @@ private:
 
 	HRESULT Go(void);
 
-	
+	HRESULT DrawCharacter(Font* pFont, unsigned long codepoint, int x, int y, int size, ZFXCOLOR color, int *advance);
 
 	void Log(char *, ...);
-
-	
-
 };
 
 extern "C" _declspec(dllexport) HRESULT CreateRenderDevice(HINSTANCE hDLL, ZFXRenderDevice **pInterface);

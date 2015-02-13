@@ -275,7 +275,8 @@ typedef struct _Image
 	enum ImagePixel_Format
 	{
 		IPF_NONE = 0,
-		IPF_RGBA = 1, // R8G8B8A8
+		IPF_RGBA, // R8G8B8A8
+		IPF_LUMINANCE,
 	};
 
 	UINT width;

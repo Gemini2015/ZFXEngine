@@ -74,8 +74,104 @@ float exponentStep = 1;
 ShaderObject *g_vshader = NULL;
 ShaderObject *g_fshader = NULL;
 
+ZFXLIGHT light;
+
+GLuint g_vao = 0;
+GLuint g_vertex = 0;
+UINT g_fontID = 0;
+
+void InitFont()
+{
+	IFontManager* fm = g_pDevice->GetFontManager();
+	if (fm)
+	{
+		fm->CreateFont("VeraMono", "fonts/VeraMono.ttf", 60, &g_fontID);
+		Font* pFont = fm->GetFont(g_fontID);
+		pFont->AddCodePointRange(33, 255);
+		pFont->LoadFont();
+	}
+}
+
+void DrawString(const char* str)
+{
+	IShaderManager* sm = g_pDevice->GetShaderManager();
+	sm->EnableShader(false);
+
+	g_pDevice->BeginRendering(true, true, true);
+
+	ZFXMatrix mWorld;
+	mWorld.Identity();
+	g_pDevice->SetWorldTransform(&mWorld);
+
+
+	g_pDevice->DrawText(g_fontID, 100, 100, 0xff00ff00, str);
+
+	g_pDevice->EndRendering();
+}
+
+void InitGlyphTex()
+{
+	int vertexnum = 6;
+	GLfloat vertexs[6][4] = {
+			{ -1.0, 0.80, 0.0, 0.0f },
+			{ -1.0, -1.0, 0.0, 1.0f },
+			{ 1.0, 0.80, 1, 0.0f },
+			{ 1.0, 0.80, 1.0, 0.0f },
+			{ -1.0, -1.0, 0.0, 1.0f },
+			{ 1.0, -1.0, 1.0, 1.0f },
+	};
+
+	GLuint vao;
+	glGenVertexArrays(1, &g_vao);
+	glBindVertexArray(g_vao);
+
+	glGenBuffers(1, &g_vertex);
+	glBindBuffer(GL_ARRAY_BUFFER, g_vertex);
+	glBufferData(GL_ARRAY_BUFFER, 4 * 6 * sizeof(GLfloat), vertexs, GL_STATIC_DRAW);
+
+	GLenum error = glGetError();
+	if (error != GL_NO_ERROR)
+	{
+		printf("gl error in %s %s", __LINE__, __LINE__);
+	}
+}
+
+void DrawGlyphTex()
+{
+	g_pDevice->BeginRendering(true, true, true);
+
+	ZFXMatrix mWorld;
+	mWorld.Identity();
+	g_pDevice->SetWorldTransform(&mWorld);
+	
+	Font *pFont = g_pDevice->GetFontManager()->GetFont(g_fontID);
+	UINT nSkinID = pFont->GetSkinID(33);
+
+	g_pDevice->SetTextureStage(0, RS_TEX_ADDSIGNED);
+	g_pDevice->GetSkinManager()->ActiveSkin(nSkinID);
+	glBindVertexArray(g_vao);
+	glBindBuffer(GL_ARRAY_BUFFER, g_vertex);
+	glVertexPointer(2, GL_FLOAT, 4 * sizeof(GLfloat), 0);
+	glTexCoordPointer(2, GL_FLOAT, 4 * sizeof(GLfloat), (void*)(2 * sizeof(float)));
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+
+
+	glDrawArrays(GL_TRIANGLES, 0, 6); 
+
+	GLenum error = glGetError();
+	if (error != GL_NO_ERROR)
+	{
+		int i = 0;
+	}
+
+	g_pDevice->EndRendering();
+
+}
+
 void DrawTriangle(IShaderManager* sm)
 {
+	
 	g_pDevice->BeginRendering(true, true, true);
 
 	ZFXMatrix mWorld;
@@ -99,7 +195,7 @@ void DrawTriangle(IShaderManager* sm)
 	glGenBuffers(1, &vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertexs), vertexs, GL_STATIC_DRAW);
-	glVertexPointer(2, GL_FLOAT, sizeof(float) * 5, 0);
+	glVertexPointer(2, GL_FLOAT, sizeof(float) * 45, 0);
 	glColorPointer(3, GL_FLOAT, 5 * sizeof(float), (void*)(2 * sizeof(float)));
 
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), BUFFER_OFFSET(0));
@@ -110,7 +206,7 @@ void DrawTriangle(IShaderManager* sm)
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_COLOR_ARRAY);
 
-	sm->EnableShader(true);
+	sm->EnableShader(false);
 
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
@@ -225,6 +321,126 @@ void UpdateFPS()
 	}
 }
 
+void InitTriangleExam()
+{
+	ZFXCOLOR color(0, 0, 1, 1);
+	g_pDevice->SetShadeMode(RS_SHADE_SOLID, 1.0f, &color);
+	ZFXVector vU(0, 1, 0);
+	ZFXVIEWPORT vp = { 0, 0, 800, 600 };
+	g_pDevice->InitStage(60, &vp, 0);
+	g_pDevice->SetClippingPlanes(0.1f, 1000.0f);
+	g_pDevice->SetMode(EMD_ORTHOGONAL, 0);
+
+	IShaderManager* sm = g_pDevice->GetShaderManager();
+	if (g_vshader)
+		sm->BindShader(g_vshader);
+	if (g_fshader)
+		sm->BindShader(g_fshader);
+	if (g_vshader || g_fshader)
+		sm->EnableShader(true);
+
+	sm->EnableShader(false);
+}
+
+void InitLightExam()
+{
+	ZFXCOLOR color(0, 0, 1, 1);
+	g_pDevice->SetShadeMode(RS_SHADE_SOLID, 1.0f, &color);
+	ZFXVector vU(0, 1, 0);
+	ZFXVIEWPORT vp = { 0, 0, 800, 600 };
+	g_pDevice->InitStage(60, &vp, 0);
+	g_pDevice->SetClippingPlanes(0.1f, 1000.0f);
+	g_pDevice->SetMode(EMD_PERSPECTIVE, 0);
+
+	IShaderManager* sm = g_pDevice->GetShaderManager();
+	if (g_vshader)
+		sm->BindShader(g_vshader);
+	if (g_fshader)
+		sm->BindShader(g_fshader);
+	if (g_vshader || g_fshader)
+		sm->EnableShader(true);
+
+
+	light.Type = LGT_SPOT;
+	light.cAmbient.rgba(0.2, 0.2, 0.2, 1);
+	light.cDiffuse.rgba(0, 0, 1, 1);
+	light.cSpecular.rgba(1, 0, 0, 1);
+	light.fAttenuation0 = 1.0f;
+	light.fAttenuation1 = 0.0f;
+	light.fTheta = 30;
+	light.fPhi = 60;
+	light.fRange = 50;
+	light.vcDirection = ZFXVector(0, 0, 0);
+}
+
+void DrawLightExam()
+{
+	// compute camera 
+	g_pos.y = distance * sin(yAngle);
+	g_pos.x = distance * cos(yAngle) * sin(-xAngle);
+	g_pos.z = distance * cos(yAngle) * cos(-xAngle);
+
+	g_lightPos.y = LightDistantce * sin(yLightAngle);
+	g_lightPos.x = LightDistantce * cos(yLightAngle) * sin(-xLightAngle);
+	g_lightPos.z = LightDistantce * cos(yLightAngle) * cos(-xLightAngle);
+
+
+
+	light.vcPosition = g_lightPos;
+	light.vcDirection = -g_lightPos;
+	light.vcDirection.w = 0;
+	light.fPhi = g_cutoff;
+	light.fExponent = g_exponent;
+
+	g_pDevice->UseWindow(0);
+
+	ZFXVector vU(0, 1, 0);
+	g_pDevice->SetViewLookAt(g_pos, ZFXVector(0, 0, 0), vU);
+	IShaderManager *sm = g_pDevice->GetShaderManager();
+	sm->SetNamedConstant("camera_position", DAT_FVEC4, 1, g_pos.v);
+	GLfloat f[16] = { 0.0 };
+	glGetFloatv(GL_MODELVIEW_MATRIX, f);
+	glGetFloatv(GL_PROJECTION_MATRIX, f);
+
+	ZFXMatrix mWorld;
+	mWorld.Identity();
+	g_pDevice->SetWorldTransform(&mWorld);
+
+	//sm->EnableShader(false);
+
+	g_pDevice->SetAmbientLight(0.1, 0.1, 0.1);
+	g_pDevice->SetLight(&light, 0);
+
+	float v[4];
+	glGetMaterialfv(GL_FRONT, GL_AMBIENT, v);
+	glGetMaterialfv(GL_FRONT, GL_DIFFUSE, v);
+	glGetMaterialfv(GL_FRONT, GL_SPECULAR, v);
+	glGetMaterialfv(GL_FRONT, GL_EMISSION, v);
+
+	DrawOBJModel();
+	GLenum error = glGetError();
+	if (error != GL_NO_ERROR)
+	{
+		int i = 0;
+	}
+
+	glGetMaterialfv(GL_FRONT, GL_AMBIENT, v);
+	glGetMaterialfv(GL_FRONT, GL_DIFFUSE, v);
+	glGetMaterialfv(GL_FRONT, GL_SPECULAR, v);
+	glGetMaterialfv(GL_FRONT, GL_EMISSION, v);
+
+	glGetLightfv(GL_LIGHT0, GL_AMBIENT, v);
+	glGetLightfv(GL_LIGHT0, GL_DIFFUSE, v);
+	glGetLightfv(GL_LIGHT0, GL_SPECULAR, v);
+
+
+	error = glGetError();
+	if (error != GL_NO_ERROR)
+	{
+		int i = 0;
+	}
+}
+
 /**
  * WinMain function to get the thing started.
  */
@@ -308,34 +524,12 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance,
 
 	//DrawVertex();
 
+	InitTriangleExam();
+	InitFont();
+	//InitLightExam();
 
-	ZFXCOLOR color(0, 0, 1, 1);
-	g_pDevice->SetShadeMode(RS_SHADE_SOLID, 1.0f, &color);
-	ZFXVector vU(0, 1, 0);
-	ZFXVIEWPORT vp = { 0, 0, 800, 600 };
-	g_pDevice->InitStage(60, &vp, 0);
-	g_pDevice->SetClippingPlanes(0.1f, 1000.0f);
-	g_pDevice->SetMode(EMD_PERSPECTIVE, 0);
+	InitGlyphTex();
 
-	IShaderManager* sm = g_pDevice->GetShaderManager();
-	if (g_vshader)
-		sm->BindShader(g_vshader);
-	if (g_fshader)
-		sm->BindShader(g_fshader);
-	if (g_vshader || g_fshader)
-		sm->EnableShader(true);
-
-	ZFXLIGHT light;
-	light.Type = LGT_SPOT;
-	light.cAmbient.rgba(0.2, 0.2, 0.2, 1);
-	light.cDiffuse.rgba(0, 0, 1, 1);
-	light.cSpecular.rgba(1, 0, 0, 1);
-	light.fAttenuation0 = 1.0f;
-	light.fAttenuation1 = 0.0f;
-	light.fTheta = 30;
-	light.fPhi = 60;
-	light.fRange = 50;
-	light.vcDirection = ZFXVector(0, 0, 0);
 	GetTimer()->Reset();
 
 	while (!g_bDone)
@@ -351,76 +545,20 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance,
 			UpdateFPS();
 
 
+			//DrawGlyphTex();
 
+			//DrawLightExam();
 
-			// compute camera 
-			g_pos.y = distance * sin(yAngle);
-			g_pos.x = distance * cos(yAngle) * sin(-xAngle);
-			g_pos.z = distance * cos(yAngle) * cos(-xAngle);
-
-			g_lightPos.y = LightDistantce * sin(yLightAngle);
-			g_lightPos.x = LightDistantce * cos(yLightAngle) * sin(-xLightAngle);
-			g_lightPos.z = LightDistantce * cos(yLightAngle) * cos(-xLightAngle);
-
-
-			
-			light.vcPosition = g_lightPos;
-			light.vcDirection = -g_lightPos;
-			light.vcDirection.w = 0;
-			light.fPhi = g_cutoff;
-			light.fExponent = g_exponent;
-
-			g_pDevice->UseWindow(0);
-			
-			g_pDevice->SetViewLookAt(g_pos, ZFXVector(0, 0, 0), vU);
-			IShaderManager *sm = g_pDevice->GetShaderManager();
-			sm->SetNamedConstant("camera_position", DAT_FVEC4, 1, g_pos.v);
-			GLfloat f[16] = { 0.0 };
-			glGetFloatv(GL_MODELVIEW_MATRIX, f);
-			glGetFloatv(GL_PROJECTION_MATRIX, f);
-
-			ZFXMatrix mWorld;
-			mWorld.Identity();
-			g_pDevice->SetWorldTransform(&mWorld);
-
-			//sm->EnableShader(false);
-
-			g_pDevice->SetAmbientLight(0.1, 0.1, 0.1);
-			g_pDevice->SetLight(&light, 0);
-
-			float v[4];
-			glGetMaterialfv(GL_FRONT, GL_AMBIENT, v);
-			glGetMaterialfv(GL_FRONT, GL_DIFFUSE, v);
-			glGetMaterialfv(GL_FRONT, GL_SPECULAR, v);
-			glGetMaterialfv(GL_FRONT, GL_EMISSION, v);
-
-			DrawOBJModel();
-			GLenum error = glGetError();
-			if (error != GL_NO_ERROR)
-			{
-				int i = 0;
-			}
-			
-			glGetMaterialfv(GL_FRONT, GL_AMBIENT, v);
-			glGetMaterialfv(GL_FRONT, GL_DIFFUSE, v);
-			glGetMaterialfv(GL_FRONT, GL_SPECULAR, v);
-			glGetMaterialfv(GL_FRONT, GL_EMISSION, v);
-
-			glGetLightfv(GL_LIGHT0, GL_AMBIENT, v);
-			glGetLightfv(GL_LIGHT0, GL_DIFFUSE, v);
-			glGetLightfv(GL_LIGHT0, GL_SPECULAR, v);
-		
-
-			error = glGetError();
-			if (error != GL_NO_ERROR)
-			{
-				int i = 0;
-			}
 
 			//ProgramTick();
+			
+			IShaderManager* sm = g_pDevice->GetShaderManager();
 			//DrawTriangle(sm);
+			
 			//DrawS3DModel();
 
+			
+			DrawString("Life is cool");
 
 			/*if (g_pDevice->IsWindowed())
 			{

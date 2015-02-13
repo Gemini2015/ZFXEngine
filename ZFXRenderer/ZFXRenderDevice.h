@@ -369,13 +369,13 @@ public:
 	virtual HRESULT CreateFont(const char*, int, bool, bool, bool, DWORD, UINT*) = 0;
 
 	// draw text: font id, x, y, r, g, b, format string, variables
-	virtual HRESULT DrawText(UINT, int, int, UCHAR, UCHAR, UCHAR, char*, ...) = 0;
+	virtual HRESULT DrawText(UINT nFontID, int x, int y, UCHAR r, UCHAR g, UCHAR b, const char* str, ...) = 0;
 
 	// draw text: font id, x, y, color, format string, variables
-	virtual HRESULT DrawText(UINT, int, int, DWORD, char*, ...) = 0;
+	virtual HRESULT DrawText(UINT nFontID, int x, int y, DWORD color, const char* str, ...) = 0;
 
 	// draw text: font id, x, y, color, string
-	virtual HRESULT DrawText(UINT, int, int, DWORD, char*) = 0;
+	//virtual HRESULT DrawText(UINT nFontID, int x, int y, DWORD color, const char* str) = 0;
 
 	// LIGHT STUFF:
 	// ============

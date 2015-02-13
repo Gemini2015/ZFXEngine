@@ -12,5 +12,6 @@
 #include "ZFX3D.h"            // zfx 3d math library
 #include "ZFX.h"       // MATERIAL structure
 #include "..\ZFXUtil\ZFXUtil.h"
+#include "ZFXFontManager.h"
 
 #endif

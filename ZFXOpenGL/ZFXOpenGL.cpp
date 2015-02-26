@@ -1003,7 +1003,9 @@ HRESULT ZFXOpenGL::DrawText(UINT nFontID, int x, int y, DWORD color, const char*
 	int penx = x;
 	int peny = y;
 	ZFXCOLOR c;
+	c.dwargb(color);
 	HRESULT hr;
+
 	for (int i = 0; i < strlen(str); i++)
 	{
 		hr = DrawCharacter(pFont, str[i], penx, peny, pFont->GetFontSize(), c, &advance);
@@ -1703,15 +1705,15 @@ HRESULT ZFXOpenGL::DrawCharacter(Font* pFont, unsigned long codepoint, int x, in
 	{
 		// width > height, like '——'
 		float aspect = v / u;
-		GLfloat buf[6][4] = {
-				{ x / width,			(y + size * (1 + aspect) / 2) / height, uv.left, uv.top },
-				{ (x + size) / width,	(y + size * (1 + aspect) / 2) / height, uv.right, uv.top },
-				{ x / width,			(y + size * (1 - aspect) / 2) / height, uv.left, uv.bottom },
-				{ (x + size) / width,	(y + size * (1 + aspect) / 2) / height, uv.right, uv.top },
-				{ (x + size) / width,	(y + size * (1 - aspect) / 2) / height, uv.right, uv.bottom },
-				{ x / width,			(y + size * (1 - aspect) / 2) / height, uv.left, uv.bottom },
+		GLfloat buf[6][7] = {
+				{ x / width,			(y + size * (1 + aspect) / 2) / height, uv.left, uv.top, color.fR, color.fG, color.fB },
+				{ (x + size) / width,	(y + size * (1 + aspect) / 2) / height, uv.right, uv.top, color.fR, color.fG, color.fB },
+				{ x / width,			(y + size * (1 - aspect) / 2) / height, uv.left, uv.bottom, color.fR, color.fG, color.fB },
+				{ (x + size) / width,	(y + size * (1 + aspect) / 2) / height, uv.right, uv.top, color.fR, color.fG, color.fB },
+				{ (x + size) / width,	(y + size * (1 - aspect) / 2) / height, uv.right, uv.bottom, color.fR, color.fG, color.fB },
+				{ x / width,			(y + size * (1 - aspect) / 2) / height, uv.left, uv.bottom, color.fR, color.fG, color.fB },
 		};
-		glBufferData(GL_ARRAY_BUFFER, 4 * 6 * sizeof(GLfloat), buf, GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, 7 * 6 * sizeof(GLfloat), buf, GL_STATIC_DRAW);
 		if (advance)
 			*advance = size;		
 	}
@@ -1719,26 +1721,35 @@ HRESULT ZFXOpenGL::DrawCharacter(Font* pFont, unsigned long codepoint, int x, in
 	{
 		// height > width, like '|'
 		float aspect = u / v;
-		GLfloat buf[6][4] = {
-				{ (x) / width,					(y + size) / height, uv.left, uv.top },
-				{ (x + size * aspect) / width,	(y + size) / height, uv.right, uv.top },
-				{ (x) / width,					y / height, uv.left, uv.bottom },
-				{ (x + size * aspect) / width,	(y + size) / height, uv.right, uv.top },
-				{ (x + size * aspect) / width,	y / height, uv.right, uv.bottom },
-				{ (x) / width,					y / height, uv.left, uv.bottom },
+		GLfloat buf[6][7] = {
+				{ (x) / width,					(y + size) / height, uv.left, uv.top, color.fR, color.fG, color.fB },
+				{ (x + size * aspect) / width,	(y + size) / height, uv.right, uv.top, color.fR, color.fG, color.fB },
+				{ (x) / width,					y / height, uv.left, uv.bottom, color.fR, color.fG, color.fB },
+				{ (x + size * aspect) / width,	(y + size) / height, uv.right, uv.top, color.fR, color.fG, color.fB },
+				{ (x + size * aspect) / width,	y / height, uv.right, uv.bottom, color.fR, color.fG, color.fB },
+				{ (x) / width,					y / height, uv.left, uv.bottom, color.fR, color.fG, color.fB },
 		};
-		glBufferData(GL_ARRAY_BUFFER, 4 * 6 * sizeof(GLfloat), buf, GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, 7 * 6 * sizeof(GLfloat), buf, GL_STATIC_DRAW);
 		if (advance)
 			*advance = size * aspect;
 	}
 
-	glVertexPointer(2, GL_FLOAT, 4 * sizeof(GLfloat), 0);
-	glTexCoordPointer(2, GL_FLOAT, 4 * sizeof(GLfloat), (const void*)(2 * sizeof(float)));
+	glVertexPointer(2, GL_FLOAT, 7 * sizeof(GLfloat), 0);
+	glTexCoordPointer(2, GL_FLOAT, 7 * sizeof(GLfloat), (const void*)(2 * sizeof(float)));
+	glColorPointer(3, GL_FLOAT, 7 * sizeof(GLfloat), (const void*)(4 * sizeof(float)));
 
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	glEnableClientState(GL_COLOR_ARRAY);
+
+	glDisable(GL_LIGHTING);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+	glDisable(GL_BLEND);
+	glEnable(GL_LIGHTING);
 
 	glDeleteBuffers(1, &vertex);
 	glDeleteVertexArrays(1, &vao);

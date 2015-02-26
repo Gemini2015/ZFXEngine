@@ -228,6 +228,20 @@ struct _ZFXCOLOR
 	{
 		return memcmp(&this->c[0], &clr1.c[0], sizeof(_ZFXCOLOR)) == 0 ? true : false;
 	}
+	void dwrgba(DWORD color)
+	{
+		fR = ((color >> 24) & 0x000000ff) / 255.0;
+		fG = ((color >> 16) & 0x000000ff) / 255.0;
+		fB = ((color >> 8) & 0x000000ff) / 255.0;
+		fA = ((color) & 0x000000ff) / 255.0;
+	}
+	void dwargb(DWORD color)
+	{
+		fA = ((color >> 24) & 0x000000ff) / 255.0;
+		fR = ((color >> 16) & 0x000000ff) / 255.0;
+		fG = ((color >> 8) & 0x000000ff) / 255.0;
+		fB = ((color) & 0x000000ff) / 255.0;
+	}
 	void rgba(float r, float g, float b, float a)
 	{
 		fR = r;
@@ -277,6 +291,7 @@ typedef struct _Image
 		IPF_NONE = 0,
 		IPF_RGBA, // R8G8B8A8
 		IPF_LUMINANCE,
+		IPF_LUMINANCE_ALPHA, 
 	};
 
 	UINT width;

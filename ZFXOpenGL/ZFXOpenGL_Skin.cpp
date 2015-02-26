@@ -835,6 +835,11 @@ HRESULT ZFXOpenGLSkinManager::CreateTextureFromMemory(ZFXTEXTURE *pTexture, cons
 		fmt = GL_LUMINANCE;
 	}
 		break;
+	case ZFXIMAGE::IPF_LUMINANCE_ALPHA:
+	{
+		fmt = GL_LUMINANCE_ALPHA;
+	}
+		break;
 	default:
 		break;
 	}

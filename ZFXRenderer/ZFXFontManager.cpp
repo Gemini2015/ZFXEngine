@@ -162,10 +162,14 @@ HRESULT Font::LoadFont()
 	ZFXIMAGE img;
 	img.width = m_texSize;
 	img.height = m_texSize;
-	img.format = ZFXIMAGE::IPF_LUMINANCE;
-	int image_size = img.width * img.height;
+	img.pixelsize = 2;
+	img.pitch = img.width * img.pixelsize;
+	img.format = ZFXIMAGE::IPF_LUMINANCE_ALPHA;
+	int image_size = img.pitch * img.height;
 	img.data = new unsigned char[image_size];
 	memset(img.data, 0, image_size);
+
+	int max_pitch = max_width * img.pixelsize;
 
 	UINT nSkinID = CreateSkin();
 	Glyph_Map glyphmap;
@@ -195,9 +199,9 @@ HRESULT Font::LoadFont()
 			
 			FT_GlyphSlot slot = face->glyph;
 
-			int pitch = slot->bitmap.pitch;
+			int pitch = slot->bitmap.pitch * img.pixelsize;
 
-			if (penx + max_width > img.width &&
+			if (penx + max_pitch > img.pitch &&
 				peny + 2 * max_height > img.height)
 			{
 				// 当前纹理已填充满
@@ -218,7 +222,7 @@ HRESULT Font::LoadFont()
 				penx = peny = 0;
 			}
 
-			if (penx + pitch > img.width)
+			if (penx + pitch > img.pitch)
 			{
 				// 换行
 				penx = 0;
@@ -229,26 +233,27 @@ HRESULT Font::LoadFont()
 			for (int j = 0; j < slot->bitmap.rows; j++)
 			{
 				int row = j + peny + max_bearingY - (slot->metrics.horiBearingY >> 6);
-				for (int i = 0; i < slot->bitmap.width; i++)
+				for (int i = 0; i < slot->bitmap.pitch; i++)
 				{
-					int col = i + penx + (slot->metrics.horiBearingX >> 6);
-					pBuf[row * img.width + col] = slot->bitmap.buffer[j * slot->bitmap.pitch + i];
+					int col = i * img.pixelsize + penx + (slot->metrics.horiBearingX >> 6) * img.pixelsize;
+					pBuf[row * img.pitch + col] = slot->bitmap.buffer[j * slot->bitmap.pitch + i];
+					pBuf[row * img.pitch + col + 1] = slot->bitmap.buffer[j * slot->bitmap.pitch + i];
 				}
 			}
 
 			// 此处涉及到 y 轴方向的问题
-			int right = penx + (slot->advance.x >> 6);
+			int right = penx + (slot->advance.x >> 6) * img.pixelsize;
 			int bottom = peny + max_height;
 			Glyph glyph(codepoint,
-				(float)penx / img.width,
+				(float)penx / img.pitch,
 				(float)peny / img.height,
-				(float)right / img.width,
+				(float)right / img.pitch,
 				(float)bottom / img.height);
 
 			// 若出现重合字符，此处会出问题
 			m_skinGlyphMap[nSkinID][codepoint] = glyph;
 
-			penx = penx + max_width;
+			penx = penx + max_pitch;
 
 		}
 

@@ -104,7 +104,7 @@ void DrawString(const char* str)
 	g_pDevice->SetWorldTransform(&mWorld);
 
 
-	g_pDevice->DrawText(g_fontID, 100, 100, 0xff00ff00, str);
+	g_pDevice->DrawText(g_fontID, 0, 0, 0xffff0000, str);
 
 	g_pDevice->EndRendering();
 }
@@ -113,10 +113,10 @@ void InitGlyphTex()
 {
 	int vertexnum = 6;
 	GLfloat vertexs[6][4] = {
-			{ -1.0, 0.80, 0.0, 0.0f },
+			{ -1.0, 1.0, 0.0, 0.0f },
 			{ -1.0, -1.0, 0.0, 1.0f },
-			{ 1.0, 0.80, 1, 0.0f },
-			{ 1.0, 0.80, 1.0, 0.0f },
+			{ 1.0, 1.0, 1, 0.0f },
+			{ 1.0, 1.0, 1.0, 0.0f },
 			{ -1.0, -1.0, 0.0, 1.0f },
 			{ 1.0, -1.0, 1.0, 1.0f },
 	};
@@ -514,7 +514,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance,
 	else
 	{
 		GetLogger().Print(LOG_DEBUG,log_file,"ProgramStartup Success");
-		g_pDevice->SetClearColor(0.1f, 0.3f, 0.1f);
+		g_pDevice->SetClearColor(1, 1, 1);
 
 		ShowWindow(hWnd, SW_SHOW);
 
@@ -553,6 +553,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance,
 			//ProgramTick();
 			
 			IShaderManager* sm = g_pDevice->GetShaderManager();
+			sm->EnableShader(false);
 			//DrawTriangle(sm);
 			
 			//DrawS3DModel();

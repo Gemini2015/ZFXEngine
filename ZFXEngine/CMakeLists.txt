@@ -2,8 +2,10 @@ project(ZFXEngine)
 
 set(Core_Inc
 	"include/ZFXPrerequisites.h"
+	"include/ZFXEnum.h"
     "include/ZFXRenderSystem.h"
     "include/ZFXSharedPtr.h"
+    "include/ZFXPlane.h"
 	)
 
 set(Core_Src

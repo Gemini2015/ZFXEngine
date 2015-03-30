@@ -1,12 +1,13 @@
 project(ZFXEngine)
 
 set(Core_Inc
-    "include/RenderSystem.h"
-    "include/SharedPtr.h"
+	"include/ZFXPrerequisites.h"
+    "include/ZFXRenderSystem.h"
+    "include/ZFXSharedPtr.h"
 	)
 
 set(Core_Src
-	"src/RenderSystem.cpp"
+	"src/ZFXRenderSystem.cpp"
 	)
 
 

@@ -21,9 +21,9 @@ namespace ZFX
 
 		virtual void ShutDown() = 0;
 
-		virtual void SetAmbientLight(float r, float g, float b) = 0;
+		virtual void SetAmbientLight(float32 r, float32 g, float32 b) = 0;
 
-		virtual void SetShadingType() = 0;
+		virtual void SetShadingType(ShadeOption so) = 0;
 
 		virtual void SetLightingEnabled(bool enabled) = 0;
 
@@ -64,7 +64,7 @@ namespace ZFX
 
 		virtual void SetDepthBufferTestFunction(DepthCompareFunc func = DCF_LESS_EQUAL) = 0;
 
-		virtual void SetDepthOffset(float constantOffset, float slopeScaleOffset = 0.0f) = 0;
+		virtual void SetDepthOffset(float32 constantOffset, float32 slopeScaleOffset = 0.0f) = 0;
 
 		virtual void BeginGeometryCount();
 
@@ -80,7 +80,7 @@ namespace ZFX
 
 		virtual void AddClipPlane(const Plane &p);
 
-		virtual void AddClipPlane(float a, float b, float c, float d);
+		virtual void AddClipPlane(float32 a, float32 b, float32 c, float32 d);
 
 		virtual void ResetClipPlanes();
 
@@ -88,7 +88,7 @@ namespace ZFX
 			int32 right = 0, int32 bottom = 0) = 0;
 
 		virtual void ClearFrameBuffer(const ColorValue& color,
-			float depth = 1.0f, uint16 stencil = 0) = 0;
+			float32 depth = 1.0f, uint16 stencil = 0) = 0;
 
 	protected:
 		uint32 mFaceCount;

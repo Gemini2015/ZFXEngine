@@ -5,6 +5,10 @@
 
 namespace ZFX
 {
+
+	typedef float float32;
+	typedef double float64;
+
 	typedef std::string String;
 
 	class RenderSystem;

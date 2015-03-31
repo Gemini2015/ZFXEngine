@@ -1,11 +1,11 @@
 project(OpenGL)
 
 set(Core_Inc
-    "include/OpenGLRenderSystem.h"
+    "include/ZFXOpenGLRenderSystem.h"
 	)
 
 set(Core_Src
-	"src/OpenGLRenderSystem.cpp"
+	"src/ZFXOpenGLRenderSystem.cpp"
 	)
 
 

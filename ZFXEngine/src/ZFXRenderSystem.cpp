@@ -66,6 +66,8 @@ namespace ZFX
 
 	void RenderSystem::AddClipPlane(float a, float b, float c, float d)
 	{
+		mClipPlaneList.push_back(Plane(a, b, c, d));
+		mClipPlaneDirty = true;
 	}
 
 	void RenderSystem::ResetClipPlanes()

@@ -7,12 +7,14 @@ set(Core_Inc
     "include/ZFXSharedPtr.h"
     "include/ZFXPlane.h"
     "include/ZFXVector4.h"
+    "include/ZFXVector3.h"
 	)
 
 set(Core_Src
 	"src/ZFXRenderSystem.cpp"
 	"src/ZFXPlane.cpp"
 	"src/ZFXVector4.cpp"
+	"src/ZFXVector3.cpp"
 	)
 
 

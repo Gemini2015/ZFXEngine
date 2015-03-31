@@ -3,6 +3,11 @@
 
 #include "ZFXEnum.h"
 
+#include <string>
+#include <vector>
+#include <map>
+#include <assert.h>
+
 namespace ZFX
 {
 
@@ -18,6 +23,7 @@ namespace ZFX
 	class Matrix4;
 	class Matrix3;
 	class Vector4;
+	class Vector3;
 	class Texture;
 	class Viewport;
 	class ColorValue;

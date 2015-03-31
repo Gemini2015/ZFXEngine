@@ -75,6 +75,12 @@ namespace ZFX
 			return v[i];
 		}
 
+		inline float32& operator[](const size_t i)
+		{
+			assert(i < 4);
+			return v[i];
+		}
+
 		inline Vector4& operator=(const Vector4& v)
 		{
 			x = v.x;

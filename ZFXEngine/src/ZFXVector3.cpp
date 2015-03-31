@@ -59,7 +59,7 @@ namespace ZFX
 
 	Vector3 Vector3::Reflect(const Vector3& normal) const
 	{
-		return Vector3(*this - (2 * this->dotProduct(normal) * normal));
+		return Vector3(*this - (2 * this->DotProduct(normal) * normal));
 	}
 
 }

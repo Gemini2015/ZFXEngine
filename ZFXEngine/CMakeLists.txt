@@ -8,6 +8,8 @@ set(Core_Inc
     "include/ZFXPlane.h"
     "include/ZFXVector4.h"
     "include/ZFXVector3.h"
+    "include/ZFXMatrix4.h"
+    "include/ZFXMatrix3.h"
 	)
 
 set(Core_Src
@@ -15,6 +17,8 @@ set(Core_Src
 	"src/ZFXPlane.cpp"
 	"src/ZFXVector4.cpp"
 	"src/ZFXVector3.cpp"
+	"src/ZFXMatrix4.cpp"
+	"src/ZFXMatrix3.cpp"
 	)
 
 

@@ -1,4 +1,5 @@
 #include "ZFXPlane.h"
+#include "ZFXMatrix3.h"
 
 namespace ZFX
 {
@@ -47,7 +48,18 @@ namespace ZFX
 
 	ZFX::Vector3 Plane::ProjectVector(const Vector3& v) const
 	{
-		return Vector3::ORIGIN;
+		Matrix3 xform;
+		xform[0][0] = 1.0f - normal.x * normal.x;
+		xform[0][1] = -normal.x * normal.y;
+		xform[0][2] = -normal.x * normal.z;
+		xform[1][0] = -normal.y * normal.x;
+		xform[1][1] = 1.0f - normal.y * normal.y;
+		xform[1][2] = -normal.y * normal.z;
+		xform[2][0] = -normal.z * normal.x;
+		xform[2][1] = -normal.z * normal.y;
+		xform[2][2] = 1.0f - normal.z * normal.z;
+
+		return xform * v;
 	}
 
 }

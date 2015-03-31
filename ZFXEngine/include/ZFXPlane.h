@@ -32,11 +32,11 @@ namespace ZFX
 
 		bool operator==(const Plane &p) const
 		{
-			return true;
+			return d == p.d && normal == p.normal;
 		}
 		bool operator!=(const Plane &p) const
 		{
-			return false;
+			return d != p.d || normal != p.normal;
 		}
 	};
 }

@@ -156,12 +156,16 @@ namespace ZFX
 
 	void GLRenderSystem::BeginRendering()
 	{
-		throw std::logic_error("The method or operation is not implemented.");
+		if (!mActiveViewport)
+		{
+			return;
+		}
+		glEnable(GL_SCISSOR_TEST);
 	}
 
 	void GLRenderSystem::EndRendering()
 	{
-		throw std::logic_error("The method or operation is not implemented.");
+		glDisable(GL_SCISSOR_TEST);
 	}
 
 	void GLRenderSystem::SetViewPort(Viewport *vp)
@@ -176,37 +180,83 @@ namespace ZFX
 
 	void GLRenderSystem::SetCullingMode(CullingMode mode)
 	{
-		throw std::logic_error("The method or operation is not implemented.");
+		mCullingMode = mode;
+
+		GLenum cullMode = GL_FRONT;
+		switch (mode)
+		{
+		case ZFX::CULLMODE_NONE:
+		{
+			glDisable(GL_CULL_FACE);
+			return;
+		}
+			break;
+		case ZFX::CULLMODE_CLOCKWISE:
+			cullMode = GL_FRONT;
+			break;
+		case ZFX::CULLMODE_ANTICLOCKWISE:
+			cullMode = GL_BACK;
+			break;
+		default:
+			break;
+		}
+
+		glEnable(GL_CULL_FACE);
+		glCullFace(cullMode);
 	}
 
 	ZFX::CullingMode GLRenderSystem::GetCullingMode()
 	{
-		throw std::logic_error("The method or operation is not implemented.");
+		return mCullingMode;
 	}
 
 	void GLRenderSystem::SetDepthBuffer(bool depthTest /*= true*/, bool depthWrite /*= true*/, DepthCompareFunc depthFunc /*= DCF_LESS_EQUAL*/)
 	{
-		throw std::logic_error("The method or operation is not implemented.");
+		SetDepthBufferTestEnabled(depthTest);
+		SetDepthBufferWriteEnabled(depthWrite);
+		SetDepthBufferTestFunction(depthFunc);
 	}
 
 	void GLRenderSystem::SetDepthBufferTestEnabled(bool enabled /*= true*/)
 	{
-		throw std::logic_error("The method or operation is not implemented.");
+		if (enabled)
+		{
+			glClearDepth(1.0f);
+			glEnable(GL_DEPTH_TEST);
+		}
+		else
+		{
+			glDisable(GL_DEPTH_TEST);
+		}
 	}
 
 	void GLRenderSystem::SetDepthBufferWriteEnabled(bool enabled /*= true*/)
 	{
-		throw std::logic_error("The method or operation is not implemented.");
+		GLboolean flag = enabled ? GL_TRUE : GL_FALSE;
+		glDepthMask(flag);
+		mDepthWrite = enabled;
 	}
 
 	void GLRenderSystem::SetDepthBufferTestFunction(DepthCompareFunc func /*= DCF_LESS_EQUAL*/)
 	{
-		throw std::logic_error("The method or operation is not implemented.");
+		glDepthFunc(GetDepthCompareFunction(func));
 	}
 
 	void GLRenderSystem::SetDepthOffset(float32 constantOffset, float32 slopeScaleOffset /*= 0.0f*/)
 	{
-		throw std::logic_error("The method or operation is not implemented.");
+		if (constantOffset != 0 || slopeScaleOffset != 0)
+		{
+			glEnable(GL_POLYGON_OFFSET_FILL);
+			glEnable(GL_POLYGON_OFFSET_POINT);
+			glEnable(GL_POLYGON_OFFSET_LINE);
+			glPolygonOffset(-slopeScaleOffset, -constantOffset);
+		}
+		else
+		{
+			glDisable(GL_POLYGON_OFFSET_FILL);
+			glDisable(GL_POLYGON_OFFSET_POINT);
+			glDisable(GL_POLYGON_OFFSET_LINE);
+		}
 	}
 
 	void GLRenderSystem::BeginGeometryCount()
@@ -231,7 +281,22 @@ namespace ZFX
 
 	void GLRenderSystem::SetPolygonMode(PolygonMode mode)
 	{
-		throw std::logic_error("The method or operation is not implemented.");
+		GLenum glmode = GL_FILL;
+		switch (mode)
+		{
+		case ZFX::PM_POINTS:
+			glmode = GL_POINT;
+			break;
+		case ZFX::PM_WIREFRAME:
+			glmode = GL_LINE;
+			break;
+		case ZFX::PM_SOLID:
+			glmode = GL_FILL;
+			break;
+		default:
+			break;
+		}
+		glPolygonMode(GL_FRONT_AND_BACK, glmode);
 	}
 
 	void GLRenderSystem::SetClipPlane(const std::vector<Plane> &planeList)
@@ -256,7 +321,31 @@ namespace ZFX
 
 	void GLRenderSystem::SetScissorTest(bool enabled, int32 left /*= 0*/, int32 top /*= 0*/, int32 right /*= 0*/, int32 bottom /*= 0*/)
 	{
-		throw std::logic_error("The method or operation is not implemented.");
+		if (mActiveRenderWindow == NULL || mActiveViewport == NULL)
+		{
+			return;
+		}
+		size_t targetHeight = 600; //mActiveRenderWindow->GetHeight();
+		GLsizei x = 0, y = 0, w = 0, h = 0;
+
+		if (enabled)
+		{
+			glEnable(GL_SCISSOR_TEST);
+			x = left;
+			y = targetHeight - bottom;
+			w = right - left;
+			h = bottom - top;
+			glScissor(x, y, w, h);
+		}
+		else
+		{
+			glDisable(GL_SCISSOR_TEST);
+			w = 800;	// mActiveViewport
+			h = 600;	// mActiveViewport
+			x = 0;		// mActiveViewport
+			y = 0;		// mActiveViewport
+			glScissor(x, y, w, h);
+		}
 	}
 
 	void GLRenderSystem::ClearFrameBuffer(const ColorValue& color, float32 depth /*= 1.0f*/, uint16 stencil /*= 0*/)
@@ -298,6 +387,41 @@ namespace ZFX
 			break;
 		case ZFX::SBF_ONE_MINUS_SOURCE_ALPHA:
 			ret = GL_ONE_MINUS_SRC_ALPHA;
+			break;
+		default:
+			break;
+		}
+		return ret;
+	}
+
+	GLenum GLRenderSystem::GetDepthCompareFunction(DepthCompareFunc func)
+	{
+		GLenum ret = GL_ALWAYS;
+		switch (func)
+		{
+		case ZFX::DCF_ALWAYS_FAIL:
+			ret = GL_NEVER;
+			break;
+		case ZFX::DCF_ALWAYS_PASS:
+			ret = GL_ALWAYS;
+			break;
+		case ZFX::DCF_LESS:
+			ret = GL_LESS;
+			break;
+		case ZFX::DCF_LESS_EQUAL:
+			ret = GL_LEQUAL;
+			break;
+		case ZFX::DCF_EQUAL:
+			ret = GL_EQUAL;
+			break;
+		case ZFX::DCF_NOT_EQUAL:
+			ret = GL_NOTEQUAL;
+			break;
+		case ZFX::DCF_GREATER_EQUAL:
+			ret = GL_GEQUAL;
+			break;
+		case ZFX::DCF_GREATER:
+			ret = GL_GREATER;
 			break;
 		default:
 			break;

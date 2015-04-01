@@ -2,6 +2,11 @@ cmake_minimum_required(VERSION 2.8)
 
 project(ZFX)
 
+if(MSVC)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4819")
+endif()
+
+
 # option
 option(BUILD_EXAMPLES "build examples" ON)
 

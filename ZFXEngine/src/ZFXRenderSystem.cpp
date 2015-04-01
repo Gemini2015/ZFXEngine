@@ -6,6 +6,7 @@ namespace ZFX
 	RenderSystem::RenderSystem()
 		: mClipPlaneDirty(true)
 		, mActiveRenderWindow(NULL)
+		, mActiveViewport(NULL)
 	{
 
 	}

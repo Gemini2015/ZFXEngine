@@ -99,6 +99,9 @@ namespace ZFX
 		typedef std::map<String, RenderWindow*> RenderWindow_Map;
 		RenderWindow_Map mRenderWindowMap;
 		RenderWindow* mActiveRenderWindow;
+		Viewport* mActiveViewport;
+
+		CullingMode mCullingMode;
 	};
 
 }

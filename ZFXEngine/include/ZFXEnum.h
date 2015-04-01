@@ -35,8 +35,9 @@ namespace ZFX
 
 	enum CullingMode
 	{
-		CM_CLOCKWISE,
-		CM_ANTICLOCKWISE,
+		CULLMODE_NONE,
+		CULLMODE_CLOCKWISE,
+		CULLMODE_ANTICLOCKWISE,
 	};
 
 	enum PolygonMode

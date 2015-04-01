@@ -88,11 +88,13 @@ namespace ZFX
 
 	private:
 		GLenum GetBlendMode(SceneBlendFactor factor);
+		GLenum GetDepthCompareFunction(DepthCompareFunc func);
 
 	private:
 		Matrix4 mViewMatrix;
 		Matrix4 mWorldMatrix;
 
+		bool mDepthWrite;
 	};
 }
 

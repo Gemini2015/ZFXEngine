@@ -15,6 +15,11 @@ namespace ZFX
 		ShutDown();
 	}
 
+	void RenderSystem::ShutDown()
+	{
+
+	}
+
 	void RenderSystem::DestroyRenderWindow(const String name)
 	{
 		RenderWindow* rw = NULL;

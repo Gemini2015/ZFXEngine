@@ -1,9 +1,7 @@
 #ifndef _ZFX_RENDER_SYSTEM_H_
 #define _ZFX_RENDER_SYSTEM_H_
 
-#include "PILPrerequisites.h"
 #include "ZFXPrerequisites.h"
-
 #include "ZFXPlane.h"
 
 namespace ZFX
@@ -19,7 +17,7 @@ namespace ZFX
 
 		virtual RenderWindow* Init(bool autoCreateWindow, const String windowTitle = "ZFX Window") = 0;
 
-		virtual void ShutDown() = 0;
+		virtual void ShutDown();
 
 		virtual void SetAmbientLight(float32 r, float32 g, float32 b) = 0;
 

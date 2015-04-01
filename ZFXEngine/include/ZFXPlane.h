@@ -1,7 +1,6 @@
 #ifndef _ZFX_PLANE_H_
 #define _ZFX_PLANE_H_
 
-#include "PILPrerequisites.h"
 #include "ZFXPrerequisites.h"
 
 #include "ZFXVector3.h"

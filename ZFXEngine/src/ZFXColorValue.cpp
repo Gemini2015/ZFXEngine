@@ -2,7 +2,19 @@
 
 namespace ZFX
 {
+	const ColorValue ColorValue::ZERO(0, 0, 0, 0);
 
+	const ColorValue ColorValue::ONE(1, 1, 1, 1);
+
+	const ColorValue ColorValue::White(1, 1, 1);
+
+	const ColorValue ColorValue::Black(0, 0, 0);
+
+	const ColorValue ColorValue::Red(1, 0, 0);
+
+	const ColorValue ColorValue::Green(0, 1, 0);
+
+	const ColorValue ColorValue::Blue(0, 0, 1);
 
 	ZFX::RGBA ColorValue::GetAsRGBA() const
 	{

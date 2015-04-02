@@ -157,6 +157,15 @@ namespace ZFX
 			return *this;
 		}
 
+	public:
+		static const ColorValue ZERO;
+		static const ColorValue ONE;
+		static const ColorValue Black;
+		static const ColorValue White;
+		static const ColorValue Red;
+		static const ColorValue Green;
+		static const ColorValue Blue;
+
 	};
 }
 

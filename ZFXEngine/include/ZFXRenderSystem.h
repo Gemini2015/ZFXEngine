@@ -88,6 +88,8 @@ namespace ZFX
 		virtual void ClearFrameBuffer(uint32 buffers, const ColorValue& color,
 			float32 depth = 1.0f, uint16 stencil = 0) = 0;
 
+		virtual void SetRenderWindow(RenderWindow *window) = 0;
+
 	protected:
 		uint32 mFaceCount;
 		uint32 mBatchCount;

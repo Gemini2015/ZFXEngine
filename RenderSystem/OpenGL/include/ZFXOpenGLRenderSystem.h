@@ -92,11 +92,14 @@ namespace ZFX
 
 		virtual void ClearFrameBuffer(uint32 buffers, const ColorValue& color, float32 depth = 1.0f, uint16 stencil = 0) override;
 
+		virtual void SetRenderWindow(RenderWindow *window) override;
+
 	private:
 		GLenum GetBlendMode(SceneBlendFactor factor);
 		GLenum GetDepthCompareFunction(DepthCompareFunc func);
 		void SetGLLight(uint32 index,const LightPtr light);
 		void SetGLLightPositionDirection(GLenum index, const LightPtr light);
+
 
 	private:
 		LightList mLights;

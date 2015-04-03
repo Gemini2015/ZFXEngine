@@ -1,6 +1,7 @@
 #include "ZFXOpenGLRenderSystem.h"
 #include "ZFXSharedPtr.h"
 #include "ZFXLight.h"
+#include "ZFXViewport.h"
 
 namespace ZFX
 {
@@ -197,12 +198,36 @@ namespace ZFX
 
 	void GLRenderSystem::SetViewport(Viewport *vp)
 	{
-		throw std::logic_error("The method or operation is not implemented.");
+		if (vp == NULL)
+		{
+			mActiveViewport = NULL;
+			SetRenderWindow(NULL);
+		}
+		else if (vp != mActiveViewport || vp->IsUpdated())
+		{
+			RenderWindow* window = NULL;
+			window = vp->GetRenderWindow();
+			SetRenderWindow(window);
+			mActiveViewport = vp;
+
+			GLsizei x = 0, y = 0, w = 0, h = 0;
+
+			x = vp->GetActualLeft();
+			y = vp->GetActualTop();
+			w = vp->GetActualWidth();
+			h = vp->GetActualHeight();
+			// y = window->GetHeight() - h -y;
+			glViewport(x, y, w, h);
+
+			glScissor(x, y, w, h);
+
+			vp->ClearUpdatedFlag();
+		}
 	}
 
 	Viewport* GLRenderSystem::GetViewport()
 	{
-		throw std::logic_error("The method or operation is not implemented.");
+		return mActiveViewport;
 	}
 
 	void GLRenderSystem::SetCullingMode(CullingMode mode)
@@ -377,7 +402,65 @@ namespace ZFX
 
 	void GLRenderSystem::ClearFrameBuffer(uint32 buffers, const ColorValue& color, float32 depth /*= 1.0f*/, uint16 stencil /*= 0*/)
 	{
-		throw std::logic_error("The method or operation is not implemented.");
+		GLbitfield flags = 0;
+		if (buffers & FBT_COLOR)
+		{
+			flags |= GL_COLOR_BUFFER_BIT;
+			glColorMask(true, true, true, true);
+			glClearColor(color.r, color.g, color.b, color.a);
+		}
+		if (buffers & FBT_DEPTH)
+		{
+			flags |= GL_DEPTH_BUFFER_BIT;
+			if (!mDepthWrite)
+			{
+				glDepthMask(GL_TRUE);
+			}
+			glClearDepth(depth);
+		}
+		if (buffers & FBT_STENCIL)
+		{
+			flags |= GL_STENCIL_BUFFER_BIT;
+			glStencilMask(0xFFFFFFFF);
+			glClearStencil(stencil);
+		}
+
+		GLboolean scissorTest = glIsEnabled(GL_SCISSOR_TEST);
+		if (!scissorTest)
+		{
+			glEnable(GL_SCISSOR_TEST);
+		}
+
+		GLint viewport[4] = { 0, 0, 0, 0 };
+		GLint scissor[4] = { 0, 0, 0, 0 };
+		glGetIntegerv(GL_VIEWPORT, viewport);
+		glGetIntegerv(GL_SCISSOR_BOX, scissor);
+		bool scissorBoxDiff =
+			viewport[0] != scissor[0] ||
+			viewport[1] != scissor[1] ||
+			viewport[2] != scissor[2] ||
+			viewport[3] != scissor[3];
+		if (scissorBoxDiff)
+		{
+			glScissor(viewport[0], viewport[1], viewport[2], viewport[3]);
+		}
+
+		glClear(flags);
+
+		// restore
+		if (scissorBoxDiff)
+		{
+			glScissor(scissor[0], scissor[1], scissor[2], scissor[3]);
+		}
+		if (!scissorTest)
+		{
+			glDisable(GL_SCISSOR_TEST);
+		}
+
+		if (!mDepthWrite && (buffers & FBT_DEPTH))
+		{
+			glDepthMask(GL_FALSE);
+		}
 	}
 
 	GLenum GLRenderSystem::GetBlendMode(SceneBlendFactor factor)
@@ -515,6 +598,11 @@ namespace ZFX
 			Vector4 dir(light->GetDirection(), 0.0);
 			glLightfv(index, GL_SPOT_DIRECTION, dir.val);
 		}
+	}
+
+	void GLRenderSystem::SetRenderWindow(RenderWindow *window)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
 	}
 
 }

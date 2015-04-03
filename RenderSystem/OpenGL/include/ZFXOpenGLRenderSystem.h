@@ -4,11 +4,17 @@
 #include "ZFXOpenGLPrerequisites.h"
 #include "ZFXRenderSystem.h"
 #include "ZFXMatrix4.h"
+#include "ZFXLight.h"
 
 namespace ZFX
 {
 	class GLRenderSystem : public RenderSystem
 	{
+	public:
+		enum GLRS_Enum
+		{
+			MAX_LIGHTS = 8,
+		};
 	public:
 		GLRenderSystem();
 
@@ -30,7 +36,7 @@ namespace ZFX
 
 		virtual void DestroyRenderWindow(const String name) override;
 
-		virtual void SetLights(const std::vector<Light> &lightList, uint32 limit) override;
+		virtual void SetLights(const LightList &lightList, uint32 limit) override;
 
 		virtual void SetWorldMatrix(const Matrix4 &m) override;
 
@@ -89,8 +95,13 @@ namespace ZFX
 	private:
 		GLenum GetBlendMode(SceneBlendFactor factor);
 		GLenum GetDepthCompareFunction(DepthCompareFunc func);
+		void SetGLLight(uint32 index,const LightPtr light);
+		void SetGLLightPositionDirection(GLenum index, const LightPtr light);
 
 	private:
+		LightList mLights;
+		uint32 mCurrentLightNum;
+
 		Matrix4 mViewMatrix;
 		Matrix4 mWorldMatrix;
 

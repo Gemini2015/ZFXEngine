@@ -30,7 +30,7 @@ namespace ZFX
 
 		virtual void DestroyRenderWindow(const String name);
 
-		virtual void SetLights(const std::vector<Light> &lightList, uint32 limit) = 0;
+		virtual void SetLights(const LightList &lightList, uint32 limit) = 0;
 
 		virtual void SetWorldMatrix(const Matrix4 &m) = 0;
 

@@ -1,9 +1,13 @@
 #include "ZFXOpenGLRenderSystem.h"
+#include "ZFXSharedPtr.h"
+#include "ZFXLight.h"
 
 namespace ZFX
 {
+
 	GLRenderSystem::GLRenderSystem()
 	{
+		mLights.reserve(GLRS_Enum::MAX_LIGHTS);
 	}
 
 	GLRenderSystem::~GLRenderSystem()
@@ -69,9 +73,32 @@ namespace ZFX
 		throw std::logic_error("The method or operation is not implemented.");
 	}
 
-	void GLRenderSystem::SetLights(const std::vector<Light> &lightList, uint32 limit)
+	void GLRenderSystem::SetLights(const LightList &lightList, uint32 limit)
 	{
-		throw std::logic_error("The method or operation is not implemented.");
+		glMatrixMode(GL_MODELVIEW);
+		glPushMatrix();
+
+		Matrix4 mat = mViewMatrix.GetColumnMajorOrderMatrix();
+		glLoadMatrixf(mat.val);
+
+		uint32 num = 0;
+		LightList::const_iterator it = lightList.begin();
+		LightList::const_iterator listEnd = lightList.end();
+		while (it != listEnd && num < limit)
+		{
+			LightPtr light(*it);
+			SetGLLight(num, light);
+			mLights[num] = light;
+			it++;
+		}
+		for (; num < mCurrentLightNum; num++)
+		{
+			SetGLLight(num, NULL);
+			mLights[num] = NULL;
+		}
+		mCurrentLightNum = std::min(limit, static_cast<uint32>(lightList.size()));
+
+		glPopMatrix();
 	}
 
 	void GLRenderSystem::SetWorldMatrix(const Matrix4 &m)
@@ -427,6 +454,67 @@ namespace ZFX
 			break;
 		}
 		return ret;
+	}
+
+	void GLRenderSystem::SetGLLight(uint32 index, LightPtr light)
+	{
+		GLenum gl_index = GL_LIGHT0 + index;
+
+		if (light.IsNULL())
+		{
+			glDisable(gl_index);
+		}
+		else
+		{
+			switch (light->GetType())
+			{
+			case Light::LT_SPOT_LIGHT:
+			{
+				glLightf(gl_index, GL_SPOT_CUTOFF, 0.5f * light->GetSpotLightOuterAngle());
+				glLightf(gl_index, GL_SPOT_EXPONENT, light->GetSpotLightFalloff());
+			}
+				break;
+			default:
+				glLightf(gl_index, GL_SPOT_CUTOFF, 180.0f);
+				break;
+			}
+
+			// Diffuse
+			ColorValue c = light->GetDiffuseColor();
+			glLightfv(gl_index, GL_DIFFUSE, c.val);
+
+			// Specular
+			c = light->GetSpecularColor();
+			glLightfv(gl_index, GL_SPECULAR, c.val);
+
+			// Ambient
+			c = ColorValue::Black;
+			glLightfv(gl_index, GL_AMBIENT, c.val);
+
+			// Position & Direction
+			SetGLLightPositionDirection(gl_index, light);
+
+			glLightf(gl_index, GL_CONSTANT_ATTENUATION, light->GetAttenuationConstant());
+			glLightf(gl_index, GL_LINEAR_ATTENUATION, light->GetAttenuationLinear());
+			glLightf(gl_index, GL_QUADRATIC_ATTENUATION, light->GetAttenuationQuad());
+
+			glEnable(gl_index);
+		}
+	}
+
+	void GLRenderSystem::SetGLLightPositionDirection(GLenum index, const LightPtr light)
+	{
+		if (light.IsNULL())
+			return;
+
+		Vector4 pos(light->GetPosition(), 1.0f);
+		glLightfv(index, GL_POSITION, pos.val);
+
+		if (light->GetType() == Light::LT_SPOT_LIGHT)
+		{
+			Vector4 dir(light->GetDirection(), 0.0);
+			glLightfv(index, GL_SPOT_DIRECTION, dir.val);
+		}
 	}
 
 }

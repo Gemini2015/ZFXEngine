@@ -2,8 +2,7 @@
 #define _ZFX_VECTOR_4_H_
 
 #include "ZFXPrerequisites.h"
-
-#include <assert.h>
+#include "ZFXVector3.h"
 
 namespace ZFX
 {
@@ -16,7 +15,7 @@ namespace ZFX
 			{
 				float32 x, y, z, w;
 			};
-			float32 v[4];
+			float32 val[4];
 		};
 
 	public:
@@ -42,14 +41,22 @@ namespace ZFX
 		inline Vector4(int32 v[4])
 		{
 			x = (float32)v[0];
-			x = (float32)v[0];
-			x = (float32)v[0];
-			x = (float32)v[0];
+			y = (float32)v[0];
+			z = (float32)v[0];
+			w = (float32)v[0];
 		}
 
 		inline Vector4(float32 scalar)
 			: x(scalar), y(scalar), z(scalar), w(scalar)
 		{
+		}
+
+		inline Vector4(const Vector3& v3, float32 w = 1.0f)
+		{
+			x = v3.x;
+			y = v3.y;
+			z = v3.z;
+			w = w;
 		}
 
 		float32 GetLength();
@@ -71,13 +78,13 @@ namespace ZFX
 		inline float32 operator[](const size_t i) const
 		{
 			assert(i < 4);
-			return v[i];
+			return val[i];
 		}
 
 		inline float32& operator[](const size_t i)
 		{
 			assert(i < 4);
-			return v[i];
+			return val[i];
 		}
 
 		inline Vector4& operator=(const Vector4& v)
@@ -86,6 +93,15 @@ namespace ZFX
 			y = v.y;
 			z = v.z;
 			w = v.w;
+			return *this;
+		}
+
+		inline Vector4& operator=(const Vector3& v3)
+		{
+			x = v3.x;
+			y = v3.y;
+			z = v3.z;
+			w = 1.0f;
 			return *this;
 		}
 

@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <algorithm>
 #include <assert.h>
 
 namespace ZFX
@@ -31,6 +32,10 @@ namespace ZFX
 	class ColorValue;
 	class Plane;
 	class Camera;
+
+
+	typedef SharedPtr<Light> LightPtr;
+	typedef std::vector<LightPtr> LightList;
 }
 
 #endif

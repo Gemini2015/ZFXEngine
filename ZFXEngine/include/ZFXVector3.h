@@ -14,7 +14,7 @@ namespace ZFX
 			{
 				float32 x, y, z;
 			};
-			float32 v[3];
+			float32 val[3];
 		};
 
 	public:
@@ -78,13 +78,13 @@ namespace ZFX
 		inline float32 operator[](const size_t i) const
 		{
 			assert(i < 3);
-			return v[i];
+			return val[i];
 		}
 
 		inline float32& operator[](const size_t i)
 		{
 			assert(i < 3);
-			return v[i];
+			return val[i];
 		}
 
 		inline Vector3& operator=(const Vector3& v)

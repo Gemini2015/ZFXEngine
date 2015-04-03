@@ -25,7 +25,7 @@ namespace ZFX
 
 	Vector3 Vector3::Normalize()
 	{
-		float64 f = sqrt(x * x + y * y + z * z);
+		float32 f = sqrt(x * x + y * y + z * z);
 		if (f != 0.0f)
 		{
 			f = 1 / f;

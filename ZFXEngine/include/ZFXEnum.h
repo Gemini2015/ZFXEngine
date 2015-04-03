@@ -58,6 +58,13 @@ namespace ZFX
 		DCF_GREATER_EQUAL,
 		DCF_GREATER,
 	};
+
+	enum FrameBufferType
+	{
+		FBT_COLOR = 0x1,
+		FBT_DEPTH = 0x2,
+		FBT_STENCIL = 0x4,
+	};
 }
 
 #endif

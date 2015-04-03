@@ -30,6 +30,7 @@ namespace ZFX
 	class Viewport;
 	class ColorValue;
 	class Plane;
+	class Camera;
 }
 
 #endif

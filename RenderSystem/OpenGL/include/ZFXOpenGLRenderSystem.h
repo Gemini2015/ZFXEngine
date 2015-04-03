@@ -46,7 +46,7 @@ namespace ZFX
 
 		virtual void EndRendering() override;
 
-		virtual void SetViewPort(Viewport *vp) override;
+		virtual void SetViewport(Viewport *vp) override;
 
 		virtual Viewport* GetViewport() override;
 
@@ -84,7 +84,7 @@ namespace ZFX
 
 		virtual void SetScissorTest(bool enabled, int32 left = 0, int32 top = 0, int32 right = 0, int32 bottom = 0) override;
 
-		virtual void ClearFrameBuffer(const ColorValue& color, float32 depth = 1.0f, uint16 stencil = 0) override;
+		virtual void ClearFrameBuffer(uint32 buffers, const ColorValue& color, float32 depth = 1.0f, uint16 stencil = 0) override;
 
 	private:
 		GLenum GetBlendMode(SceneBlendFactor factor);

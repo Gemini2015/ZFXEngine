@@ -168,7 +168,7 @@ namespace ZFX
 		glDisable(GL_SCISSOR_TEST);
 	}
 
-	void GLRenderSystem::SetViewPort(Viewport *vp)
+	void GLRenderSystem::SetViewport(Viewport *vp)
 	{
 		throw std::logic_error("The method or operation is not implemented.");
 	}
@@ -348,7 +348,7 @@ namespace ZFX
 		}
 	}
 
-	void GLRenderSystem::ClearFrameBuffer(const ColorValue& color, float32 depth /*= 1.0f*/, uint16 stencil /*= 0*/)
+	void GLRenderSystem::ClearFrameBuffer(uint32 buffers, const ColorValue& color, float32 depth /*= 1.0f*/, uint16 stencil /*= 0*/)
 	{
 		throw std::logic_error("The method or operation is not implemented.");
 	}

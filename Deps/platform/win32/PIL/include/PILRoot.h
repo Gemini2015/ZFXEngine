@@ -1,13 +1,17 @@
 #ifndef _PIL_ROOT_H_
 #define _PIL_ROOT_H_
 
-#include "PILInclude.h"
+#include "PILWindowManager.h"
+#include "PILFileSystem.h"
+#include "PILTime.h"
 
 namespace PIL
 {
 
 	class Root
 	{
+	public:
+		static Root *Instance;
 	public:
 		Root()
 		{
@@ -16,6 +20,8 @@ namespace PIL
 			mFileSystem = new FileSystem();
 
 			mTimer = new Timer();
+
+			Instance = this;
 		}
 		~Root()
 		{
@@ -25,21 +31,34 @@ namespace PIL
 				delete mFileSystem;
 			if (mTimer)
 				delete mTimer;
+
+			Instance = NULL;
 		}
 
-		WindowManager* GetWindowManger()
+		WindowManager* GetWindowManger() const
 		{
 			return mWindowManger;
 		}
 
-		FileSystem* GetFileSystem()
+		FileSystem* GetFileSystem() const
 		{
 			return mFileSystem;
 		}
 
-		Timer* GetTimer()
+		Timer* GetTimer() const
 		{
 			return mTimer;
+		}
+
+		static Root* SingletonPtr()
+		{
+			return Instance;
+		}
+
+		static Root& Singleton()
+		{
+			assert(Instance != NULL);
+			return *Instance;
 		}
 
 	private:
@@ -47,7 +66,6 @@ namespace PIL
 		FileSystem *mFileSystem;
 		Timer *mTimer;
 	};
-
 }
 
 #endif

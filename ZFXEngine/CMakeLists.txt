@@ -13,6 +13,7 @@ set(Core_Inc
     "include/ZFXColorValue.h"
     "include/ZFXViewport.h"
     "include/ZFXLight.h"
+    "include/ZFXRenderWindow.h"
 	)
 
 set(Core_Src
@@ -25,6 +26,7 @@ set(Core_Src
 	"src/ZFXColorValue.cpp"
 	"src/ZFXViewport.cpp"
 	"src/ZFXLight.cpp"
+	"src/ZFXRenderWindow.cpp"
 	)
 
 

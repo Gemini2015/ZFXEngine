@@ -5,6 +5,9 @@
 
 #include "ZFXEnum.h"
 
+#include <iostream>
+#include <fstream>
+#include <sstream>
 #include <string>
 #include <vector>
 #include <map>
@@ -32,7 +35,8 @@ namespace ZFX
 	class ColorValue;
 	class Plane;
 	class Camera;
-
+	class Log;
+	class LogManager;
 
 	typedef SharedPtr<Light> LightPtr;
 	typedef std::vector<LightPtr> LightList;

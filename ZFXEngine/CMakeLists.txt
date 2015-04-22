@@ -14,6 +14,8 @@ set(Core_Inc
     "include/ZFXViewport.h"
     "include/ZFXLight.h"
     "include/ZFXRenderWindow.h"
+    "include/ZFXLog.h"
+    "include/ZFXLogManager.h"
 	)
 
 set(Core_Src
@@ -27,6 +29,8 @@ set(Core_Src
 	"src/ZFXViewport.cpp"
 	"src/ZFXLight.cpp"
 	"src/ZFXRenderWindow.cpp"
+	"src/ZFXLog.cpp"
+	"src/ZFXLogManager.cpp"
 	)
 
 

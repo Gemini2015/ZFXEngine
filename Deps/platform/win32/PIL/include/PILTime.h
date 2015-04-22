@@ -11,6 +11,16 @@
 
 namespace PIL
 {
+	enum TimeStringFormat
+	{
+		HS,			// h:m:s
+		H_S,		// h_m_s
+		YMD,		// y-m-d
+		Y_M_D,		// y_m_d
+		YMDHS,		// y-m-d h:m:s
+		YMDHS_FILE,	// y-m-d-h-m-s
+		Y_M_D_H_S,	// y_m_d_h_m_s
+	};
 
 	class Timer
 	{
@@ -19,7 +29,10 @@ namespace PIL
 		~Timer();
 
 		void Reset();
+
 		uint32 GetMillisecondTime();
+
+		std::string GetTimeString(TimeStringFormat fmt, struct tm* time = nullptr);
 
 	protected:
 

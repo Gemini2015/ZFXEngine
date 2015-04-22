@@ -51,6 +51,24 @@ namespace PIL
 		friend class WindowManager;
 
 	public:
+		typedef struct PixelFormatParams_t
+		{
+			uint32 ColorBits;
+			uint32 AlphaBits;
+			uint32 DepthBits;
+			uint32 StencilBits;
+
+			PixelFormatParams_t()
+			{
+				ColorBits = 24;
+				AlphaBits = 8;
+				DepthBits = 24;
+				StencilBits = 8;
+			}
+
+		}PixelFormatParams;
+
+	public:
 
 		HRESULT SetWindowTitle(std::string title);
 
@@ -131,6 +149,8 @@ namespace PIL
 
 		void BindUserWindow(WindowObject* window);
 
+		void UpdatePixelFormatParams();
+
 	protected:
 		uint32 mID;
 		std::string mName;
@@ -147,6 +167,8 @@ namespace PIL
 		bool mIsClosed;
 		bool mIsVisible;
 		bool mIsContextInit;
+
+		PixelFormatParams mPixelFormatParams;
 
 		IWindowEventListenerList mListenerList;
 
@@ -171,7 +193,7 @@ namespace PIL
 	private:
 		static uint32 sWindowCounter;
 		WindowManager* mWindowManager;
-		WindowObject* mCustomWindow;
+		WindowObject* mUserWindow;
 	};
 }
 

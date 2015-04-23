@@ -31,8 +31,8 @@ namespace ZFX
 	{
 		if (mRenderWindow == nullptr)
 			return;
-		float32 height = mRenderWindow->GetHeight();
-		float32 width = mRenderWindow->GetWidth();
+		float32 height = (float32)mRenderWindow->GetHeight();
+		float32 width = (float32)mRenderWindow->GetWidth();
 
 		mActLeft = (int32)(mRelLeft * width);
 		mActTop = (int32)(mRelTop * height);

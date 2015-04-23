@@ -1,4 +1,5 @@
 #include "ZFXOpenGLRenderSystem.h"
+#include "PILInclude.h"
 #include "ZFXSharedPtr.h"
 #include "ZFXLight.h"
 #include "ZFXViewport.h"
@@ -72,14 +73,12 @@ namespace ZFX
 			// Log error
 			return nullptr;
 		}
-
 		RenderWindow* w = new RenderWindow();
 		if (w == nullptr)
 		{
 			// Log error
 			return nullptr;
 		}
-
 		if (FAILED(w->Create(name, width, height, fullScreen, param)))
 		{
 			// Log error
@@ -92,7 +91,8 @@ namespace ZFX
 
 	void GLRenderSystem::DestroyRenderWindow(const String name)
 	{
-		throw std::logic_error("The method or operation is not implemented.");
+		PIL::WindowManager* wm = PIL::Root::Singleton().GetWindowManger();
+		wm->DeleteWindow(name);
 	}
 
 	void GLRenderSystem::SetLights(const LightList &lightList, uint32 limit)

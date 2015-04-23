@@ -177,6 +177,7 @@ namespace ZFX
 
 		PIL::Window* mWindow;
 	};
+
 }
 
 #endif

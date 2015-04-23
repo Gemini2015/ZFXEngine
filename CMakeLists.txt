@@ -36,7 +36,7 @@ set(SYS_LIB_LIST ${SYS_LIB_LIST} "platform.lib")
 
 
 include_directories(${CMAKE_SOURCE_DIR}/ZFXEngine/include)
-link_directories(${PROJECT_BINARY_DIR}/lib/${CMAKE_BUILD_TYPE})
+link_directories(${PROJECT_BINARY_DIR}/lib)
 
 add_subdirectory(ZFXEngine)
 add_subdirectory(RenderSystem)

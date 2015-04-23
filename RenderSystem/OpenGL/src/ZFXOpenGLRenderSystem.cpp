@@ -2,6 +2,7 @@
 #include "ZFXSharedPtr.h"
 #include "ZFXLight.h"
 #include "ZFXViewport.h"
+#include "ZFXRenderWindow.h"
 
 namespace ZFX
 {
@@ -66,7 +67,27 @@ namespace ZFX
 
 	RenderWindow* GLRenderSystem::CreateRenderWindow(const String name, uint32 width, uint32 height, bool fullScreen, const PIL::NameValue_Map *param)
 	{
-		throw std::logic_error("The method or operation is not implemented.");
+		if (mRenderWindowMap.find(name) != mRenderWindowMap.end())
+		{
+			// Log error
+			return nullptr;
+		}
+
+		RenderWindow* w = new RenderWindow();
+		if (w == nullptr)
+		{
+			// Log error
+			return nullptr;
+		}
+
+		if (FAILED(w->Create(name, width, height, fullScreen, param)))
+		{
+			// Log error
+			delete w;
+			return nullptr;
+		}
+		mRenderWindowMap[name] = w;
+		return w;
 	}
 
 	void GLRenderSystem::DestroyRenderWindow(const String name)

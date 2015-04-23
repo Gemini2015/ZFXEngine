@@ -394,7 +394,16 @@ namespace ZFX
 
 	void RenderWindow::OnWindowResize(const PIL::Window* w, const PIL::Size& oldSize, const PIL::Size& newSize)
 	{
-		throw std::logic_error("The method or operation is not implemented.");
+		if (mWindow == w)
+		{
+			ViewportList::iterator it = mViewportList.begin();
+			while (it != mViewportList.end())
+			{
+				if (it->second != nullptr)
+					it->second->UpdateDimensions();
+				it++;
+			}
+		}
 	}
 
 }

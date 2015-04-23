@@ -1,5 +1,6 @@
 #include "ZFXViewport.h"
 #include "ZFXRenderSystem.h"
+#include "ZFXRenderWindow.h"
 
 namespace ZFX
 {
@@ -28,12 +29,27 @@ namespace ZFX
 
 	void Viewport::UpdateDimensions()
 	{
+		if (mRenderWindow == nullptr)
+			return;
+		float32 height = mRenderWindow->GetHeight();
+		float32 width = mRenderWindow->GetWidth();
 
+		mActLeft = (int32)(mRelLeft * width);
+		mActTop = (int32)(mRelTop * height);
+		mActWidth = (int32)(mRelWidth * width);
+		mActHeight = (int32)(mRelHeight * height);
+
+		if (mCamera != nullptr)
+		{
+			throw std::logic_error("The method or operation is not implemented.");
+		}
+
+		mIsUpdated = true;
 	}
 
 	void Viewport::Update()
 	{
-
+		throw std::logic_error("The method or operation is not implemented.");
 	}
 
 	void Viewport::Clear(uint32 buffers /*= FBT_COLOR | FBT_DEPTH*/, const ColorValue& color /*= ColorValue::Black*/, float32 depth /*= 1.0f*/, uint16 stencil /*= 0*/)
@@ -66,7 +82,7 @@ namespace ZFX
 
 	void Viewport::SetCamera(Camera *camera)
 	{
-
+		throw std::logic_error("The method or operation is not implemented.");
 	}
 
 	uint32 Viewport::GetZOrder() const

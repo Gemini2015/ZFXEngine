@@ -132,6 +132,7 @@ namespace PIL
 	typedef Vector2I Point;
 	typedef Vector2I Size;
 
+	class Root;
 	class Timer;
 	class FileSystem;
 	class Window;

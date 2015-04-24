@@ -23,7 +23,7 @@ namespace ZFX
 
 	void RenderSystem::DestroyRenderWindow(const String name)
 	{
-		RenderWindow* rw = NULL;
+		/*RenderWindow* rw = NULL;
 		RenderWindow_Map::iterator it = mRenderWindowMap.find(name);
 		if (it != mRenderWindowMap.end())
 		{
@@ -32,7 +32,7 @@ namespace ZFX
 		}
 		if (rw == mActiveRenderWindow)
 			mActiveRenderWindow = NULL;
-		delete rw;
+		delete rw;*/
 	}
 
 	void RenderSystem::BeginGeometryCount()

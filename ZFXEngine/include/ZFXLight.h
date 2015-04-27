@@ -20,7 +20,7 @@ namespace ZFX
 	public:
 		Light();
 
-		Light(const String& name);
+		explicit Light(const String& name);
 
 		~Light();
 

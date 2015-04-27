@@ -11,18 +11,18 @@ namespace ZFX
 	class SharedPtr
 	{
 	public:
-		SharedPtr() : mPtr(NULL), mUseCount(NULL)
+		SharedPtr() : mPtr(nullptr), mUseCount(nullptr)
 		{
 		}
 
-		SharedPtr(T *ptr) :
+		explicit SharedPtr(T *ptr) :
 			mPtr(ptr),
-			mUseCount(ptr == NULL ? 0 : new uint32(1))
+			mUseCount(ptr == nullptr ? 0 : new uint32(1))
 		{
 		}
 
 		SharedPtr(const SharedPtr& ptr) :
-			mPtr(NULL), mUseCount(NULL)
+			mPtr(nullptr), mUseCount(nullptr)
 		{
 			mPtr = ptr.mPtr;
 			mUseCount = ptr.mUseCount;
@@ -76,8 +76,8 @@ namespace ZFX
 			if (mPtr)
 			{
 				Release();
-				mPtr = NULL;
-				mUseCount = NULL;
+				mPtr = nullptr;
+				mUseCount = nullptr;
 			}
 		}
 
@@ -89,7 +89,7 @@ namespace ZFX
 
 		inline bool IsNULL() const
 		{
-			return mPtr == NULL;
+			return mPtr == nullptr;
 		}
 
 		void Swap(SharedPtr<T> & ptr)

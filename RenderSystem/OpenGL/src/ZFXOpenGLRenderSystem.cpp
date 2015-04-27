@@ -115,8 +115,8 @@ namespace ZFX
 		}
 		for (; num < mCurrentLightNum; num++)
 		{
-			SetGLLight(num, NULL);
-			mLights[num] = NULL;
+			SetGLLight(num, LightPtr(nullptr));
+			mLights[num] = LightPtr(nullptr);
 		}
 		mCurrentLightNum = std::min(limit, static_cast<uint32>(lightList.size()));
 

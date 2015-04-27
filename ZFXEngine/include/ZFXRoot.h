@@ -7,7 +7,7 @@ namespace ZFX
 	class Root
 	{
 	public:
-		Root(String projectName);
+		explicit Root(String projectName);
 
 		~Root();
 

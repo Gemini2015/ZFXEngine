@@ -11,7 +11,7 @@ namespace ZFX
 		ostr << mName << "-" << timestr << ".log";
 		mFileName = ostr.str();
 		mLogMask = mask;
-		mStream.open(mFileName.c_str(), std::ios::out);
+		mStream.open(mFileName.c_str(), std::ios::out | std::ios::app);
 	}
 
 	Log::~Log()

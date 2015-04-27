@@ -27,7 +27,8 @@ namespace ZFX
 		if (LogManager::SingletonPtr() == nullptr)
 		{
 			mLogManager = new LogManager();
-			mLogManager->CreateLog(mName);
+			Log* log = mLogManager->CreateLog(mName);
+			mLogManager->SetCurrentLog(log);
 		}
 
 		mTimer = mPILRoot->GetTimer();
@@ -50,11 +51,10 @@ namespace ZFX
 	{
 		if (mRenderSystem == nullptr)
 		{
-			throw std::runtime_error("No RenderSystem");
 			StringBuffer sb;
-			sb << "No RenderSystem " << __FILE__ << __LINE__;
+			sb << "No RenderSystem ";
 			mLogManager->Print(sb.str(), Log_Error);
-			return nullptr;
+			throw std::runtime_error("No RenderSystem");
 		}
 
 		if (useDefaultWindow)

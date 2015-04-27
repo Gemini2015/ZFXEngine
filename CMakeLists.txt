@@ -13,6 +13,11 @@ if(WIN32)
 
 set(PLATFORM_DEPS_PREFIX "${CMAKE_SOURCE_DIR}/deps/platform/win32")
 
+set(SYS_LIB_LIST ${SYS_LIB_LIST}
+	"glew32.lib"
+	"glu32.lib"
+	"opengl32.lib")
+
 else()
 
 set(PLATFORM_DEPS_PREFIX "${CMAKE_SOURCE_DIR}/deps/platform/linux")
@@ -37,6 +42,9 @@ set(SYS_LIB_LIST ${SYS_LIB_LIST} "platform.lib")
 
 include_directories(${CMAKE_SOURCE_DIR}/ZFXEngine/include)
 link_directories(${PROJECT_BINARY_DIR}/lib)
+
+# option
+option(BUILD_EXAMPLES "build examples" ON)
 
 add_subdirectory(ZFXEngine)
 add_subdirectory(RenderSystem)

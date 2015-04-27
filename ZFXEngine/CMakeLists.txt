@@ -1,6 +1,7 @@
 project(ZFXEngine)
 
 set(Core_Inc
+	"include/ZFX.h"
 	"include/ZFXPrerequisites.h"
 	"include/ZFXEnum.h"
     "include/ZFXRenderSystem.h"

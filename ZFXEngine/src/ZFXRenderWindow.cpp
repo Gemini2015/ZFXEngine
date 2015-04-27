@@ -1,6 +1,7 @@
 #include "ZFXRenderWindow.h"
 #include "ZFXViewport.h"
 #include "PILInclude.h"
+#include "ZFXLogManager.h"
 
 namespace ZFX
 {
@@ -239,16 +240,24 @@ namespace ZFX
 		PIL::WindowManager* wm = PIL::Root::SingletonPtr()->GetWindowManger();
 		if (wm == NULL)
 		{
-			// Log error
+			StringBuffer sb;
+			sb << "PIL get window manager failed";
+			LogManager::Singleton().Print(sb.str(), Log_Error);
 			return E_FAIL;
 		}
 		HRESULT hr = wm->NewWindow(name, -1, -1, width, height, NULL, this, &mWindow);
 		if (FAILED(hr))
 		{
-			// Log error
+			StringBuffer sb;
+			sb << "PIL create window failed";
+			LogManager::Singleton().Print(sb.str(), Log_Error);
 			return E_FAIL;
 		}
 		wm->AddListener(this);
+
+		StringBuffer sb;
+		sb << "Window " << name << " created";
+		LogManager::Singleton().Print(sb.str(), Log_Info);
 		return S_OK;
 	}
 
@@ -267,7 +276,9 @@ namespace ZFX
 
 	void RenderWindow::Destroy()
 	{
-
+		StringBuffer sb;
+		sb << "Window " << GetName() << " destroy";
+		LogManager::Singleton().Print(sb.str(), Log_Info);
 	}
 
 	void RenderWindow::Resize(uint32 width, uint32 height)

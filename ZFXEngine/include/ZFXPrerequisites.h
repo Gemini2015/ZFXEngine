@@ -21,6 +21,7 @@ namespace ZFX
 	typedef double float64;
 
 	typedef std::string String;
+	typedef std::stringstream StringBuffer;
 
 	class RenderSystem;
 	class RenderWindow;

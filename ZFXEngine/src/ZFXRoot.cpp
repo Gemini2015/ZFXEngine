@@ -50,7 +50,10 @@ namespace ZFX
 	{
 		if (mRenderSystem == nullptr)
 		{
-			// Log error;
+			throw std::runtime_error("No RenderSystem");
+			StringBuffer sb;
+			sb << "No RenderSystem " << __FILE__ << __LINE__;
+			mLogManager->Print(sb.str(), Log_Error);
 			return nullptr;
 		}
 
@@ -60,7 +63,7 @@ namespace ZFX
 		}
 		mTimer->Reset();
 		mIsInitialised = true;
-		// Log Info
+		mLogManager->Print("ZFX Root Initialised.", Log_Info);
 		return mDefaultWindow;
 	}
 
@@ -72,7 +75,7 @@ namespace ZFX
 	void Root::ShutDown()
 	{
 		mIsInitialised = false;
-		// Log Info
+		mLogManager->Print("Root Shutdown.", Log_Info);
 	}
 
 	RenderWindow* Root::GetDefaultWindow()
@@ -95,7 +98,9 @@ namespace ZFX
 		if (rs == nullptr)
 			return;
 		mRenderSystem = rs;
-		// Log Info
+		StringBuffer sb;
+		sb << "Set RenderSystem " << rs->GetName();
+		mLogManager->Print(sb.str(), Log_Info);
 	}
 
 	RenderSystem* Root::GetRenderSystem()

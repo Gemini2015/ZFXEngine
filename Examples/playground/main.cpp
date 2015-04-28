@@ -3,15 +3,17 @@
 int main()
 {
 	ZFX::Root* root = new ZFX::Root("playground");
+	ZFX::RenderSystemFactory* rsf = ZFX::RenderSystemFactory::SingletonPtr();
 	try
 	{
+		ZFX::RenderSystem* rs = rsf->CreateRenderSystem(ZFX::RST_OPENGL);
+		root->SetRenderSystem(rs);
 		root->Init(true);
 	}
-	catch (std::runtime_error e)
+	catch (std::exception &e)
 	{
 		std::cout << e.what() << std::endl;
 	}
-
 
 	if (root != nullptr)
 		delete root;

@@ -626,4 +626,24 @@ namespace ZFX
 		throw std::logic_error("The method or operation is not implemented.");
 	}
 
+	HRESULT CreateRenderDevice(RenderSystem **pInterface)
+	{
+		if (pInterface != nullptr && *pInterface == nullptr)
+		{
+			*pInterface = new GLRenderSystem();
+			return S_OK;
+		}
+		return E_FAIL;
+	}
+
+	HRESULT ReleaseRenderDevice(RenderSystem **pInterface)
+	{
+		if (pInterface != nullptr && *pInterface != nullptr)
+		{
+			delete *pInterface;
+			*pInterface = NULL;
+			return S_OK;
+		}
+		return E_FAIL;
+	}
 }

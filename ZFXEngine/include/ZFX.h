@@ -11,6 +11,7 @@
 #include "ZFXMatrix4.h"
 #include "ZFXPlane.h"
 #include "ZFXRenderSystem.h"
+#include "ZFXRenderSystemFactory.h"
 #include "ZFXRenderWindow.h"
 #include "ZFXRoot.h"
 #include "ZFXSharedPtr.h"

@@ -18,6 +18,7 @@ set(Core_Inc
     "include/ZFXLog.h"
     "include/ZFXLogManager.h"
     "include/ZFXRoot.h"
+    "include/ZFXRenderSystemFactory.h"
 	)
 
 set(Core_Src
@@ -34,6 +35,7 @@ set(Core_Src
 	"src/ZFXLog.cpp"
 	"src/ZFXLogManager.cpp"
 	"src/ZFXRoot.cpp"
+	"src/ZFXRenderSystemFactory.cpp"
 	)
 
 

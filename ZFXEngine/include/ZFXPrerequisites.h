@@ -24,6 +24,7 @@ namespace ZFX
 	typedef std::stringstream StringBuffer;
 
 	class RenderSystem;
+	class RenderSystemFactory;
 	class RenderWindow;
 	template <class T> class SharedPtr;
 	class Light;

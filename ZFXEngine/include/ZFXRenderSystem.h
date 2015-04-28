@@ -106,6 +106,14 @@ namespace ZFX
 		CullingMode mCullingMode;
 	};
 
+	extern "C"
+	{
+		//HRESULT CreateRenderDevice(HINSTANCE hDLL, ZFXRenderDevice **pInterface);
+		typedef HRESULT(*CREATERENDERDEVICE)(RenderSystem **pInterface);
+
+		//HRESULT ReleaseRenderDevice(ZFXRenderDevice **pInterface);
+		typedef HRESULT(*RELEASERENDERDEVICE)(RenderSystem **pInterface);
+	}
 }
 
 #endif

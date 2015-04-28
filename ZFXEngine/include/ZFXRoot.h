@@ -35,6 +35,7 @@ namespace ZFX
 		String mName;
 		PIL::Root* mPILRoot;
 		RenderSystem* mRenderSystem;
+		RenderSystemFactory* mRenderSystemFactory;
 		RenderWindow* mDefaultWindow;
 		LogManager* mLogManager;
 		PIL::Timer* mTimer;

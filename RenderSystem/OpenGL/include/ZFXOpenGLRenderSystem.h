@@ -110,6 +110,13 @@ namespace ZFX
 
 		bool mDepthWrite;
 	};
+
+	extern "C"
+	{
+		_declspec(dllexport) HRESULT CreateRenderDevice(RenderSystem **pInterface);
+
+		_declspec(dllexport) HRESULT ReleaseRenderDevice(RenderSystem **pInterface);
+	}
 }
 
 #endif

@@ -4,6 +4,7 @@
 #include "ZFXRenderSystem.h"
 #include "ZFXRenderWindow.h"
 #include "ZFXLogManager.h"
+#include "ZFXRenderSystemFactory.h"
 
 namespace ZFX
 {
@@ -31,6 +32,8 @@ namespace ZFX
 			mLogManager->SetCurrentLog(log);
 		}
 
+		mRenderSystemFactory = new RenderSystemFactory();
+
 		mTimer = mPILRoot->GetTimer();
 
 		mLogManager->Print("ZFX Root Created", Log_Info);
@@ -45,6 +48,9 @@ namespace ZFX
 
 		if (mPILRoot)
 			delete mPILRoot;
+
+		if (mRenderSystemFactory)
+			delete mRenderSystemFactory;
 	}
 
 	RenderWindow* Root::Init(bool useDefaultWindow, String windowTitle /*= "ZFX Render Window"*/)

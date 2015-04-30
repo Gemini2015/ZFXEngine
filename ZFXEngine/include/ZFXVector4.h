@@ -6,7 +6,7 @@
 
 namespace ZFX
 {
-	class Vector4
+	class ZFXExport Vector4
 	{
 	public:
 		union

@@ -7,7 +7,7 @@
 
 namespace ZFX
 {
-	class Light
+	class ZFXExport Light
 	{
 	public:
 		enum LightType

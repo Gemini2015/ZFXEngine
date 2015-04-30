@@ -8,7 +8,7 @@
 
 namespace ZFX
 {
-	class Matrix4
+	class ZFXExport Matrix4
 	{
 	public:
 		union

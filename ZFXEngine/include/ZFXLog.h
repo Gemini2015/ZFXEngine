@@ -17,7 +17,7 @@ namespace ZFX
 		LogLevel_Error = Log_Error,
 	};
 
-	class Log
+	class ZFXExport Log
 	{
 		friend class LogManager;
 	public:

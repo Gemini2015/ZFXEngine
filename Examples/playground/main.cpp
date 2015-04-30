@@ -1,4 +1,7 @@
 #include "ZFX.h"
+#include "PILInclude.h"
+#include <conio.h>
+
 
 int main()
 {
@@ -9,6 +12,18 @@ int main()
 		ZFX::RenderSystem* rs = rsf->CreateRenderSystem(ZFX::RST_OPENGL);
 		root->SetRenderSystem(rs);
 		root->Init(true);
+		ZFX::RenderWindow* w = root->GetDefaultWindow();
+		w->SetHidden(false);
+		PIL::WindowManager* wm = PIL::Root::Singleton().GetWindowManger();
+
+		while (1)
+		{
+			wm->HandleMessage();
+			if (_kbhit())
+			{
+				break;
+			}
+		}
 	}
 	catch (std::exception &e)
 	{

@@ -5,7 +5,7 @@
 
 namespace ZFX
 {
-	class LogManager
+	class ZFXExport LogManager
 	{
 	public:
 		typedef std::map<String, Log*> Log_Map;

@@ -6,7 +6,7 @@
 
 namespace ZFX
 {
-	class Viewport
+	class ZFXExport Viewport
 	{
 	public:
 		Viewport(RenderSystem* renderSystem, Camera* camera, RenderWindow* renderWindow,

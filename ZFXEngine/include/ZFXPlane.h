@@ -7,7 +7,7 @@
 
 namespace ZFX
 {
-	class Plane
+	class ZFXExport Plane
 	{
 	public:
 		Vector3 normal;

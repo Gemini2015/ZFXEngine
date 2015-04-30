@@ -4,7 +4,7 @@
 
 namespace ZFX
 {
-	class Root
+	class ZFXExport Root
 	{
 	public:
 		explicit Root(String projectName);

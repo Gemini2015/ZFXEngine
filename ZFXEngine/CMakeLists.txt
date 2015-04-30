@@ -1,6 +1,8 @@
 project(ZFXEngine)
 
 set(Core_Inc
+	"${CMAKE_BINARY_DIR}/include/ZFXConfig.h"
+	"include/ZFXPlatform.h"
 	"include/ZFX.h"
 	"include/ZFXPrerequisites.h"
 	"include/ZFXEnum.h"
@@ -39,5 +41,10 @@ set(Core_Src
 	)
 
 
-add_library(${PROJECT_NAME} STATIC ${Core_Inc} ${Core_Src})
+add_library(${PROJECT_NAME} ${ZFX_LIB_TYPE} ${Core_Inc} ${Core_Src})
 target_link_libraries(${PROJECT_NAME} ${SYS_LIB_LIST})
+
+if(NOT ZFX_STATIC)
+	set_target_properties(${PROJECT_NAME} PROPERTIES
+		COMPILE_DEFINITIONS ZFX_ENGINE_EXPORTS)
+endif()

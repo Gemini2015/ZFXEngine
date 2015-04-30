@@ -7,7 +7,7 @@
 
 namespace ZFX
 {
-	class RenderWindow
+	class ZFXExport RenderWindow
 		: public PIL::WindowObject
 		, public PIL::IWindowEventListener
 	{

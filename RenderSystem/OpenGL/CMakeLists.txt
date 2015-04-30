@@ -16,5 +16,10 @@ set(SYS_LIB_LIST ${SYS_LIB_LIST}
 	"glu32.lib"
 	"opengl32.lib")
 
-add_library(${PROJECT_NAME} SHARED ${Core_Inc} ${Core_Src})
+add_library(${PROJECT_NAME} ${ZFX_LIB_TYPE} ${Core_Inc} ${Core_Src})
 target_link_libraries(${PROJECT_NAME} ${SYS_LIB_LIST} ZFXEngine)
+
+if(NOT ZFX_STATIC)
+	set_target_properties(${PROJECT_NAME} PROPERTIES
+		COMPILE_DEFINITIONS ZFX_OPENGL_EXPORTS)
+endif()

@@ -6,7 +6,7 @@
 
 namespace ZFX
 {
-	class RenderSystem
+	class ZFXExport RenderSystem
 	{
 	public:
 		RenderSystem();

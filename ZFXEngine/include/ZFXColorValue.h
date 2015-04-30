@@ -10,7 +10,7 @@ namespace ZFX
 	typedef uint32 ABGR;
 	typedef uint32 BGRA;
 
-	class ColorValue
+	class ZFXExport ColorValue
 	{
 	public:
 		union

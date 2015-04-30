@@ -253,6 +253,7 @@ namespace ZFX
 			LogManager::Singleton().Print(sb.str(), Log_Error);
 			return E_FAIL;
 		}
+		mWindow->AddListener(this);
 		wm->AddListener(this);
 
 		StringBuffer sb;
@@ -378,18 +379,22 @@ namespace ZFX
 
 	bool RenderWindow::OnClosing(const PIL::Window* w)
 	{
-		throw std::logic_error("The method or operation is not implemented.");
+		if (mWindow == w)
+		{
+			return true;
+		}
+		return false;
 	}
 
 	void RenderWindow::OnDestroy(const PIL::Window* w)
 	{
 		if (mWindow == w)
 		{
-			RenderWindow* renderWindow = (RenderWindow*)w->GetUserWindow();
+			/*RenderWindow* renderWindow = (RenderWindow*)w->GetUserWindow();
 			if (renderWindow)
 			{
 				delete renderWindow;
-			}
+			}*/
 		}
 	}
 

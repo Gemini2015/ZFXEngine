@@ -1,7 +1,11 @@
 #ifndef _ZFX_PRE_REQ_H_
 #define _ZFX_PRE_REQ_H_
 
+
+
 #include "PILPrerequisites.h"
+
+#include "ZFXPlatform.h"
 
 #include "ZFXEnum.h"
 

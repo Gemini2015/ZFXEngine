@@ -4,13 +4,21 @@
 #include "ZFXLight.h"
 #include "ZFXViewport.h"
 #include "ZFXRenderWindow.h"
+#include "ZFXLogManager.h"
 
 namespace ZFX
 {
 
 	GLRenderSystem::GLRenderSystem()
+		: mCurrentLightNum(0)
+		, mDepthWrite(true)
 	{
+		mLights.clear();
 		mLights.reserve(GLRS_Enum::MAX_LIGHTS);
+
+		StringBuffer sb;
+		sb << "Render System " << GetName() << " Created.";
+		LogManager::Singleton().Print(sb.str(), Log_Info);
 	}
 
 	GLRenderSystem::~GLRenderSystem()
@@ -25,7 +33,13 @@ namespace ZFX
 
 	RenderWindow* GLRenderSystem::Init(bool autoCreateWindow, const String windowTitle /*= "ZFX Window"*/)
 	{
-		throw std::logic_error("The method or operation is not implemented.");
+		if (autoCreateWindow)
+		{
+			RenderWindow* w = CreateRenderWindow(windowTitle, 800, 600, false, nullptr);
+			return w;
+		}
+		else
+			return nullptr;
 	}
 
 	void GLRenderSystem::ShutDown()

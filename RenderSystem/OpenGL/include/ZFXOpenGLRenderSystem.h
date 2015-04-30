@@ -8,7 +8,7 @@
 
 namespace ZFX
 {
-	class GLRenderSystem : public RenderSystem
+	class OpenGLExport GLRenderSystem : public RenderSystem
 	{
 	public:
 		enum GLRS_Enum

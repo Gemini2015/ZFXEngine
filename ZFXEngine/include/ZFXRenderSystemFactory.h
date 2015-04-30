@@ -9,7 +9,7 @@ namespace ZFX
 		RST_OPENGL,
 	};
 
-	class RenderSystemFactory
+	class ZFXExport RenderSystemFactory
 	{
 	public:
 		typedef std::map<String, RenderSystem*> RenderSystem_Map;

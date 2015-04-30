@@ -5,7 +5,7 @@
 
 namespace ZFX
 {
-	class Matrix3
+	class ZFXExport Matrix3
 	{
 	public:
 		union

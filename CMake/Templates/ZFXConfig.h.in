@@ -1,0 +1,7 @@
+#pragma once
+
+#cmakedefine ZFX_PLATFORM_WIN32
+
+#cmakedefine ZFX_PLATFORM_LINUX
+
+#cmakedefine ZFX_STATIC_LIB

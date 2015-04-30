@@ -22,7 +22,7 @@ namespace PIL
 		Y_M_D_H_S,	// y_m_d_h_m_s
 	};
 
-	class Timer
+	class PILExport Timer
 	{
 	public:
 		Timer();

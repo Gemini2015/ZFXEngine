@@ -7,7 +7,7 @@
 
 namespace PIL
 {
-	class WindowManager
+	class PILExport WindowManager
 	{
 		enum WindowState
 		{
@@ -284,7 +284,7 @@ namespace PIL
 			}
 		}
 
-	protected:
+	private:
 		typedef std::map<std::string, Window*> Window_Map;
 		Window_Map mWindowMap;
 

@@ -12,11 +12,11 @@
 
 namespace PIL
 {
-	class WindowObject
+	class PILExport WindowObject
 	{
 	};
 
-	class IWindowEventListener
+	class PILExport IWindowEventListener
 	{
 	public:
 		virtual ~IWindowEventListener() {}
@@ -46,12 +46,12 @@ namespace PIL
 
 	typedef std::vector<IWindowEventListener*> IWindowEventListenerList;
 
-	class Window
+	class PILExport Window
 	{
 		friend class WindowManager;
 
 	public:
-		typedef struct PixelFormatParams_t
+		typedef struct PILExport PixelFormatParams_t
 		{
 			uint32 ColorBits;
 			uint32 AlphaBits;

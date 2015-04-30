@@ -8,7 +8,7 @@
 namespace PIL
 {
 
-	class Root
+	class PILExport Root
 	{
 	public:
 		static Root *Instance;

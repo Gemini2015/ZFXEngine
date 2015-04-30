@@ -20,7 +20,7 @@
 
 namespace PIL
 {
-	typedef struct FileInfo_t {
+	typedef struct PILExport FileInfo_t {
 		uint32		attrib;
 		int64		time_write;
 		uint32		size;
@@ -30,7 +30,7 @@ namespace PIL
 	typedef std::vector<FileInfo> FileInfo_Vec;
 	typedef std::vector<std::string> FilePath_Vec;
 
-	class FileSystem
+	class PILExport FileSystem
 	{
 	public:
 		FileSystem() {};

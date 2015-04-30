@@ -2,7 +2,18 @@
 #define _PIL_PRE_REQ_H_
 
 // platform define
-#include "config.h"
+#include "PILConfig.h"
+
+#if !defined(PIL_STATIC_LIB)
+
+#if defined(_MSC_VER)
+
+#   pragma warning (disable : 4251)
+
+#endif
+
+#endif // defined(PIL_STATIC_LIB)
+
 
 #if defined(PLATFORM_WIN32)
 
@@ -100,6 +111,23 @@ typedef int32 HRESULT;
 
 #endif // ! Win32 HRESULT
 
+#if defined(PLATFORM_WIN32)
+
+#if defined(PIL_STATIC_LIB)
+
+#	define PILExport
+
+#else
+
+#	if defined(PIL_EXPORTS)
+#		define PILExport __declspec(dllexport)
+#	else
+#		define PILExport __declspec(dllimport)
+#	endif
+
+#endif
+
+#endif
 
 /************************************************************************/
 /* 
@@ -111,7 +139,7 @@ namespace PIL
 
 	typedef std::map<std::string, std::string> NameValue_Map;
 
-	typedef struct Vector2I_t
+	typedef struct PILExport Vector2I_t
 	{
 		union
 		{

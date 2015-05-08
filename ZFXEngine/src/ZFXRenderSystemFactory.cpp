@@ -15,14 +15,23 @@ namespace ZFX
 
 	RenderSystemFactory::~RenderSystemFactory()
 	{
-		RenderSystem_Map::iterator it = mRenderSystemMap.begin();
-		while (it != mRenderSystemMap.end())
+		RenderSystemInfo_Map::iterator it = mRenderSystemInfoMap.begin();
+		while (it != mRenderSystemInfoMap.end())
 		{
 			if (it->second)
-				delete it->second;
+			{
+				RenderSystemInfo* info = it->second;
+				if (info == nullptr) return;
+				RELEASERENDERDEVICE releaserenderdevice = (RELEASERENDERDEVICE)GetProcAddress(info->hDLL, "ReleaseRenderDevice");
+				if (releaserenderdevice)
+				{
+					releaserenderdevice(&(info->rendersystem));
+				}
+				delete info;
+			}
 			it++;
 		}
-		mRenderSystemMap.clear();
+		mRenderSystemInfoMap.clear();
 	}
 
 	RenderSystem* RenderSystemFactory::CreateRenderSystem(RenderSystemType type)
@@ -32,6 +41,8 @@ namespace ZFX
 		{
 		case ZFX::RST_OPENGL:
 		{
+			RenderSystemInfo* info = new RenderSystemInfo(RST_OPENGL);
+			info->type = RST_OPENGL;
 			PIL::FileSystem* fs = PIL::Root::Singleton().GetFileSystem();
 			String dlllib = "OpenGL.dll";
 			if (!fs->IsFileOrDirExist(dlllib))
@@ -41,13 +52,15 @@ namespace ZFX
 				LogManager::Singleton().Print(sb.str(), Log_Error);
 				throw std::invalid_argument("File Not Found");
 			}
-			HINSTANCE mDLL = LoadLibrary(dlllib.c_str());
-			CREATERENDERDEVICE createdevice = (CREATERENDERDEVICE)GetProcAddress(mDLL, "CreateRenderDevice");
+			info->hDLL = LoadLibrary(dlllib.c_str());
+			if (info->hDLL == NULL) return nullptr;
+			CREATERENDERDEVICE createdevice = (CREATERENDERDEVICE)GetProcAddress(info->hDLL, "CreateRenderDevice");
 			if (createdevice)
 			{
 				if (!FAILED(createdevice(&rs)) && rs != nullptr)
 				{
-					mRenderSystemMap[rs->GetName()] = rs;
+					info->rendersystem = rs;
+					mRenderSystemInfoMap[RST_OPENGL] = info;
 				}
 			}
 		}
@@ -60,7 +73,18 @@ namespace ZFX
 
 	void RenderSystemFactory::DestroyRenderSystem(RenderSystemType type)
 	{
-
+		RenderSystemInfo_Map::iterator it = mRenderSystemInfoMap.find(type);
+		if (it == mRenderSystemInfoMap.end())
+			return;
+		RenderSystemInfo* info = it->second;
+		if (info == nullptr) return;
+		RELEASERENDERDEVICE releaserenderdevice = (RELEASERENDERDEVICE)GetProcAddress(info->hDLL, "ReleaseRenderDevice");
+		if (releaserenderdevice)
+		{
+			releaserenderdevice(&(info->rendersystem));
+		}
+		delete info;
+		mRenderSystemInfoMap.erase(it);
 	}
 
 	RenderSystemFactory& RenderSystemFactory::Singleton()

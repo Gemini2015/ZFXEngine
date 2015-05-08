@@ -12,7 +12,20 @@ namespace ZFX
 	class ZFXExport RenderSystemFactory
 	{
 	public:
-		typedef std::map<String, RenderSystem*> RenderSystem_Map;
+		struct RenderSystemInfo
+		{
+			RenderSystemType type;
+			HINSTANCE hDLL;
+			RenderSystem* rendersystem;
+			RenderSystemInfo(RenderSystemType type)
+				: type(type)
+				, hDLL(NULL)
+				, rendersystem(nullptr)
+			{
+			}
+		};
+	public:
+		typedef std::map<RenderSystemType, RenderSystemInfo*> RenderSystemInfo_Map;
 	public:
 		RenderSystemFactory();
 
@@ -27,7 +40,7 @@ namespace ZFX
 		static RenderSystemFactory* SingletonPtr();
 
 	private:
-		RenderSystem_Map mRenderSystemMap;
+		RenderSystemInfo_Map mRenderSystemInfoMap;
 
 		static RenderSystemFactory* Instance;
 	};

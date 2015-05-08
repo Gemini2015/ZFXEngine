@@ -672,7 +672,8 @@ namespace ZFX
 	{
 		if (pInterface != nullptr && *pInterface != nullptr)
 		{
-			delete *pInterface;
+			GLRenderSystem* rendersystem = (GLRenderSystem*)*pInterface;
+			delete rendersystem;
 			*pInterface = NULL;
 			return S_OK;
 		}

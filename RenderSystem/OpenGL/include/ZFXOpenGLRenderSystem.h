@@ -109,6 +109,7 @@ namespace ZFX
 		Matrix4 mWorldMatrix;
 
 		bool mDepthWrite;
+		bool mIsInitialised;
 	};
 
 	extern "C"

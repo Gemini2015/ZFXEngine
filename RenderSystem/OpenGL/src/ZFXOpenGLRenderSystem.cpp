@@ -12,6 +12,7 @@ namespace ZFX
 	GLRenderSystem::GLRenderSystem()
 		: mCurrentLightNum(0)
 		, mDepthWrite(true)
+		, mIsInitialised(false)
 	{
 		mLights.clear();
 		mLights.reserve(GLRS_Enum::MAX_LIGHTS);
@@ -23,6 +24,7 @@ namespace ZFX
 
 	GLRenderSystem::~GLRenderSystem()
 	{
+		ShutDown();
 	}
 
 	const String& GLRenderSystem::GetName() const
@@ -33,18 +35,29 @@ namespace ZFX
 
 	RenderWindow* GLRenderSystem::Init(bool autoCreateWindow, const String windowTitle /*= "ZFX Window"*/)
 	{
+		RenderWindow* w = nullptr;
 		if (autoCreateWindow)
 		{
-			RenderWindow* w = CreateRenderWindow(windowTitle, 800, 600, false, nullptr);
-			return w;
+			w = CreateRenderWindow(windowTitle, 800, 600, false, nullptr);
 		}
-		else
-			return nullptr;
+		mIsInitialised = true;
+		return w;
 	}
 
 	void GLRenderSystem::ShutDown()
 	{
-		throw std::logic_error("The method or operation is not implemented.");
+		if (!mIsInitialised)
+			return;
+
+		RenderWindow_Map::iterator it = mRenderWindowMap.begin();
+		while (it != mRenderWindowMap.end())
+		{
+			if (it->second)
+				delete it->second;
+			it++;
+		}
+
+		mIsInitialised = false;
 	}
 
 	void GLRenderSystem::SetAmbientLight(float32 r, float32 g, float32 b)
@@ -105,8 +118,13 @@ namespace ZFX
 
 	void GLRenderSystem::DestroyRenderWindow(const String name)
 	{
-		PIL::WindowManager* wm = PIL::Root::Singleton().GetWindowManger();
-		wm->DeleteWindow(name);
+		RenderWindow_Map::iterator it = mRenderWindowMap.find(name);
+		if (it != mRenderWindowMap.end())
+		{
+			if(it->second)
+				delete it->second;
+			mRenderWindowMap.erase(it);
+		}
 	}
 
 	void GLRenderSystem::SetLights(const LightList &lightList, uint32 limit)

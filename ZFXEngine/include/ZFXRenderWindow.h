@@ -143,8 +143,12 @@ namespace ZFX
 
 		virtual bool IsClosed() const;
 
+		virtual void SwapBuffers(bool waitForVSync);
+
 	protected:
 		void UpdateStats();
+
+		virtual void OnCreate(const PIL::Window* w) override;
 
 		virtual bool OnClosing(const PIL::Window* w) override;
 
@@ -152,9 +156,9 @@ namespace ZFX
 
 		virtual void OnSetActive(const PIL::Window* w, bool active) override;
 
-		virtual void OnWindowMove(const PIL::Window* w, const PIL::Point& oldPos, const PIL::Point& newPos) override;
+		virtual void OnWindowMove(const PIL::Window* w) override;
 
-		virtual void OnWindowResize(const PIL::Window* w, const PIL::Size& oldSize, const PIL::Size& newSize) override;
+		virtual void OnWindowResize(const PIL::Window* w) override;
 
 	protected:
 		String mName;

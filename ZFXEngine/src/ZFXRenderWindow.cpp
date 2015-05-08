@@ -19,15 +19,13 @@ namespace ZFX
 		, mIsPrimary(false)
 		, mWindow(NULL)
 	{
-
+		PIL::Root::SingletonPtr()->GetWindowManger()->AddListener(this);
 	}
 
 	RenderWindow::~RenderWindow()
 	{
-		mWindow = NULL;
-		mTimer = NULL;
-
 		Destroy();
+		PIL::Root::SingletonPtr()->GetWindowManger()->RemoveListener(this);
 	}
 
 	const String& RenderWindow::GetName() const
@@ -237,6 +235,7 @@ namespace ZFX
 
 	HRESULT RenderWindow::Create(const String& name, uint32 width, uint32 height, bool fullScreen, const PIL::NameValue_Map *param)
 	{
+		mName = name;
 		PIL::WindowManager* wm = PIL::Root::SingletonPtr()->GetWindowManger();
 		if (wm == NULL)
 		{
@@ -253,8 +252,6 @@ namespace ZFX
 			LogManager::Singleton().Print(sb.str(), Log_Error);
 			return E_FAIL;
 		}
-		mWindow->AddListener(this);
-		wm->AddListener(this);
 
 		StringBuffer sb;
 		sb << "Window " << name << " created";
@@ -277,6 +274,13 @@ namespace ZFX
 
 	void RenderWindow::Destroy()
 	{
+		if (mWindow == nullptr)
+			return;
+		HRESULT hr = mWindow->GetWindowManager()->ShutDownWindow(mWindow);
+		if (!FAILED(hr))
+		{
+			std::cout << "Release Window " << GetName() << std::endl;
+		}
 		StringBuffer sb;
 		sb << "Window " << GetName() << " destroy";
 		LogManager::Singleton().Print(sb.str(), Log_Info);
@@ -347,6 +351,11 @@ namespace ZFX
 		return true;
 	}
 
+	void RenderWindow::SwapBuffers(bool waitForVSync)
+	{
+		if (mWindow) mWindow->SwapBuffers(waitForVSync);
+	}
+
 	void RenderWindow::UpdateStats()
 	{
 		if (mTimer == NULL)
@@ -379,17 +388,19 @@ namespace ZFX
 
 	bool RenderWindow::OnClosing(const PIL::Window* w)
 	{
-		if (mWindow == w)
+		/*if (mWindow == w)
 		{
 			return true;
 		}
-		return false;
+		return false;*/
+		return true;
 	}
 
 	void RenderWindow::OnDestroy(const PIL::Window* w)
 	{
 		if (mWindow == w)
 		{
+			mWindow = nullptr;
 			/*RenderWindow* renderWindow = (RenderWindow*)w->GetUserWindow();
 			if (renderWindow)
 			{
@@ -403,12 +414,12 @@ namespace ZFX
 		throw std::logic_error("The method or operation is not implemented.");
 	}
 
-	void RenderWindow::OnWindowMove(const PIL::Window* w, const PIL::Point& oldPos, const PIL::Point& newPos)
+	void RenderWindow::OnWindowMove(const PIL::Window* w)
 	{
 		throw std::logic_error("The method or operation is not implemented.");
 	}
 
-	void RenderWindow::OnWindowResize(const PIL::Window* w, const PIL::Size& oldSize, const PIL::Size& newSize)
+	void RenderWindow::OnWindowResize(const PIL::Window* w)
 	{
 		if (mWindow == w)
 		{
@@ -420,6 +431,11 @@ namespace ZFX
 				it++;
 			}
 		}
+	}
+
+	void RenderWindow::OnCreate(const PIL::Window* w)
+	{
+		throw std::logic_error("The method or operation is not implemented.");
 	}
 
 }

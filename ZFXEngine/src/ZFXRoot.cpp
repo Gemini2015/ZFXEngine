@@ -43,14 +43,14 @@ namespace ZFX
 	{
 		ShutDown();
 
+		if (mRenderSystemFactory)
+			delete mRenderSystemFactory;
+
 		if (mLogManager)
 			delete mLogManager;
 
 		if (mPILRoot)
 			delete mPILRoot;
-
-		if (mRenderSystemFactory)
-			delete mRenderSystemFactory;
 	}
 
 	RenderWindow* Root::Init(bool useDefaultWindow, String windowTitle /*= "ZFX Render Window"*/)

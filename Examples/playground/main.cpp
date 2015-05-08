@@ -16,12 +16,17 @@ int main()
 		w->SetHidden(false);
 		PIL::WindowManager* wm = PIL::Root::Singleton().GetWindowManger();
 
+		std::cout << "handling message. press 'q' to quit." << std::endl;
 		while (1)
 		{
 			wm->HandleMessage();
+
+			w->SwapBuffers(false);
 			if (_kbhit())
 			{
-				break;
+				char c = _getch();
+				if(c == 'q')
+					break;
 			}
 		}
 	}

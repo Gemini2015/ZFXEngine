@@ -33,14 +33,11 @@ namespace PIL
 		// focus change
 		virtual void OnSetActive(const PIL::Window* w, bool active) = 0;
 
-		// visibility change
-		virtual void OnSetVisible(const PIL::Window* w, bool visible) {}
-
 		// window move
-		virtual void OnWindowMove(const PIL::Window* w, const PIL::Point& oldPos, const PIL::Point& newPos) = 0;
+		virtual void OnWindowMove(const PIL::Window* w) = 0;
 
 		// window resize
-		virtual void OnWindowResize(const PIL::Window* w, const PIL::Size& oldSize, const PIL::Size& newSize) = 0;
+		virtual void OnWindowResize(const PIL::Window* w) = 0;
 
 	};
 
@@ -109,43 +106,22 @@ namespace PIL
 
 		WindowManager* GetWindowManager() const	{ return mWindowManager; }
 
-		void AddListener(IWindowEventListener* listener);
-
-		void RemoveListener(IWindowEventListener* listener);
-
 		WindowObject* GetUserWindow() const;
 
 	private:
-		Window(std::string name, int32 x, int32 y, uint32 width, uint32 height, NameValue_Map *param);
+		Window(std::string name, int32 x, int32 y, uint32 width, uint32 height, NameValue_Map *param, WindowManager* wm);
 
 		~Window();
 
-		void SetWindowManager(WindowManager* wm)
-		{
-			mWindowManager = wm;
-		}
-
 		HRESULT Create();
-
-		void NotifyWindowCreate(const Window* w);
 
 		HRESULT InitContext();
 
 		HRESULT Destroy();
 
-		void NotifyWindowDestroy(const Window* w);
-
 		void HandleMessage();
 
-		void OnActiveChange(const Window* w, bool bActive);
-
-		void NotifyActiveChange(bool active);
-
-		void OnMoveOrResize(const Window* w);
-
-		void NotifyWindowMove(const Point& oldPos, const Point& newPos);
-
-		void NotifyWindowResize(const Size& oldSize, const Size& newSize);
+		void OnUpdateDimension();
 
 		void BindUserWindow(WindowObject* window);
 
@@ -170,16 +146,11 @@ namespace PIL
 
 		PixelFormatParams mPixelFormatParams;
 
-		IWindowEventListenerList mListenerList;
-
 #if defined(PLATFORM_WIN32)
 		HINSTANCE mHInstance;
 		HWND mHWnd;
 		HDC mHDC;
 		HGLRC mHGLRC;
-
-	public:
-		static LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 	private:
 		HRESULT InitPixelFormat();

@@ -1,9 +1,12 @@
 set(EXAMPLE_NAME "playground")
 
 set(SRC_LIST
-	main.cpp)
+	main.cpp
+	GLDemo.cpp
+	)
 
 set(INC_LIST
+	GLDemo.h
 	)
 
 add_executable(${EXAMPLE_NAME} ${SRC_LIST} ${INC_LIST})

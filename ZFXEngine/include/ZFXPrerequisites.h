@@ -27,22 +27,23 @@ namespace ZFX
 	typedef std::string String;
 	typedef std::stringstream StringBuffer;
 
+	class Camera;
+	class ColorValue;
+	class Light;
+	class Log;
+	class LogManager;
+	class Matrix3;
+	class Matrix4;
+	class Plane;
 	class RenderSystem;
 	class RenderSystemFactory;
 	class RenderWindow;
+	class Root;
 	template <class T> class SharedPtr;
-	class Light;
-	class Matrix4;
-	class Matrix3;
-	class Vector4;
-	class Vector3;
 	class Texture;
+	class Vector3;
+	class Vector4;
 	class Viewport;
-	class ColorValue;
-	class Plane;
-	class Camera;
-	class Log;
-	class LogManager;
 
 	typedef SharedPtr<Light> LightPtr;
 	typedef std::vector<LightPtr> LightList;

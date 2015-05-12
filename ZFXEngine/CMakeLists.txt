@@ -6,6 +6,7 @@ set(Core_Inc
 	"include/ZFXColorValue.h"
 	"${CMAKE_BINARY_DIR}/include/ZFXConfig.h"
 	"include/ZFXEnum.h"
+	"include/ZFXFrustum.h"
 	"include/ZFXLight.h"
 	"include/ZFXLog.h"
 	"include/ZFXLogManager.h"
@@ -27,6 +28,7 @@ set(Core_Inc
 set(Core_Src
 	"src/ZFXCamera.cpp"
 	"src/ZFXColorValue.cpp"
+	"src/ZFXFrustum.cpp"
 	"src/ZFXLight.cpp"
 	"src/ZFXLog.cpp"
 	"src/ZFXLogManager.cpp"

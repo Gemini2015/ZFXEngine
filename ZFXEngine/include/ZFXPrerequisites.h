@@ -29,6 +29,7 @@ namespace ZFX
 
 	class Camera;
 	class ColorValue;
+	class Frustum;
 	class Light;
 	class Log;
 	class LogManager;

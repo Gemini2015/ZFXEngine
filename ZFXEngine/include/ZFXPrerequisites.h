@@ -42,6 +42,7 @@ namespace ZFX
 	class Root;
 	template <class T> class SharedPtr;
 	class Texture;
+	class Vector2;
 	class Vector3;
 	class Vector4;
 	class Viewport;

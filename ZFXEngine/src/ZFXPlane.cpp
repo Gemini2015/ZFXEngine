@@ -62,4 +62,14 @@ namespace ZFX
 		return xform * v;
 	}
 
+	Plane::Side Plane::GetSide(const Vector3& vertex) const
+	{
+		float32 distance = GetDistance(vertex);
+		if (distance < 0.0f)
+			return Plane::NEGATIVE_SIDE;
+		if (distance > 0.0f)
+			return Plane::POSITIVE_SIDE;
+		return Plane::NO_SIDE;
+	}
+
 }

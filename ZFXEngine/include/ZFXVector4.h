@@ -15,6 +15,10 @@ namespace ZFX
 			{
 				float32 x, y, z, w;
 			};
+			struct
+			{
+				float32 left, right, top, bottom;
+			};
 			float32 val[4];
 		};
 

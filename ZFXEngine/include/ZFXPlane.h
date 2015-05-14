@@ -37,6 +37,16 @@ namespace ZFX
 		{
 			return d != p.d || normal != p.normal;
 		}
+
+		enum Side
+		{
+			NO_SIDE,
+			POSITIVE_SIDE,
+			NEGATIVE_SIDE,
+			BOTH_SIDE
+		};
+
+		Side GetSide(const Vector3& vertex) const;
 	};
 }
 

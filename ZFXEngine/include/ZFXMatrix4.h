@@ -22,10 +22,10 @@ namespace ZFX
 		inline Matrix4() {}
 
 		inline Matrix4(
-			float f11, float f12, float f13, float f14,
-			float f21, float f22, float f23, float f24,
-			float f31, float f32, float f33, float f34,
-			float f41, float f42, float f43, float f44
+			float32 f11, float32 f12, float32 f13, float32 f14,
+			float32 f21, float32 f22, float32 f23, float32 f24,
+			float32 f31, float32 f32, float32 f33, float32 f34,
+			float32 f41, float32 f42, float32 f43, float32 f44
 			)
 		{
 			m[0][0] = f11;

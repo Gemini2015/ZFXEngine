@@ -124,7 +124,7 @@ namespace ZFX
 
 		const Vector2 GetOrthoWindow() const;
 
-	private:
+	protected:
 		const Vector4 GetProjParameters() const;
 
 		void UpdateFrustum() const;

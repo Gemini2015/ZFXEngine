@@ -27,15 +27,20 @@ namespace ZFX
 	typedef std::string String;
 	typedef std::stringstream StringBuffer;
 
+	class Angle;
 	class Camera;
 	class ColorValue;
+	class Degree;
 	class Frustum;
 	class Light;
 	class Log;
 	class LogManager;
+	class Math;
 	class Matrix3;
 	class Matrix4;
 	class Plane;
+	class Quaternion;
+	class Radian;
 	class RenderSystem;
 	class RenderSystemFactory;
 	class RenderWindow;
